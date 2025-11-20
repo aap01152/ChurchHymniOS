@@ -6,6 +6,7 @@ import Foundation
 struct ContentView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.openWindow) private var openWindow
+    @EnvironmentObject private var externalDisplayManager: ExternalDisplayManager
     @Query(sort: \Hymn.title, order: .forward) private var hymns: [Hymn]
     
     // Core state
@@ -111,6 +112,11 @@ struct ContentView: View {
                         onPresent: onPresentHymn
                     )
                     .navigationTitle("Library")
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            ExternalDisplayNavigationIndicator()
+                        }
+                    }
                     .frame(minWidth: 320)
                 } detail: {
                     VStack(spacing: 0) {
@@ -138,6 +144,23 @@ struct ContentView: View {
                             Spacer()
                         }
                         .padding(.top, 16)
+                        
+                        // External Display Status Bar - PHASE 3 Integration
+                        if externalDisplayManager.state != .disconnected {
+                            VStack(spacing: 0) {
+                                ExternalDisplayStatusBar()
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 8)
+                                
+                                if externalDisplayManager.state == .connected || externalDisplayManager.state == .presenting {
+                                    ExternalDisplayQuickControls(selectedHymn: selected)
+                                        .padding(.horizontal, 16)
+                                        .padding(.bottom, 8)
+                                }
+                            }
+                            .background(Color(.systemBackground))
+                        }
+                        
                         Divider()
                         VStack {
                             if isMultiSelectMode {
@@ -216,6 +239,22 @@ struct ContentView: View {
                         }
                         .padding(.top, 16)
                         
+                        // External Display Status Bar - PHASE 3 Integration (iPhone)
+                        if externalDisplayManager.state != .disconnected {
+                            VStack(spacing: 0) {
+                                ExternalDisplayStatusBar()
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 8)
+                                
+                                if externalDisplayManager.state == .connected || externalDisplayManager.state == .presenting {
+                                    ExternalDisplayQuickControls(selectedHymn: selected)
+                                        .padding(.horizontal, 16)
+                                        .padding(.bottom, 8)
+                                }
+                            }
+                            .background(Color(.systemBackground))
+                        }
+                        
                         Divider()
                         
                         VStack {
@@ -240,6 +279,13 @@ struct ContentView: View {
                     }
                     .tag(1)
                 }
+            }
+        }
+        .overlay {
+            // PHASE 4: External Display Preview Window
+            if UIDevice.current.userInterfaceIdiom == .pad {
+                ManagedExternalDisplayPreview()
+                    .allowsHitTesting(true)
             }
         }
         .fileImporter(

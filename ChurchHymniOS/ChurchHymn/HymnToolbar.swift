@@ -218,6 +218,8 @@ struct HymnToolbarView: View {
     let context: ModelContext
     let openWindow: OpenWindowAction
     let onPresent: (Hymn) -> Void
+    
+    @EnvironmentObject private var externalDisplayManager: ExternalDisplayManager
 
     var body: some View {
         HStack(spacing: 40) { // Evenly space icons
@@ -240,6 +242,9 @@ struct HymnToolbarView: View {
             .disabled(selected == nil)
             .help("Present selected hymn")
 
+            // External Display Button
+            ExternalDisplayButton(selectedHymn: selected)
+
             // Edit Button
             Button(action: {
                 showingEdit = true
@@ -258,6 +263,11 @@ struct HymnToolbarView: View {
 
             // Font Size Control
             FontSizeSliderButton(lyricsFontSize: $lyricsFontSize)
+            
+            // External Display Preview Settings (iPad only)
+            if UIDevice.current.userInterfaceIdiom == .pad && externalDisplayManager.state != .disconnected {
+                ExternalDisplayPreviewSettingsButton()
+            }
 
             // Delete Button (added before Help)
             Button(action: {
@@ -303,6 +313,110 @@ struct HymnToolbarView: View {
         .frame(maxWidth: .infinity)
     }
 } 
+
+struct ExternalDisplayButton: View {
+    let selectedHymn: Hymn?
+    @EnvironmentObject private var externalDisplayManager: ExternalDisplayManager
+    @State private var showingErrorAlert = false
+    @State private var errorMessage = ""
+    
+    var body: some View {
+        Button(action: buttonAction) {
+            VStack(spacing: 4) {
+                Image(systemName: buttonIcon)
+                    .font(.title)
+                    .foregroundColor(buttonColor)
+                Text(buttonText)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .disabled(isButtonDisabled)
+        .help(buttonHelpText)
+        .alert("External Display Error", isPresented: $showingErrorAlert) {
+            Button("OK") { }
+        } message: {
+            Text(errorMessage)
+        }
+    }
+    
+    private var buttonIcon: String {
+        switch externalDisplayManager.state {
+        case .disconnected:
+            return "tv.slash"
+        case .connected:
+            return "tv"
+        case .presenting:
+            return "tv.fill"
+        }
+    }
+    
+    private var buttonColor: Color {
+        switch externalDisplayManager.state {
+        case .disconnected:
+            return .gray
+        case .connected:
+            return .green
+        case .presenting:
+            return .orange
+        }
+    }
+    
+    private var buttonText: String {
+        switch externalDisplayManager.state {
+        case .disconnected:
+            return "No Display"
+        case .connected:
+            return "External"
+        case .presenting:
+            return "Stop External"
+        }
+    }
+    
+    private var buttonHelpText: String {
+        switch externalDisplayManager.state {
+        case .disconnected:
+            return "No external display connected"
+        case .connected:
+            return "Present to external display"
+        case .presenting:
+            return "Stop external presentation"
+        }
+    }
+    
+    private var isButtonDisabled: Bool {
+        switch externalDisplayManager.state {
+        case .disconnected:
+            return true
+        case .connected:
+            return selectedHymn == nil
+        case .presenting:
+            return false
+        }
+    }
+    
+    private func buttonAction() {
+        switch externalDisplayManager.state {
+        case .disconnected:
+            break
+        case .connected:
+            startExternalPresentation()
+        case .presenting:
+            externalDisplayManager.stopPresentation()
+        }
+    }
+    
+    private func startExternalPresentation() {
+        guard let hymn = selectedHymn else { return }
+        
+        do {
+            try externalDisplayManager.startPresentation(hymn: hymn)
+        } catch {
+            errorMessage = error.localizedDescription
+            showingErrorAlert = true
+        }
+    }
+}
 
 struct FontSizeSliderButton: View {
     @Binding var lyricsFontSize: CGFloat

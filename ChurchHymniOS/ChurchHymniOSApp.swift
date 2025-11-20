@@ -10,9 +10,12 @@ import SwiftData
 
 @main
 struct ChurchHymniOSApp: App {
+    @StateObject private var externalDisplayManager = ExternalDisplayManager()
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(externalDisplayManager)
         }
         .modelContainer(for: Hymn.self)
     }
