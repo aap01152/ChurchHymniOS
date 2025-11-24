@@ -86,8 +86,6 @@ class ExternalDisplayManager: ObservableObject {
         )
         
         state = .connected
-        
-        print("External display connected: \(externalDisplayInfo?.description ?? "Unknown")")
     }
     
     private func handleExternalDisplayDisconnected() {
@@ -98,8 +96,6 @@ class ExternalDisplayManager: ObservableObject {
         externalWindow = nil
         externalDisplayInfo = nil
         state = .disconnected
-        
-        print("External display disconnected")
     }
     
     func startPresentation(hymn: Hymn, startingAtVerse: Int = 0) throws {
@@ -117,7 +113,6 @@ class ExternalDisplayManager: ObservableObject {
             state = .presenting
             
             updateExternalDisplay()
-            print("Started external presentation for hymn: \(hymn.title)")
         } catch {
             throw ExternalDisplayError.presentationFailed(error.localizedDescription)
         }
@@ -140,8 +135,6 @@ class ExternalDisplayManager: ObservableObject {
         } else {
             state = .disconnected
         }
-        
-        print("Stopped external presentation")
     }
     
     func nextVerse() {
@@ -186,7 +179,9 @@ class ExternalDisplayManager: ObservableObject {
     private func updateExternalDisplay() {
         guard let window = externalWindow,
               let hymn = currentHymn,
-              isPresenting else { return }
+              isPresenting else {
+            return 
+        }
         
         let hostingController = UIHostingController(
             rootView: ExternalPresenterView(
@@ -197,8 +192,7 @@ class ExternalDisplayManager: ObservableObject {
         
         hostingController.view.backgroundColor = .black
         window.rootViewController = hostingController
-        
-        print("Updated external display to verse \(currentVerseIndex + 1)")
+        window.makeKeyAndVisible()
     }
     
     var canGoToNextVerse: Bool {
