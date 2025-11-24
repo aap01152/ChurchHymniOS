@@ -11,37 +11,37 @@ struct DeleteConfirmationAlerts: ViewModifier {
     
     func body(content: Content) -> some View {
         content
-            .alert("Delete Hymn", isPresented: $showingDeleteConfirmation) {
-                Button("Cancel", role: .cancel) { }
-                Button("Delete", role: .destructive) {
+            .alert(NSLocalizedString("alert.delete_hymn", comment: "Delete hymn alert title"), isPresented: $showingDeleteConfirmation) {
+                Button(NSLocalizedString("btn.cancel", comment: "Cancel button"), role: .cancel) { }
+                Button(NSLocalizedString("btn.delete", comment: "Delete button"), role: .destructive) {
                     onDeleteHymn()
                 }
             } message: {
                 if let hymn = hymnToDelete {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Are you sure you want to delete this hymn?")
+                        Text(NSLocalizedString("msg.delete_hymn_confirm", comment: "Delete hymn confirmation"))
                             .font(.headline)
                         
-                        Text("Title: \(hymn.title)")
+                        Text("\(NSLocalizedString("form.title", comment: "Title label")): \(hymn.title)")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                         
                         if let lyrics = hymn.lyrics, !lyrics.isEmpty {
-                            Text("Lyrics: \(lyrics.count) characters")
+                            Text(String(format: NSLocalizedString("count.lyrics_chars", comment: "Lyrics character count"), lyrics.count))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
                         
-                        Text("This action cannot be undone.")
+                        Text(NSLocalizedString("msg.action_cannot_be_undone", comment: "Action cannot be undone warning"))
                             .font(.caption)
                             .foregroundColor(.red)
                             .padding(.top, 4)
                     }
                 }
             }
-            .alert("Delete Multiple Hymns", isPresented: $showingBatchDeleteConfirmation) {
-                Button("Cancel", role: .cancel) { }
-                Button("Delete \(selectedHymnsForDelete.count) Hymn\(selectedHymnsForDelete.count == 1 ? "" : "s")", role: .destructive) {
+            .alert(NSLocalizedString("alert.delete_multiple_hymns", comment: "Delete multiple hymns alert title"), isPresented: $showingBatchDeleteConfirmation) {
+                Button(NSLocalizedString("btn.cancel", comment: "Cancel button"), role: .cancel) { }
+                Button(String(format: NSLocalizedString("btn.delete_count", comment: "Delete count button"), selectedHymnsForDelete.count), role: .destructive) {
                     onDeleteSelectedHymns()
                 }
             } message: {
@@ -51,7 +51,7 @@ struct DeleteConfirmationAlerts: ViewModifier {
                 }
                 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Are you sure you want to delete \(selectedHymnsForDelete.count) hymn\(selectedHymnsForDelete.count == 1 ? "" : "s")?")
+                    Text(String(format: NSLocalizedString("msg.delete_multiple_hymns_confirm", comment: "Delete multiple hymns confirmation"), selectedHymnsForDelete.count))
                         .font(.headline)
                     
                     if selectedHymnsForDelete.count <= 5 {
@@ -68,12 +68,12 @@ struct DeleteConfirmationAlerts: ViewModifier {
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                         
-                        Text("• ...and \(remainingCount) more")
+                        Text(String(format: NSLocalizedString("count.and_more", comment: "And more count"), remainingCount))
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
                     
-                    Text("Total content: \(totalCharacters) characters")
+                    Text(String(format: NSLocalizedString("count.total_content_chars", comment: "Total content characters"), totalCharacters))
                         .font(.caption)
                         .foregroundColor(.secondary)
                     

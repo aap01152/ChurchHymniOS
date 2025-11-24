@@ -1,0 +1,7 @@
+/* ChurchHymniOS Base InfoPlist Localization */
+
+/* App name */
+CFBundleDisplayName = "ChurchHymn iOS";
+
+/* App description for system prompts and accessibility */
+CFBundleGetInfoString = "A hymnal application for church services with external display support";

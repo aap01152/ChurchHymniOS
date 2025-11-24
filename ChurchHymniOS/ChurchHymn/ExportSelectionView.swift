@@ -16,12 +16,12 @@ struct ExportSelectionView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Selected: \(selectedHymns.count) hymn\(selectedHymns.count == 1 ? "" : "s")")
+                            Text(String(format: NSLocalizedString("count.selected_hymns", comment: "Selected hymns count"), selectedHymns.count))
                                 .font(.title2)
                                 .fontWeight(.semibold)
                                 .foregroundColor(.primary)
                             
-                            Text("Total available: \(hymns.count)")
+                            Text(String(format: NSLocalizedString("count.total_available", comment: "Total available count"), hymns.count))
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                         }
@@ -29,13 +29,13 @@ struct ExportSelectionView: View {
                         Spacer()
                         
                         HStack(spacing: 12) {
-                            Button("Select All") {
+                            Button(NSLocalizedString("btn.select_all", comment: "Select all button")) {
                                 selectedHymns = Set(hymns.map { $0.id })
                             }
                             .disabled(selectedHymns.count == hymns.count)
                             .buttonStyle(.bordered)
                             
-                            Button("Clear All") {
+                            Button(NSLocalizedString("btn.clear_all", comment: "Clear all button")) {
                                 selectedHymns.removeAll()
                             }
                             .disabled(selectedHymns.isEmpty)
@@ -44,11 +44,11 @@ struct ExportSelectionView: View {
                     }
                     
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Export Format")
+                        Text(NSLocalizedString("export.format", comment: "Export format label"))
                             .font(.headline)
                             .foregroundColor(.primary)
                         
-                        Picker("Format", selection: $exportFormat) {
+                        Picker(NSLocalizedString("export.format", comment: "Format picker"), selection: $exportFormat) {
                             ForEach(ExportFormat.allCases, id: \.self) { format in
                                 Text(format.description).tag(format)
                             }
@@ -79,11 +79,11 @@ struct ExportSelectionView: View {
                 }
                 .listStyle(InsetGroupedListStyle())
             }
-            .navigationTitle("Export Hymns")
+            .navigationTitle(NSLocalizedString("nav.export_hymns", comment: "Export hymns navigation title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    Button(NSLocalizedString("btn.cancel", comment: "Cancel button")) {
                         onCancel()
                         dismiss()
                     }
@@ -91,7 +91,7 @@ struct ExportSelectionView: View {
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Export") {
+                    Button(NSLocalizedString("btn.export", comment: "Export button")) {
                         onConfirm()
                         dismiss()
                     }

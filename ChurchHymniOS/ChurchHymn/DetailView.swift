@@ -110,26 +110,26 @@ struct MultiSelectDetailView: View {
                 .font(.system(size: 60))
                 .foregroundColor(.orange)
             
-            Text("Multi-Select Mode")
+            Text(NSLocalizedString("multiselect.mode", comment: "Multi-select mode title"))
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .foregroundColor(.orange)
             
-            Text("\(selectedHymnsForDelete.count) hymn\(selectedHymnsForDelete.count == 1 ? "" : "s") selected")
+            Text(String(format: NSLocalizedString("count.hymns_selected", comment: "Selected hymns count"), selectedHymnsForDelete.count))
                 .font(.title2)
                 .foregroundColor(.secondary)
             
             if !selectedHymnsForDelete.isEmpty {
                 VStack(spacing: 8) {
-                    Text("Actions Available:")
+                    Text(NSLocalizedString("multiselect.actions_available", comment: "Actions available text"))
                         .font(.headline)
                         .foregroundColor(.primary)
                     
-                    Text("• Delete selected hymns")
+                    Text(NSLocalizedString("multiselect.delete_selected", comment: "Delete selected action"))
                         .font(.body)
                         .foregroundColor(.secondary)
                     
-                    Text("• Export selected hymns")
+                    Text(NSLocalizedString("multiselect.export_selected", comment: "Export selected action"))
                         .font(.body)
                         .foregroundColor(.secondary)
                 }
@@ -189,12 +189,12 @@ Praise God, praise God, praise God
                         .font(.system(size: 60))
                         .foregroundColor(.blue)
                     
-                    Text("Select a hymn to get started")
+                    Text(NSLocalizedString("status.select_hymn_to_start", comment: "Select hymn to start message"))
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .foregroundColor(.primary)
                     
-                    Text("You can also import .txt or .json files to add hymns to your collection")
+                    Text(NSLocalizedString("status.import_info", comment: "Import info message"))
                         .font(.title3)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -203,13 +203,13 @@ Praise God, praise God, praise God
                 .padding(.bottom, 20)
                 
                 VStack(alignment: .leading, spacing: 20) {
-                    Text("Import Formats")
+                    Text(NSLocalizedString("help.import_formats", comment: "Import formats title"))
                         .font(.title)
                         .fontWeight(.bold)
                         .foregroundColor(.primary)
                     
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("JSON – Single Hymn")
+                        Text(NSLocalizedString("help.json_single", comment: "JSON single hymn format"))
                             .font(.headline)
                             .foregroundColor(.primary)
                         
@@ -222,7 +222,7 @@ Praise God, praise God, praise God
                     }
                     
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("JSON – Multiple Hymns")
+                        Text(NSLocalizedString("help.json_multiple", comment: "JSON multiple hymns format"))
                             .font(.headline)
                             .foregroundColor(.primary)
                         
@@ -235,7 +235,7 @@ Praise God, praise God, praise God
                     }
                     
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Plain Text")
+                        Text(NSLocalizedString("help.plain_text", comment: "Plain text format"))
                             .font(.headline)
                             .foregroundColor(.primary)
                         
@@ -246,7 +246,7 @@ Praise God, praise God, praise God
                             .background(Color(.systemGray6))
                             .cornerRadius(8)
                         
-                        Text("Put the word 'Chorus' on a line by itself before the chorus section.")
+                        Text(NSLocalizedString("help.chorus_instruction", comment: "Chorus instruction"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                             .italic()

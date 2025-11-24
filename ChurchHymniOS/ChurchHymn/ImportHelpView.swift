@@ -50,15 +50,12 @@ Praise God, praise God, praise God
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Importing Hymns")
+                        Text(NSLocalizedString("progress.importing_hymns", comment: "Importing hymns title"))
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .foregroundColor(.primary)
 
-                        Text("""
-You can import hymns from **JSON** or **plain-text** files. \
-Use the **Import** toolbar button, and select your file(s).
-""")
+                        Text(NSLocalizedString("help.import_description", comment: "Import help description"))
                         .font(.body)
                         .foregroundColor(.primary)
                     }
@@ -66,7 +63,7 @@ Use the **Import** toolbar button, and select your file(s).
 
                     VStack(alignment: .leading, spacing: 20) {
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("JSON – Single Hymn")
+                            Text(NSLocalizedString("help.json_single", comment: "JSON single hymn title"))
                                 .font(.title2)
                                 .fontWeight(.semibold)
                                 .foregroundColor(.primary)
@@ -74,7 +71,7 @@ Use the **Import** toolbar button, and select your file(s).
                         }
 
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("JSON – Batch Import")
+                            Text(NSLocalizedString("help.json_batch", comment: "JSON batch import title"))
                                 .font(.title2)
                                 .fontWeight(.semibold)
                                 .foregroundColor(.primary)
@@ -82,12 +79,12 @@ Use the **Import** toolbar button, and select your file(s).
                         }
 
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("Plain-Text")
+                            Text(NSLocalizedString("help.plain_text", comment: "Plain text title"))
                                 .font(.title2)
                                 .fontWeight(.semibold)
                                 .foregroundColor(.primary)
                             CodeBlock(text: plainText)
-                            Text("Put the word 'Chorus' on a line by itself immediately before the chorus section.")
+                            Text(NSLocalizedString("help.chorus_instruction", comment: "Chorus instruction text"))
                                 .font(.body)
                                 .foregroundColor(.secondary)
                                 .padding(.top, 4)
@@ -99,13 +96,13 @@ Use the **Import** toolbar button, and select your file(s).
 
                     HStack {
                         Spacer()
-                        Link("Support page", destination: URL(string: "https://paulobfsilva.github.io/ChurchHymn/support.html")!)
+                        Link(NSLocalizedString("help.support_page", comment: "Support page link"), destination: URL(string: "https://paulobfsilva.github.io/ChurchHymn/support.html")!)
                             .font(.body)
                     }
                 }
                 .padding(24)
             }
-            .navigationTitle("Import Help")
+            .navigationTitle(NSLocalizedString("nav.import_help", comment: "Import help navigation title"))
             .navigationBarTitleDisplayMode(.inline)
         }
     }

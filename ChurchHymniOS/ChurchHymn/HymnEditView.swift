@@ -26,28 +26,28 @@ struct HymnEditView: View {
                 VStack(spacing: 24) {
                     // Header section with basic info
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Hymn Details")
+                        Text(NSLocalizedString("form.hymn_details", comment: "Hymn details section title"))
                             .font(.largeTitle)
                             .fontWeight(.bold)
                         
                         VStack(spacing: 16) {
                             VStack(alignment: .leading, spacing: 8) {
-                                Text("Title")
+                                Text(NSLocalizedString("form.title", comment: "Title field label"))
                                     .font(.headline)
                                     .foregroundColor(.primary)
                                 
-                                TextField("Enter hymn title", text: $hymn.title)
+                                TextField(NSLocalizedString("placeholder.hymn_title", comment: "Hymn title placeholder"), text: $hymn.title)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .font(.body)
                             }
                             
                             HStack(spacing: 16) {
                                 VStack(alignment: .leading, spacing: 8) {
-                                    Text("Hymn Number")
+                                    Text(NSLocalizedString("form.hymn_number", comment: "Hymn number field label"))
                                         .font(.headline)
                                         .foregroundColor(.primary)
                                     
-                                    TextField("Number", text: $songNumberText)
+                                    TextField(NSLocalizedString("placeholder.number", comment: "Number placeholder"), text: $songNumberText)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
                                         .font(.body)
                                         .onChange(of: songNumberText) { oldValue, newValue in
@@ -63,42 +63,42 @@ struct HymnEditView: View {
                                 }
                                 
                                 VStack(alignment: .leading, spacing: 8) {
-                                    Text("Key")
+                                    Text(NSLocalizedString("form.key", comment: "Key field label"))
                                         .font(.headline)
                                         .foregroundColor(.primary)
                                     
-                                    TextField("e.g. G Major", text: $hymn.musicalKey.unwrap(or: ""))
+                                    TextField(NSLocalizedString("placeholder.key", comment: "Key placeholder"), text: $hymn.musicalKey.unwrap(or: ""))
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
                                         .font(.body)
                                 }
                                 
                                 VStack(alignment: .leading, spacing: 8) {
-                                    Text("Author")
+                                    Text(NSLocalizedString("form.author", comment: "Author field label"))
                                         .font(.headline)
                                         .foregroundColor(.primary)
                                     
-                                    TextField("Author name", text: $hymn.author.unwrap(or: ""))
+                                    TextField(NSLocalizedString("placeholder.author", comment: "Author placeholder"), text: $hymn.author.unwrap(or: ""))
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
                                         .font(.body)
                                 }
                             }
                             
                             VStack(alignment: .leading, spacing: 8) {
-                                Text("Copyright")
+                                Text(NSLocalizedString("form.copyright", comment: "Copyright field label"))
                                     .font(.headline)
                                     .foregroundColor(.primary)
                                 
-                                TextField("e.g. © 2025 Church", text: $hymn.copyright.unwrap(or: ""))
+                                TextField(NSLocalizedString("placeholder.copyright", comment: "Copyright placeholder"), text: $hymn.copyright.unwrap(or: ""))
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .font(.body)
                             }
                             
                             VStack(alignment: .leading, spacing: 8) {
-                                Text("Tags")
+                                Text(NSLocalizedString("form.tags", comment: "Tags field label"))
                                     .font(.headline)
                                     .foregroundColor(.primary)
                                 
-                                TextField("Comma separated tags", text: Binding(
+                                TextField(NSLocalizedString("placeholder.tags", comment: "Tags placeholder"), text: Binding(
                                     get: { hymn.tags?.joined(separator: ", ") ?? "" },
                                     set: { hymn.tags = $0.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) } }
                                 ))
@@ -110,7 +110,7 @@ struct HymnEditView: View {
                     
                     // Lyrics section
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Lyrics")
+                        Text(NSLocalizedString("form.lyrics", comment: "Lyrics section title"))
                             .font(.title)
                             .fontWeight(.bold)
                         
@@ -128,29 +128,29 @@ struct HymnEditView: View {
                     
                     // Notes section
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Notes")
+                        Text(NSLocalizedString("form.notes", comment: "Notes section title"))
                             .font(.title)
                             .fontWeight(.bold)
                         
-                        TextField("Additional notes...", text: $hymn.notes.unwrap(or: ""))
+                        TextField(NSLocalizedString("placeholder.notes", comment: "Notes placeholder"), text: $hymn.notes.unwrap(or: ""))
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .font(.body)
                     }
                 }
                 .padding(24)
             }
-            .navigationTitle("Edit Hymn")
+            .navigationTitle(NSLocalizedString("nav.edit_hymn", comment: "Edit hymn navigation title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    Button(NSLocalizedString("btn.cancel", comment: "Cancel button")) {
                         dismiss()
                     }
                     .font(.body)
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
+                    Button(NSLocalizedString("btn.save", comment: "Save button")) {
                         onSave?(hymn)
                         dismiss()
                     }

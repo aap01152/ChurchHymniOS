@@ -207,7 +207,7 @@ class ExternalDisplayManager: ObservableObject {
     
     var currentVerseInfo: String {
         guard let hymn = currentHymn, !hymn.parts.isEmpty else {
-            return "No verse available"
+            return NSLocalizedString("status.no_lyrics_available", comment: "No verse available status")
         }
         
         let part = hymn.parts[currentVerseIndex]
@@ -215,7 +215,7 @@ class ExternalDisplayManager: ObservableObject {
             return label
         } else {
             let verseNumber = hymn.parts[0...currentVerseIndex].filter { $0.label == nil }.count
-            return "Verse \(verseNumber)"
+            return String(format: NSLocalizedString("external.verse_number", comment: "Verse number format"), verseNumber)
         }
     }
     

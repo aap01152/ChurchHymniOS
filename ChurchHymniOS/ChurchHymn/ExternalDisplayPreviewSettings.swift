@@ -19,15 +19,15 @@ struct ExternalDisplayPreviewSettingsView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section("Preview Window") {
-                    Toggle("Show Preview Window", isOn: $previewManager.isPreviewVisible)
-                        .help("Show a small preview of what's displayed on the external screen")
+                Section(NSLocalizedString("preview.window", comment: "Preview window section")) {
+                    Toggle(NSLocalizedString("preview.show_preview_window", comment: "Show preview window toggle"), isOn: $previewManager.isPreviewVisible)
+                        .help(NSLocalizedString("preview.show_preview_help", comment: "Show preview help text"))
                     
                     if previewManager.isPreviewVisible {
                         HStack {
-                            Text("Size")
+                            Text(NSLocalizedString("preview.size", comment: "Size label"))
                             Spacer()
-                            Picker("Size", selection: $previewManager.previewSize) {
+                            Picker(NSLocalizedString("preview.size", comment: "Size picker"), selection: $previewManager.previewSize) {
                                 ForEach(ExternalDisplayPreviewManager.PreviewSize.allCases) { size in
                                     Text(size.rawValue).tag(size)
                                 }
@@ -37,7 +37,7 @@ struct ExternalDisplayPreviewSettingsView: View {
                         
                         VStack(alignment: .leading) {
                             HStack {
-                                Text("Opacity")
+                                Text(NSLocalizedString("preview.opacity", comment: "Opacity label"))
                                 Spacer()
                                 Text("\(Int(previewManager.previewOpacity * 100))%")
                                     .foregroundColor(.secondary)
@@ -45,25 +45,25 @@ struct ExternalDisplayPreviewSettingsView: View {
                             }
                             
                             Slider(value: $previewManager.previewOpacity, in: 0.3...1.0, step: 0.1)
-                                .help("Adjust the transparency of the preview window")
+                                .help(NSLocalizedString("preview.adjust_transparency_help", comment: "Adjust transparency help text"))
                         }
                     }
                 }
                 
-                Section("Behavior") {
-                    Toggle("Auto-show when presenting", isOn: $previewManager.autoShowOnPresentation)
-                        .help("Automatically show the preview window when starting an external presentation")
+                Section(NSLocalizedString("preview.behavior", comment: "Behavior section")) {
+                    Toggle(NSLocalizedString("preview.auto_show_presenting", comment: "Auto-show toggle"), isOn: $previewManager.autoShowOnPresentation)
+                        .help(NSLocalizedString("preview.auto_show_help", comment: "Auto-show help text"))
                     
-                    Toggle("Auto-hide when disconnected", isOn: $previewManager.autoHideOnDisconnect)
-                        .help("Automatically hide the preview window when the external display is disconnected")
+                    Toggle(NSLocalizedString("preview.auto_hide_disconnected", comment: "Auto-hide toggle"), isOn: $previewManager.autoHideOnDisconnect)
+                        .help(NSLocalizedString("preview.auto_hide_help", comment: "Auto-hide help text"))
                     
-                    Toggle("Snap to corners", isOn: $previewManager.snapToCorners)
-                        .help("Snap the preview window to screen corners when dragging nearby")
+                    Toggle(NSLocalizedString("preview.snap_corners", comment: "Snap to corners toggle"), isOn: $previewManager.snapToCorners)
+                        .help(NSLocalizedString("preview.snap_help", comment: "Snap to corners help text"))
                 }
                 
-                Section("Preview Position") {
+                Section(NSLocalizedString("preview.position", comment: "Preview position section")) {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Current Position")
+                        Text(NSLocalizedString("preview.current_position", comment: "Current position label"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                         
@@ -86,33 +86,33 @@ struct ExternalDisplayPreviewSettingsView: View {
                             GridItem(.flexible()),
                             GridItem(.flexible())
                         ], spacing: 8) {
-                            previewPositionButton("Top Left", position: .topLeft)
-                            previewPositionButton("Top Right", position: .topRight)
-                            previewPositionButton("Bottom Left", position: .bottomLeft)
-                            previewPositionButton("Bottom Right", position: .bottomRight)
+                            previewPositionButton(NSLocalizedString("preview.top_left", comment: "Top left position"), position: .topLeft)
+                            previewPositionButton(NSLocalizedString("preview.top_right", comment: "Top right position"), position: .topRight)
+                            previewPositionButton(NSLocalizedString("preview.bottom_left", comment: "Bottom left position"), position: .bottomLeft)
+                            previewPositionButton(NSLocalizedString("preview.bottom_right", comment: "Bottom right position"), position: .bottomRight)
                         }
                     }
                 }
                 
                 if previewManager.isPreviewVisible {
-                    Section("Test Preview") {
-                        Button("Reset to Default Position") {
+                    Section(NSLocalizedString("preview.test_preview", comment: "Test preview section")) {
+                        Button(NSLocalizedString("preview.reset_default", comment: "Reset to default position")) {
                             previewManager.updatePosition(defaultPosition)
                         }
                         .foregroundColor(.blue)
                         
-                        Button("Show Preview Now") {
+                        Button(NSLocalizedString("preview.show_now", comment: "Show preview now")) {
                             previewManager.showPreview()
                         }
                         .foregroundColor(.green)
                     }
                 }
             }
-            .navigationTitle("Preview Settings")
+            .navigationTitle(NSLocalizedString("preview.settings", comment: "Preview settings title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
+                    Button(NSLocalizedString("preview.done", comment: "Done button")) {
                         dismiss()
                     }
                 }
@@ -182,13 +182,13 @@ struct ExternalDisplayPreviewSettingsButton: View {
                 Image(systemName: previewManager.isPreviewVisible ? "rectangle.inset.filled" : "rectangle")
                     .font(.title3)
                     .foregroundColor(previewManager.isPreviewVisible ? .blue : .gray)
-                Text("Preview")
+                Text(NSLocalizedString("display.preview", comment: "Preview text"))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
         }
         .buttonStyle(.plain)
-        .help("Configure external display preview")
+        .help(NSLocalizedString("preview.configure_help", comment: "Configure preview help text"))
         .sheet(isPresented: $showingSettings) {
             ExternalDisplayPreviewSettingsView(previewManager: previewManager)
         }
@@ -207,7 +207,7 @@ struct ExternalDisplayPreviewQuickToggle: View {
             HStack(spacing: 6) {
                 Image(systemName: previewManager.isPreviewVisible ? "eye" : "eye.slash")
                     .font(.caption)
-                Text(previewManager.isPreviewVisible ? "Hide" : "Show")
+                Text(previewManager.isPreviewVisible ? NSLocalizedString("btn.hide", comment: "Hide button") : NSLocalizedString("btn.show", comment: "Show button"))
                     .font(.caption)
             }
             .foregroundColor(previewManager.isPreviewVisible ? .blue : .gray)

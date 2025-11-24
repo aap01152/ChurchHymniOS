@@ -71,7 +71,7 @@ struct ExternalPresenterView: View {
                     
                     // Musical key in high-contrast yellow
                     if let key = hymn.musicalKey, !key.isEmpty {
-                        Text("Key: \(key)")
+                        Text(String(format: NSLocalizedString("external.key_prefix", comment: "Key prefix for musical key"), key))
                             .font(.system(size: 40, weight: .bold, design: .rounded))
                             .foregroundColor(.yellow)
                             .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 1)
@@ -109,12 +109,12 @@ struct ExternalPresenterView: View {
             } else {
                 // No lyrics message in high contrast
                 VStack(spacing: 16) {
-                    Text("No Lyrics Available")
+                    Text(NSLocalizedString("external.no_lyrics_available", comment: "No lyrics available message"))
                         .font(.system(size: 56, weight: .bold, design: .rounded))
                         .foregroundColor(.red)
                         .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 1)
                     
-                    Text("Please check the hymn content")
+                    Text(NSLocalizedString("external.check_hymn_content", comment: "Check hymn content message"))
                         .font(.system(size: 32, weight: .medium, design: .rounded))
                         .foregroundColor(.yellow)
                         .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 1)
@@ -136,7 +136,7 @@ struct ExternalPresenterView: View {
                 }
                 
                 if let author = hymn.author, !author.isEmpty {
-                    Text("By: \(author)")
+                    Text(String(format: NSLocalizedString("external.by_author", comment: "By author prefix"), author))
                         .font(.system(size: 22, weight: .medium, design: .rounded))
                         .foregroundColor(.white.opacity(0.7))
                         .shadow(color: .black.opacity(0.3), radius: 1, x: 0, y: 1)
@@ -166,7 +166,7 @@ struct ExternalPresenterView: View {
                         .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 1)
                 } else {
                     let verseNumber = presentationParts[0...verseIndex].filter { $0.label == nil }.count
-                    Text("Verse \(verseNumber)")
+                    Text(String(format: NSLocalizedString("external.verse_number", comment: "Verse number format"), verseNumber))
                         .font(.system(size: 32, weight: .bold, design: .rounded))
                         .foregroundColor(.yellow)
                         .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 1)
@@ -174,7 +174,7 @@ struct ExternalPresenterView: View {
             }
             
             // Progress indicator with better visibility
-            Text("\(verseIndex + 1) of \(presentationParts.count)")
+            Text(String(format: NSLocalizedString("external.verse_progress", comment: "Verse progress format"), verseIndex + 1, presentationParts.count))
                 .font(.system(size: 24, weight: .medium, design: .rounded))
                 .foregroundColor(.white.opacity(0.8))
                 .shadow(color: .black.opacity(0.3), radius: 1, x: 0, y: 1)

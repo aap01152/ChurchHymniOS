@@ -1,0 +1,250 @@
+/* ChurchHymniOS Portuguese (European) Localization File */
+
+/* Navigation and Tab Titles */
+"nav.library" = "Biblioteca";
+"nav.song" = "Cântico";
+"nav.edit_hymn" = "Editar Hino";
+"nav.import_help" = "Ajuda da Importação";
+"nav.preview_settings" = "Definições de Pré-visualização";
+"nav.export_hymns" = "Exportar Hinos";
+"nav.import_preview" = "Pré-visualização da Importação";
+
+/* Button Labels */
+"btn.add" = "Adicionar";
+"btn.import" = "Importar";
+"btn.export" = "Exportar";
+"btn.manage" = "Gerir";
+"btn.help" = "Ajuda";
+"btn.present" = "Apresentar";
+"btn.edit" = "Editar";
+"btn.delete" = "Apagar";
+"btn.cancel" = "Cancelar";
+"btn.save" = "Guardar";
+"btn.ok" = "OK";
+"btn.select_all" = "Seleccionar Tudo";
+"btn.deselect_all" = "Desseleccionar Tudo";
+"btn.clear_all" = "Limpar Tudo";
+"btn.show" = "Mostrar";
+"btn.hide" = "Ocultar";
+"btn.stop" = "Parar";
+"btn.previous" = "Anterior";
+"btn.next" = "Seguinte";
+"btn.present_externally" = "Apresentar Externamente";
+"btn.present_to_external_display" = "Apresentar no Ecrã Externo";
+"btn.stop_external" = "Parar Exibição Externa";
+
+/* Alert and Dialog Titles */
+"alert.delete_hymn" = "Apagar Hino";
+"alert.delete_multiple_hymns" = "Apagar Vários Hinos";
+"alert.import_error" = "Erro de Importação";
+"alert.import_successful" = "Importação Bem-sucedida";
+"alert.external_display_error" = "Erro do Ecrã Externo";
+
+/* Alert and Error Messages */
+"msg.delete_hymn_confirm" = "Tem a certeza de que deseja apagar este hino?";
+"msg.delete_multiple_hymns_confirm" = "Tem a certeza de que deseja apagar %d hino(s)?";
+"msg.action_cannot_be_undone" = "Esta acção não pode ser desfeita.";
+"msg.hymn_missing_title" = "O hino não tem título";
+"msg.file_empty" = "O ficheiro seleccionado está vazio";
+"msg.permission_denied" = "Permissão negada. Verifique as permissões do ficheiro.";
+"msg.file_not_found" = "Ficheiro não encontrado. O ficheiro pode ter sido movido ou apagado.";
+"msg.file_corrupted" = "O ficheiro parece estar corrompido";
+"msg.unexpected_error" = "Ocorreu um erro inesperado";
+"msg.failed_to_read_file" = "Falha ao ler o ficheiro";
+"msg.invalid_file_format" = "Formato de ficheiro inválido";
+"msg.no_files_selected" = "Nenhum ficheiro seleccionado";
+"msg.unknown_import_type" = "Tipo de importação desconhecido";
+"msg.auto_detection_failed" = "A detecção automática falhou";
+"msg.no_hymns_selected_for_export" = "Nenhum hino seleccionado para exportação";
+"msg.hymn_imported_successfully" = "Hino importado com sucesso.";
+
+/* Form Labels and Field Names */
+"form.hymn_details" = "Detalhes do Hino";
+"form.title" = "Título";
+"form.hymn_number" = "Número do Hino";
+"form.key" = "Tom";
+"form.author" = "Autor";
+"form.copyright" = "Direitos de Autor";
+"form.tags" = "Etiquetas";
+"form.lyrics" = "Letra";
+"form.notes" = "Notas";
+
+/* Placeholder Text */
+"placeholder.hymn_title" = "Introduza o título do hino";
+"placeholder.number" = "Número";
+"placeholder.key" = "ex. Sol Maior";
+"placeholder.author" = "Nome do autor";
+"placeholder.tags" = "Etiquetas separadas por vírgulas";
+"placeholder.copyright" = "ex. © 2025 Igreja";
+"placeholder.notes" = "Notas adicionais...";
+
+/* Status and Information Messages */
+"status.no_external_display" = "Sem Ecrã Externo";
+"status.external_display_ready" = "Ecrã Externo Pronto";
+"status.ready" = "Pronto";
+"status.no_content" = "Sem Conteúdo";
+"status.minimized" = "Minimizado";
+"status.no_lyrics_available" = "Letra não disponível";
+"status.select_hymn_to_start" = "Seleccione um hino para começar";
+"status.import_info" = "Também pode importar ficheiros .txt ou .json para adicionar hinos à sua colecção";
+
+/* Progress and Operation Messages */
+"progress.importing_hymns" = "A Importar Hinos";
+"progress.exporting_hymns" = "A Exportar Hinos";
+"progress.streaming_operation" = "Operação de Transmissão";
+"progress.file_progress" = "Progresso do Ficheiro";
+"progress.hymn_processing" = "A Processar Hino";
+"progress.memory_efficient_processing" = "Processamento eficiente da memória";
+"progress.reading_file" = "A ler ficheiro...";
+"progress.parsing_content" = "A analisar conteúdo...";
+"progress.validating_hymn_data" = "A validar dados do hino...";
+"progress.checking_duplicates" = "A verificar duplicados...";
+"progress.preparing_preview" = "A preparar pré-visualização...";
+
+/* External Display Status */
+"external.no_display" = "Sem Ecrã";
+"external.live" = "Em Directo";
+"external.present_to_external" = "Apresentar no Ecrã Externo";
+"external.stop_external" = "Parar Exibição Externa";
+"external.presenting_to_external" = "A Apresentar no Ecrã Externo";
+"external.connect_projector" = "Ligue um projector ou monitor externo";
+"external.ready_to_present" = "Pronto para apresentar";
+"external.current_verse" = "Verso Actual";
+
+/* Count and Summary Text */
+"count.hymns_of_total" = "%d de %d hinos";
+"count.selected_hymns" = "Seleccionados: %d hino(s)";
+"count.total_available" = "Total disponível: %d";
+"count.hymns_selected" = "%d hino(s) seleccionado(s)";
+"count.total_content_chars" = "Conteúdo total: %d caracteres";
+"count.lyrics_chars" = "Letra: %d caracteres";
+"count.and_more" = "• ...e mais %d";
+"btn.delete_count" = "Apagar %d Hino(s)";
+
+/* Export and Import Labels */
+"export.format" = "Formato de Exportação";
+"export.json_format" = "Exportar como formato JSON";
+"export.text_format" = "Exportar como formato de texto simples";
+"export.json" = "JSON";
+"export.plain_text" = "Texto Simples";
+"export.selected" = "Exportar Seleccionados";
+"export.multiple" = "Exportar Múltiplos";
+"export.all" = "Exportar Tudo";
+"export.large_collection" = "Exportar Colecção Grande";
+"export.file" = "Ficheiro: %@";
+"export.total" = "Total";
+"export.new" = "Novos";
+"export.duplicates" = "Duplicados";
+"export.errors" = "Erros";
+"export.new_hymns" = "Novos Hinos";
+"export.duplicate_resolution" = "Resolução de Duplicados";
+
+/* Duplicate Resolution Options */
+"duplicate.skip" = "Ignorar";
+"duplicate.merge" = "Juntar";
+"duplicate.replace" = "Substituir";
+"duplicate.skip_desc" = "Ignorar hinos duplicados";
+"duplicate.merge_desc" = "Juntar novos dados com hinos existentes";
+"duplicate.replace_desc" = "Substituir hinos existentes com novos dados";
+
+/* Multi-Select Mode */
+"multiselect.mode" = "Modo de Selecção Múltipla";
+"multiselect.exit" = "Sair da Selecção Múltipla";
+"multiselect.actions_available" = "Acções Disponíveis:";
+"multiselect.delete_selected" = "• Apagar hinos seleccionados";
+"multiselect.export_selected" = "• Exportar hinos seleccionados";
+
+/* External Display Features */
+"display.size" = "Tamanho";
+"display.opacity" = "Opacidade";
+"display.current_position" = "Posição Actual";
+"display.preview" = "Pré-visualização";
+"display.font_size" = "Tamanho da Fonte";
+"display.font_size_value" = "Tamanho da Fonte: %d";
+
+/* External Display and Presentation */
+"external.verse_number" = "Verso %d";
+"external.key_prefix" = "Tom: %@";
+"external.by_author" = "Por: %@";
+"external.no_lyrics_available" = "Letra Não Disponível";
+"external.check_hymn_content" = "Verifique o conteúdo do hino";
+"external.verse_progress" = "%d de %d";
+"presentation.test_title" = "Exibição de Teste do Hino";
+"presentation.test_message" = "Este é um teste para verificar se o apresentador está a funcionar correctamente.";
+"presentation.test_instructions" = "Toque para avançar, deslize para navegar";
+"presentation.exit" = "Sair da apresentação";
+
+/* Preview Settings */
+"preview.window" = "Janela de Pré-visualização";
+"preview.show_preview_window" = "Mostrar Janela de Pré-visualização";
+"preview.show_preview_help" = "Mostrar uma pequena pré-visualização do que é exibido no ecrã externo";
+"preview.size" = "Tamanho";
+"preview.opacity" = "Opacidade";
+"preview.adjust_transparency_help" = "Ajustar a transparência da janela de pré-visualização";
+"preview.behavior" = "Comportamento";
+"preview.auto_show_presenting" = "Mostrar automaticamente ao apresentar";
+"preview.auto_show_help" = "Mostrar automaticamente a janela de pré-visualização ao iniciar uma apresentação externa";
+"preview.auto_hide_disconnected" = "Ocultar automaticamente ao desligar";
+"preview.auto_hide_help" = "Ocultar automaticamente a janela de pré-visualização quando o ecrã externo é desligado";
+"preview.snap_corners" = "Ajustar aos cantos";
+"preview.snap_help" = "Ajustar a janela de pré-visualização aos cantos do ecrã quando arrastar para perto";
+"preview.position" = "Posição da Pré-visualização";
+"preview.current_position" = "Posição Actual";
+"preview.top_left" = "Superior Esquerdo";
+"preview.top_right" = "Superior Direito";
+"preview.bottom_left" = "Inferior Esquerdo";
+"preview.bottom_right" = "Inferior Direito";
+"preview.test_preview" = "Testar Pré-visualização";
+"preview.reset_default" = "Repor Posição Predefinida";
+"preview.show_now" = "Mostrar Pré-visualização Agora";
+"preview.settings" = "Definições de Pré-visualização";
+"preview.done" = "Concluído";
+"preview.configure_help" = "Configurar pré-visualização do ecrã externo";
+"preview.live" = "EM DIRECTO";
+"preview.external_display" = "Ecrã Externo";
+"preview.minimized" = "Minimizado";
+"preview.no_lyrics" = "Sem letra";
+"preview.hide_help" = "Ocultar pré-visualização do ecrã externo";
+"preview.show_help" = "Mostrar pré-visualização do ecrã externo";
+"preview.size_small" = "Pequeno";
+"preview.size_medium" = "Médio";
+"preview.size_large" = "Grande";
+
+/* Help and Information */
+"help.import_formats" = "Formatos de Importação";
+"help.json_single" = "JSON – Hino Único";
+"help.json_multiple" = "JSON – Múltiplos Hinos";
+"help.json_batch" = "JSON – Importação por Lotes";
+"help.plain_text" = "Texto Simples";
+"help.chorus_instruction" = "Coloque a palavra 'Coro' numa linha sozinha antes da secção do coro.";
+"help.support_page" = "Página de suporte";
+"help.import_description" = "Pode importar hinos de ficheiros **JSON** ou **texto simples**. Use o botão **Importar** da barra de ferramentas e seleccione os seus ficheiros.";
+
+/* Error Recovery Suggestions */
+"error.try_different_file" = "Tente seleccionar um ficheiro diferente ou verifique as permissões do ficheiro";
+"error.check_format_docs" = "Consulte a documentação do formato de importação e certifique-se de que o seu ficheiro segue o formato correcto";
+"error.add_titles" = "Adicione títulos a todos os hinos no ficheiro antes de importar";
+"error.select_file_with_data" = "Seleccione um ficheiro que contenha dados de hinos";
+"error.ensure_file_exists" = "Certifique-se de que o ficheiro existe e tente seleccioná-lo novamente";
+"error.try_different_file_damaged" = "Tente seleccionar um ficheiro diferente ou verifique se o ficheiro foi danificado";
+"error.try_again_contact_support" = "Tente novamente ou contacte o suporte se o problema persistir";
+
+/* Accessibility and Help Text */
+"accessibility.present_hymn" = "Apresentar hino seleccionado";
+"accessibility.add_new_hymn" = "Adicionar novo hino";
+"accessibility.import_hymns" = "Importar hinos de ficheiros de texto ou JSON";
+"accessibility.edit_hymn" = "Editar hino seleccionado";
+"accessibility.delete_hymns" = "Apagar hinos seleccionados";
+"accessibility.delete_hymn" = "Apagar hino seleccionado";
+"accessibility.deselect_all" = "Desseleccionar todos os hinos";
+"accessibility.select_all" = "Seleccionar todos os hinos";
+"accessibility.no_external_display" = "Nenhum ecrã externo ligado";
+"accessibility.present_external" = "Apresentar no ecrã externo";
+"accessibility.stop_external_presentation" = "Parar apresentação externa";
+"accessibility.adjust_font_size" = "Ajustar tamanho da fonte";
+"accessibility.export_selected" = "Exportar hinos";
+"accessibility.manage_mode" = "Gerir modo de selecção";
+
+/* Search and Sorting */
+"search.placeholder" = "Procurar hinos...";
+"sort.by" = "Ordenar por";

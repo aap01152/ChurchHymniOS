@@ -1,0 +1,7 @@
+/* ChurchHymniOS Portuguese InfoPlist Localization */
+
+/* App name */
+CFBundleDisplayName = "Hinário Igreja iOS";
+
+/* App description for system prompts and accessibility */
+CFBundleGetInfoString = "Uma aplicação de hinário para serviços religiosos com suporte para ecrã externo";

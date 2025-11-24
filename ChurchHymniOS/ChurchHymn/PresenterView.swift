@@ -96,7 +96,7 @@ struct PresenterView: View {
                         .foregroundColor(.white.opacity(0.8))
                 }
                 .buttonStyle(PlainButtonStyle())
-                .help("Exit presentation")
+                .help(NSLocalizedString("presentation.exit", comment: "Exit presentation help text"))
             }
             .padding(.top, UIDevice.current.userInterfaceIdiom == .phone ? safeTop + 48 : 24)
             .padding(.horizontal, 24)
@@ -132,14 +132,14 @@ struct PresenterView: View {
     
     private var testMessageView: some View {
         VStack(spacing: 20) {
-            Text("Test Hymn Display")
+            Text(NSLocalizedString("presentation.test_title", comment: "Test hymn display title"))
                 .font(.system(size: 56))
                 .foregroundColor(.white)
-            Text("This is a test to verify the presenter is working correctly.")
+            Text(NSLocalizedString("presentation.test_message", comment: "Test presentation message"))
                 .font(.system(size: 28))
                 .foregroundColor(.gray)
                 .multilineTextAlignment(.center)
-            Text("Tap to advance, swipe to navigate")
+            Text(NSLocalizedString("presentation.test_instructions", comment: "Test presentation instructions"))
                 .font(.system(size: 20))
                 .foregroundColor(.yellow)
         }
@@ -168,7 +168,7 @@ struct PresenterView: View {
                     Text(label)
                 } else {
                     let verseNumber = presentationParts[0...index].filter { $0.label == nil }.count
-                    Text("Verse \(verseNumber)")
+                    Text(String(format: NSLocalizedString("external.verse_number", comment: "Verse number format"), verseNumber))
                 }
             }
             .font(.system(size: 16))

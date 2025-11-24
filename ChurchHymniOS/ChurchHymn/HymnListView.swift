@@ -104,13 +104,13 @@ struct HymnListView: View {
                     VStack(spacing: 4) {
                         Image(systemName: "plus.circle.fill")
                             .font(.title)
-                        Text("Add")
+                        Text(NSLocalizedString("btn.add", comment: "Add button"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
                 }
                 .buttonStyle(PlainButtonStyle())
-                .help("Add new hymn")
+                .help(NSLocalizedString("accessibility.add_new_hymn", comment: "Add new hymn accessibility"))
                 
                 // Import Button
                 Button(action: {
@@ -120,33 +120,33 @@ struct HymnListView: View {
                     VStack(spacing: 4) {
                         Image(systemName: "square.and.arrow.down.fill")
                             .font(.title)
-                        Text("Import")
+                        Text(NSLocalizedString("btn.import", comment: "Import button"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
                 }
                 .buttonStyle(PlainButtonStyle())
-                .help("Import hymns from text or JSON files")
+                .help(NSLocalizedString("accessibility.import_hymns", comment: "Import hymns accessibility"))
                 
                 // Export Menu
                 Menu {
-                    Button("Export Selected") {
+                    Button(NSLocalizedString("export.selected", comment: "Export selected button")) {
                         if let hymn = selected {
                             selectedHymnsForExport = [hymn.id]
                             showingExportSelection = true
                         }
                     }
                     .disabled(selected == nil)
-                    Button("Export Multiple") {
+                    Button(NSLocalizedString("export.multiple", comment: "Export multiple button")) {
                         showingExportSelection = true
                     }
                     .disabled(hymns.isEmpty)
-                    Button("Export All") {
+                    Button(NSLocalizedString("export.all", comment: "Export all button")) {
                         selectedHymnsForExport = Set(hymns.map { $0.id })
                         showingExportSelection = true
                     }
                     .disabled(hymns.isEmpty)
-                    Button("Export Large Collection") {
+                    Button(NSLocalizedString("export.large_collection", comment: "Export large collection button")) {
                         selectedHymnsForExport = Set(hymns.map { $0.id })
                         showingExportSelection = true
                     }
@@ -155,17 +155,17 @@ struct HymnListView: View {
                     VStack(spacing: 4) {
                         Image(systemName: "square.and.arrow.up")
                             .font(.title)
-                        Text("Export")
+                        Text(NSLocalizedString("btn.export", comment: "Export button"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
                 }
                 .buttonStyle(PlainButtonStyle())
-                .help("Export hymns")
+                .help(NSLocalizedString("accessibility.export_selected", comment: "Export hymns accessibility"))
                 
                 // Manage Menu
                 Menu {
-                    Button(isMultiSelectMode ? "Exit Multi-Select" : "Multi-Select") {
+                    Button(isMultiSelectMode ? NSLocalizedString("multiselect.exit", comment: "Exit multi-select") : NSLocalizedString("multiselect.mode", comment: "Multi-select mode")) {
                         isMultiSelectMode.toggle()
                         if !isMultiSelectMode {
                             selectedHymnsForDelete.removeAll()
@@ -174,11 +174,11 @@ struct HymnListView: View {
                     .foregroundColor(isMultiSelectMode ? .orange : .blue)
                     if isMultiSelectMode {
                         Divider()
-                        Button("Select All") {
+                        Button(NSLocalizedString("btn.select_all", comment: "Select all button")) {
                             selectedHymnsForDelete = Set(hymns.map { $0.id })
                         }
                         .disabled(hymns.isEmpty)
-                        Button("Deselect All") {
+                        Button(NSLocalizedString("btn.deselect_all", comment: "Deselect all button")) {
                             selectedHymnsForDelete.removeAll()
                         }
                         .disabled(selectedHymnsForDelete.isEmpty)
@@ -187,13 +187,13 @@ struct HymnListView: View {
                     VStack(spacing: 4) {
                         Image(systemName: "slider.horizontal.3")
                             .font(.title)
-                        Text("Manage")
+                        Text(NSLocalizedString("btn.manage", comment: "Manage button"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
                 }
                 .buttonStyle(PlainButtonStyle())
-                .help("Manage selection mode")
+                .help(NSLocalizedString("accessibility.manage_mode", comment: "Manage selection mode accessibility"))
                 
                 // Help Button
                 // Removed as requested
@@ -225,7 +225,7 @@ struct HymnListView: View {
                 .background(Color(.systemBackground))
             
             // Sorting options
-            Picker("Sort by", selection: $sortOption) {
+            Picker(NSLocalizedString("sort.by", comment: "Sort by picker"), selection: $sortOption) {
                 ForEach(SortOption.allCases) { option in
                     Text(option.rawValue).tag(option as SortOption)
                 }
@@ -277,7 +277,7 @@ struct HymnListView: View {
             // Footer with total count
             HStack {
                 Spacer()
-                Text("\(filteredHymns.count) of \(hymns.count) hymns")
+                Text(String(format: NSLocalizedString("count.hymns_of_total", comment: "Hymns count display"), filteredHymns.count, hymns.count))
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .padding(.horizontal, 12)
@@ -300,7 +300,7 @@ struct SearchBar: View {
                 .foregroundColor(.secondary)
                 .font(.body)
             
-            TextField("Search hymns...", text: $text)
+            TextField(NSLocalizedString("search.placeholder", comment: "Search placeholder"), text: $text)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .font(.body)
                 // Add these modifiers to ensure immediate updates
@@ -408,11 +408,11 @@ struct HymnRow: View {
             }
         )
         .contextMenu {
-            Button("Edit") {
+            Button(NSLocalizedString("btn.edit", comment: "Edit button")) {
                 onEdit()
             }
             Divider()
-            Button("Delete", role: .destructive) {
+            Button(NSLocalizedString("btn.delete", comment: "Delete button"), role: .destructive) {
                 onDelete()
             }
         }

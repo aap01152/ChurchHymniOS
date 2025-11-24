@@ -1,0 +1,250 @@
+/* ChurchHymniOS Base Localization File */
+
+/* Navigation and Tab Titles */
+"nav.library" = "Library";
+"nav.song" = "Song";
+"nav.edit_hymn" = "Edit Hymn";
+"nav.import_help" = "Import Help";
+"nav.preview_settings" = "Preview Settings";
+"nav.export_hymns" = "Export Hymns";
+"nav.import_preview" = "Import Preview";
+
+/* Button Labels */
+"btn.add" = "Add";
+"btn.import" = "Import";
+"btn.export" = "Export";
+"btn.manage" = "Manage";
+"btn.help" = "Help";
+"btn.present" = "Present";
+"btn.edit" = "Edit";
+"btn.delete" = "Delete";
+"btn.cancel" = "Cancel";
+"btn.save" = "Save";
+"btn.ok" = "OK";
+"btn.select_all" = "Select All";
+"btn.deselect_all" = "Deselect All";
+"btn.clear_all" = "Clear All";
+"btn.show" = "Show";
+"btn.hide" = "Hide";
+"btn.stop" = "Stop";
+"btn.previous" = "Previous";
+"btn.next" = "Next";
+"btn.present_externally" = "Present Externally";
+"btn.present_to_external_display" = "Present to External Display";
+"btn.stop_external" = "Stop External";
+
+/* Alert and Dialog Titles */
+"alert.delete_hymn" = "Delete Hymn";
+"alert.delete_multiple_hymns" = "Delete Multiple Hymns";
+"alert.import_error" = "Import Error";
+"alert.import_successful" = "Import Successful";
+"alert.external_display_error" = "External Display Error";
+
+/* Alert and Error Messages */
+"msg.delete_hymn_confirm" = "Are you sure you want to delete this hymn?";
+"msg.delete_multiple_hymns_confirm" = "Are you sure you want to delete %d hymn(s)?";
+"msg.action_cannot_be_undone" = "This action cannot be undone.";
+"msg.hymn_missing_title" = "Hymn is missing a title";
+"msg.file_empty" = "The selected file is empty";
+"msg.permission_denied" = "Permission denied. Please check file permissions.";
+"msg.file_not_found" = "File not found. The file may have been moved or deleted.";
+"msg.file_corrupted" = "File appears to be corrupted";
+"msg.unexpected_error" = "An unexpected error occurred";
+"msg.failed_to_read_file" = "Failed to read file";
+"msg.invalid_file_format" = "Invalid file format";
+"msg.no_files_selected" = "No files selected";
+"msg.unknown_import_type" = "Unknown import type";
+"msg.auto_detection_failed" = "Auto detection failed";
+"msg.no_hymns_selected_for_export" = "No hymns selected for export";
+"msg.hymn_imported_successfully" = "Hymn imported successfully.";
+
+/* Form Labels and Field Names */
+"form.hymn_details" = "Hymn Details";
+"form.title" = "Title";
+"form.hymn_number" = "Hymn Number";
+"form.key" = "Key";
+"form.author" = "Author";
+"form.copyright" = "Copyright";
+"form.tags" = "Tags";
+"form.lyrics" = "Lyrics";
+"form.notes" = "Notes";
+
+/* Placeholder Text */
+"placeholder.hymn_title" = "Enter hymn title";
+"placeholder.number" = "Number";
+"placeholder.key" = "e.g. G Major";
+"placeholder.author" = "Author name";
+"placeholder.tags" = "Comma separated tags";
+"placeholder.copyright" = "e.g. © 2025 Church";
+"placeholder.notes" = "Additional notes...";
+
+/* Status and Information Messages */
+"status.no_external_display" = "No External Display";
+"status.external_display_ready" = "External Display Ready";
+"status.ready" = "Ready";
+"status.no_content" = "No Content";
+"status.minimized" = "Minimized";
+"status.no_lyrics_available" = "No lyrics available";
+"status.select_hymn_to_start" = "Select a hymn to get started";
+"status.import_info" = "You can also import .txt or .json files to add hymns to your collection";
+
+/* Progress and Operation Messages */
+"progress.importing_hymns" = "Importing Hymns";
+"progress.exporting_hymns" = "Exporting Hymns";
+"progress.streaming_operation" = "Streaming Operation";
+"progress.file_progress" = "File Progress";
+"progress.hymn_processing" = "Hymn Processing";
+"progress.memory_efficient_processing" = "Memory efficient processing";
+"progress.reading_file" = "Reading file...";
+"progress.parsing_content" = "Parsing content...";
+"progress.validating_hymn_data" = "Validating hymn data...";
+"progress.checking_duplicates" = "Checking for duplicates...";
+"progress.preparing_preview" = "Preparing preview...";
+
+/* External Display Status */
+"external.no_display" = "No Display";
+"external.live" = "Live";
+"external.present_to_external" = "Present to External Display";
+"external.stop_external" = "Stop External";
+"external.presenting_to_external" = "Presenting to External Display";
+"external.connect_projector" = "Connect a projector or external monitor";
+"external.ready_to_present" = "Ready to present";
+"external.current_verse" = "Current Verse";
+
+/* Count and Summary Text */
+"count.hymns_of_total" = "%d of %d hymns";
+"count.selected_hymns" = "Selected: %d hymn(s)";
+"count.total_available" = "Total available: %d";
+"count.hymns_selected" = "%d hymn(s) selected";
+"count.total_content_chars" = "Total content: %d characters";
+"count.lyrics_chars" = "Lyrics: %d characters";
+"count.and_more" = "• ...and %d more";
+"btn.delete_count" = "Delete %d Hymn(s)";
+
+/* Export and Import Labels */
+"export.format" = "Export Format";
+"export.json_format" = "Export as JSON format";
+"export.text_format" = "Export as plain text format";
+"export.json" = "JSON";
+"export.plain_text" = "Plain Text";
+"export.selected" = "Export Selected";
+"export.multiple" = "Export Multiple";
+"export.all" = "Export All";
+"export.large_collection" = "Export Large Collection";
+"export.file" = "File: %@";
+"export.total" = "Total";
+"export.new" = "New";
+"export.duplicates" = "Duplicates";
+"export.errors" = "Errors";
+"export.new_hymns" = "New Hymns";
+"export.duplicate_resolution" = "Duplicate Resolution";
+
+/* Duplicate Resolution Options */
+"duplicate.skip" = "Skip";
+"duplicate.merge" = "Merge";
+"duplicate.replace" = "Replace";
+"duplicate.skip_desc" = "Skip duplicate hymns";
+"duplicate.merge_desc" = "Merge new data with existing hymns";
+"duplicate.replace_desc" = "Replace existing hymns with new data";
+
+/* Multi-Select Mode */
+"multiselect.mode" = "Multi-Select Mode";
+"multiselect.exit" = "Exit Multi-Select";
+"multiselect.actions_available" = "Actions Available:";
+"multiselect.delete_selected" = "• Delete selected hymns";
+"multiselect.export_selected" = "• Export selected hymns";
+
+/* External Display Features */
+"display.size" = "Size";
+"display.opacity" = "Opacity";
+"display.current_position" = "Current Position";
+"display.preview" = "Preview";
+"display.font_size" = "Font Size";
+"display.font_size_value" = "Font Size: %d";
+
+/* External Display and Presentation */
+"external.verse_number" = "Verse %d";
+"external.key_prefix" = "Key: %@";
+"external.by_author" = "By: %@";
+"external.no_lyrics_available" = "No Lyrics Available";
+"external.check_hymn_content" = "Please check the hymn content";
+"external.verse_progress" = "%d of %d";
+"presentation.test_title" = "Test Hymn Display";
+"presentation.test_message" = "This is a test to verify the presenter is working correctly.";
+"presentation.test_instructions" = "Tap to advance, swipe to navigate";
+"presentation.exit" = "Exit presentation";
+
+/* Preview Settings */
+"preview.window" = "Preview Window";
+"preview.show_preview_window" = "Show Preview Window";
+"preview.show_preview_help" = "Show a small preview of what's displayed on the external screen";
+"preview.size" = "Size";
+"preview.opacity" = "Opacity";
+"preview.adjust_transparency_help" = "Adjust the transparency of the preview window";
+"preview.behavior" = "Behavior";
+"preview.auto_show_presenting" = "Auto-show when presenting";
+"preview.auto_show_help" = "Automatically show the preview window when starting an external presentation";
+"preview.auto_hide_disconnected" = "Auto-hide when disconnected";
+"preview.auto_hide_help" = "Automatically hide the preview window when the external display is disconnected";
+"preview.snap_corners" = "Snap to corners";
+"preview.snap_help" = "Snap the preview window to screen corners when dragging nearby";
+"preview.position" = "Preview Position";
+"preview.current_position" = "Current Position";
+"preview.top_left" = "Top Left";
+"preview.top_right" = "Top Right";
+"preview.bottom_left" = "Bottom Left";
+"preview.bottom_right" = "Bottom Right";
+"preview.test_preview" = "Test Preview";
+"preview.reset_default" = "Reset to Default Position";
+"preview.show_now" = "Show Preview Now";
+"preview.settings" = "Preview Settings";
+"preview.done" = "Done";
+"preview.configure_help" = "Configure external display preview";
+"preview.live" = "LIVE";
+"preview.external_display" = "External Display";
+"preview.minimized" = "Minimized";
+"preview.no_lyrics" = "No lyrics";
+"preview.hide_help" = "Hide external display preview";
+"preview.show_help" = "Show external display preview";
+"preview.size_small" = "Small";
+"preview.size_medium" = "Medium";
+"preview.size_large" = "Large";
+
+/* Help and Information */
+"help.import_formats" = "Import Formats";
+"help.json_single" = "JSON – Single Hymn";
+"help.json_multiple" = "JSON – Multiple Hymns";
+"help.json_batch" = "JSON – Batch Import";
+"help.plain_text" = "Plain Text";
+"help.chorus_instruction" = "Put the word 'Chorus' on a line by itself before the chorus section.";
+"help.support_page" = "Support page";
+"help.import_description" = "You can import hymns from **JSON** or **plain-text** files. Use the **Import** toolbar button, and select your file(s).";
+
+/* Error Recovery Suggestions */
+"error.try_different_file" = "Try selecting a different file or check file permissions";
+"error.check_format_docs" = "Check the import format documentation and ensure your file follows the correct format";
+"error.add_titles" = "Add titles to all hymns in the file before importing";
+"error.select_file_with_data" = "Select a file that contains hymn data";
+"error.ensure_file_exists" = "Ensure the file exists and try selecting it again";
+"error.try_different_file_damaged" = "Try selecting a different file or check if the file has been damaged";
+"error.try_again_contact_support" = "Try again or contact support if the problem persists";
+
+/* Accessibility and Help Text */
+"accessibility.present_hymn" = "Present selected hymn";
+"accessibility.add_new_hymn" = "Add new hymn";
+"accessibility.import_hymns" = "Import hymns from text or JSON files";
+"accessibility.edit_hymn" = "Edit selected hymn";
+"accessibility.delete_hymns" = "Delete selected hymns";
+"accessibility.delete_hymn" = "Delete selected hymn";
+"accessibility.deselect_all" = "Deselect all hymns";
+"accessibility.select_all" = "Select all hymns";
+"accessibility.no_external_display" = "No external display connected";
+"accessibility.present_external" = "Present to external display";
+"accessibility.stop_external_presentation" = "Stop external presentation";
+"accessibility.adjust_font_size" = "Adjust font size";
+"accessibility.export_selected" = "Export hymns";
+"accessibility.manage_mode" = "Manage selection mode";
+
+/* Search and Sorting */
+"search.placeholder" = "Search hymns...";
+"sort.by" = "Sort by";

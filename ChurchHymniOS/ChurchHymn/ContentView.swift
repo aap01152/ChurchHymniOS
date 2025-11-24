@@ -111,7 +111,7 @@ struct ContentView: View {
                         context: context,
                         onPresent: onPresentHymn
                     )
-                    .navigationTitle("Library")
+                    .navigationTitle(NSLocalizedString("nav.library", comment: "Navigation title for library"))
                     .toolbar {
                         ToolbarItem(placement: .navigationBarTrailing) {
                             ExternalDisplayNavigationIndicator()
@@ -206,7 +206,7 @@ struct ContentView: View {
                     )
                     .tabItem {
                         Image(systemName: "music.note.list")
-                        Text("Library")
+                        Text(NSLocalizedString("nav.library", comment: "Tab title for library"))
                     }
                     .tag(0)
                     
@@ -275,7 +275,7 @@ struct ContentView: View {
                     }
                     .tabItem {
                         Image(systemName: "music.note")
-                        Text("Song")
+                        Text(NSLocalizedString("nav.song", comment: "Tab title for song"))
                     }
                     .tag(1)
                 }
@@ -306,15 +306,15 @@ struct ContentView: View {
                 handleExportResult(type, url: url)
             }
         }
-        .alert("Import Error", isPresented: $showingErrorAlert, presenting: importError) { error in
-            Button("OK") { }
+        .alert(NSLocalizedString("alert.import_error", comment: "Import error alert title"), isPresented: $showingErrorAlert, presenting: importError) { error in
+            Button(NSLocalizedString("btn.ok", comment: "OK button")) { }
         } message: { error in
             Text(error.detailedErrorDescription)
         }
-        .alert("Import Successful", isPresented: $showingSuccessAlert) {
-            Button("OK") { }
+        .alert(NSLocalizedString("alert.import_successful", comment: "Import success alert title"), isPresented: $showingSuccessAlert) {
+            Button(NSLocalizedString("btn.ok", comment: "OK button")) { }
         } message: {
-            Text(importSuccessMessage ?? "Hymn imported successfully.")
+            Text(importSuccessMessage ?? NSLocalizedString("msg.hymn_imported_successfully", comment: "Default import success message"))
         }
         .deleteConfirmationAlerts(
             hymns: hymns,
@@ -1019,11 +1019,11 @@ struct ContentView: View {
     
     private var exportDefaultFilename: String {
         switch exportType {
-        case .singlePlainText: return (selected?.title ?? "Hymn") + ".txt"
-        case .singleJSON: return (selected?.title ?? "Hymn") + ".json"
-        case .multipleJSON: return "Selected_Hymns.json"
+        case .singlePlainText: return (selected?.title ?? NSLocalizedString("nav.song", comment: "Default hymn name")) + ".txt"
+        case .singleJSON: return (selected?.title ?? NSLocalizedString("nav.song", comment: "Default hymn name")) + ".json"
+        case .multipleJSON: return "\(NSLocalizedString("export.selected", comment: "Selected hymns filename"))_Hymns.json"
         case .batchJSON: return "Hymns.json"
-        default: return "Export"
+        default: return NSLocalizedString("btn.export", comment: "Default export filename")
         }
     }
 }

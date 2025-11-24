@@ -20,7 +20,7 @@ struct ProgressOverlay: View {
                     .foregroundColor(isImporting ? .blue : .green)
                 
                 // Title
-                Text(isImporting ? "Importing Hymns" : "Exporting Hymns")
+                Text(isImporting ? NSLocalizedString("progress.importing_hymns", comment: "Importing hymns progress title") : NSLocalizedString("progress.exporting_hymns", comment: "Exporting hymns progress title"))
                     .font(.title2)
                     .fontWeight(.bold)
                 
@@ -45,7 +45,7 @@ struct ProgressOverlay: View {
                 
                 // Cancel button (only for imports)
                 if isImporting {
-                    Button("Cancel") {
+                    Button(NSLocalizedString("btn.cancel", comment: "Cancel button")) {
                         // TODO: Implement cancellation
                     }
                     .buttonStyle(.bordered)

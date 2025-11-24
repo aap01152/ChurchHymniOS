@@ -19,7 +19,7 @@ struct StreamingProgressOverlay: View {
                     .foregroundColor(.blue)
                 
                 // Title
-                Text("Streaming Operation")
+                Text(NSLocalizedString("progress.streaming_operation", comment: "Streaming operation title"))
                     .font(.title2)
                     .fontWeight(.bold)
                 
@@ -28,7 +28,7 @@ struct StreamingProgressOverlay: View {
                     // File progress
                     if let progress = progress, progress.totalBytes > 0 {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("File Progress")
+                            Text(NSLocalizedString("progress.file_progress", comment: "File progress label"))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                             
@@ -45,7 +45,7 @@ struct StreamingProgressOverlay: View {
                     // Hymn progress
                     if let progress = progress, let totalHymns = progress.totalHymns, totalHymns > 0 {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Hymn Processing")
+                            Text(NSLocalizedString("progress.hymn_processing", comment: "Hymn processing label"))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                             
@@ -89,14 +89,14 @@ struct StreamingProgressOverlay: View {
                     HStack {
                         Image(systemName: "memorychip")
                             .foregroundColor(.orange)
-                        Text("Memory efficient processing")
+                        Text(NSLocalizedString("progress.memory_efficient_processing", comment: "Memory efficient processing text"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
                 }
                 
                 // Cancel button
-                Button("Cancel") {
+                Button(NSLocalizedString("btn.cancel", comment: "Cancel button")) {
                     // TODO: Implement cancellation
                 }
                 .buttonStyle(.bordered)

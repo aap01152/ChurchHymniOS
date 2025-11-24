@@ -86,7 +86,7 @@ struct ExternalDisplayPreview: View {
                     .frame(width: 6, height: 6)
                     .symbolEffect(.pulse)
                 
-                Text("LIVE")
+                Text(NSLocalizedString("preview.live", comment: "Live indicator"))
                     .font(.system(size: 9, weight: .bold))
                     .foregroundColor(.red)
             }
@@ -94,7 +94,7 @@ struct ExternalDisplayPreview: View {
             Spacer()
             
             // Preview title
-            Text("External Display")
+            Text(NSLocalizedString("preview.external_display", comment: "External display title"))
                 .font(.system(size: 10, weight: .medium))
                 .foregroundColor(.primary)
             
@@ -135,7 +135,7 @@ struct ExternalDisplayPreview: View {
                     Image(systemName: "tv.fill")
                         .font(.title2)
                         .foregroundColor(.white)
-                    Text("Minimized")
+                    Text(NSLocalizedString("preview.minimized", comment: "Minimized status"))
                         .font(.caption2)
                         .foregroundColor(.white.opacity(0.7))
                 }
@@ -286,7 +286,7 @@ struct ExternalDisplayMiniPreview: View {
                             .minimumScaleFactor(0.5)
                             .lineLimit(6)
                     } else {
-                        Text("No lyrics")
+                        Text(NSLocalizedString("preview.no_lyrics", comment: "No lyrics available"))
                             .font(.system(size: 10, weight: .medium))
                             .foregroundColor(.gray)
                     }
@@ -336,9 +336,9 @@ class ExternalDisplayPreviewSettings: ObservableObject {
     @Published var autoHideWhenNotPresenting: Bool = true
     
     enum PreviewSize: String, CaseIterable, Identifiable {
-        case small = "Small"
-        case medium = "Medium"
-        case large = "Large"
+        case small = "Small" // Using raw value for enum, localized in UI
+        case medium = "Medium" // Using raw value for enum, localized in UI
+        case large = "Large" // Using raw value for enum, localized in UI
         
         var id: String { rawValue }
         
@@ -383,13 +383,13 @@ struct ExternalDisplayPreviewToggle: View {
                 Image(systemName: previewSettings.isPreviewEnabled ? "rectangle.inset.filled" : "rectangle")
                     .font(.title3)
                     .foregroundColor(previewSettings.isPreviewEnabled ? .blue : .gray)
-                Text("Preview")
+                Text(NSLocalizedString("display.preview", comment: "Preview button text"))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
         }
         .buttonStyle(.plain)
-        .help(previewSettings.isPreviewEnabled ? "Hide external display preview" : "Show external display preview")
+        .help(previewSettings.isPreviewEnabled ? NSLocalizedString("preview.hide_help", comment: "Hide preview help text") : NSLocalizedString("preview.show_help", comment: "Show preview help text"))
     }
     
     private func togglePreview() {
