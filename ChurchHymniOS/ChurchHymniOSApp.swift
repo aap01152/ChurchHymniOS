@@ -17,6 +17,6 @@ struct ChurchHymniOSApp: App {
             ContentView()
                 .environmentObject(externalDisplayManager)
         }
-        .modelContainer(for: Hymn.self)
+        .modelContainer(ServiceMigrationManager.createModelContainer())
     }
 }
