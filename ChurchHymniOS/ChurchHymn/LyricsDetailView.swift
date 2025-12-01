@@ -13,6 +13,7 @@ struct LyricsDetailView: View {
     @Binding var lyricsFontSize: CGFloat
     
     @Namespace private var scrollSpace
+    @EnvironmentObject private var externalDisplayManager: ExternalDisplayManager
     
     private var parts: [(label: String?, lines: [String])] {
         let allBlocks = hymn.parts
@@ -41,7 +42,7 @@ struct LyricsDetailView: View {
                                         .font(.headline)
                                         .foregroundColor(.secondary)
                                 } else {
-                                    Text("Verse \(parts[0..<index].filter { $0.label == nil }.count + 1)")
+                                    Text(String(format: NSLocalizedString("external.verse_number", comment: "Verse number format"), parts[0..<index].filter { $0.label == nil }.count + 1))
                                         .font(.headline)
                                         .foregroundColor(.secondary)
                                 }
@@ -49,19 +50,31 @@ struct LyricsDetailView: View {
                                 // Lyrics
                                 Text(part.lines.joined(separator: "\n"))
                                     .font(.system(size: lyricsFontSize))
-                                    .padding(8)
+                                    .padding(12)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .background(
                                         RoundedRectangle(cornerRadius: 8)
-                                            .fill(isPresenting && currentPresentationIndex == index ? 
-                                                  Color.accentColor.opacity(0.1) : Color.clear)
+                                            .fill(isCurrentVerse(index) ? Color.accentColor.opacity(0.2) : 
+                                                  (isPresenting ? Color(.systemGray6).opacity(0.5) : Color.clear))
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 8)
+                                                    .stroke(isCurrentVerse(index) ? Color.accentColor : Color.clear, lineWidth: 2)
+                                            )
                                     )
-                                    .animation(.easeInOut(duration: 0.3), value: currentPresentationIndex)
+                                    .scaleEffect(isCurrentVerse(index) ? 1.02 : 1.0)
+                                    .animation(.spring(response: 0.3, dampingFraction: 0.8), value: currentPresentationIndex)
+                                    .onTapGesture {
+                                        if isPresenting && externalDisplayManager.state == .presenting {
+                                            externalDisplayManager.goToVerse(index)
+                                        }
+                                    }
+                                    .accessibilityAddTraits(isPresenting ? .isButton : [])
+                                    .accessibilityHint(isPresenting ? NSLocalizedString("verse.tap_to_navigate", comment: "Tap to navigate hint") : "")
                             }
                             .id(index) // Add id for scrolling
                         }
                     } else {
-                        Text("No lyrics available")
+                        Text(NSLocalizedString("status.no_lyrics_available", comment: "No lyrics available"))
                             .foregroundColor(.secondary)
                             .frame(maxWidth: .infinity, alignment: .center)
                     }
@@ -90,5 +103,10 @@ struct LyricsDetailView: View {
                 }
             }
         }
+    }
+    
+    /// Helper function to determine if a verse is currently being presented
+    private func isCurrentVerse(_ index: Int) -> Bool {
+        return isPresenting && currentPresentationIndex == index
     }
 }

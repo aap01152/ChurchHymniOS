@@ -248,3 +248,6 @@
 /* Search and Sorting */
 "search.placeholder" = "Procurar hinos...";
 "sort.by" = "Ordenar por";
+
+/* Verse Navigation */
+"verse.tap_to_navigate" = "Toque para apresentar este verso";

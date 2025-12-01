@@ -248,3 +248,6 @@
 /* Search and Sorting */
 "search.placeholder" = "Search hymns...";
 "sort.by" = "Sort by";
+
+/* Verse Navigation */
+"verse.tap_to_navigate" = "Tap to present this verse";
