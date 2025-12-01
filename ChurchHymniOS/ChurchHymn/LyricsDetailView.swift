@@ -6,6 +6,12 @@
 //
 import SwiftUI
 
+enum VerseInteractionState {
+    case readOnly
+    case availablePresenting
+    case activePresenting
+}
+
 struct LyricsDetailView: View {
     let hymn: Hymn
     var currentPresentationIndex: Int?
@@ -14,6 +20,88 @@ struct LyricsDetailView: View {
     
     @Namespace private var scrollSpace
     @EnvironmentObject private var externalDisplayManager: ExternalDisplayManager
+    
+    // MARK: - Enhanced Visual Feedback Properties
+    
+    /// Determines if verse interaction is enabled based on external display state
+    private var isInteractiveMode: Bool {
+        externalDisplayManager.state == .presenting
+    }
+    
+    /// Gets the interaction state for a specific verse
+    private func verseInteractionState(for index: Int) -> VerseInteractionState {
+        if externalDisplayManager.state == .presenting && isCurrentExternalVerse(index) {
+            return .activePresenting
+        }
+        if externalDisplayManager.state == .presenting {
+            return .availablePresenting
+        }
+        return .readOnly
+    }
+    
+    // MARK: - Enhanced Visual Styling Methods
+    
+    /// Gets the background color for a verse based on its interaction state
+    private func backgroundStyle(for index: Int) -> some View {
+        let state = verseInteractionState(for: index)
+        
+        switch state {
+        case .readOnly:
+            return RoundedRectangle(cornerRadius: 8)
+                .fill(Color.clear)
+        case .availablePresenting:
+            return RoundedRectangle(cornerRadius: 8)
+                .fill(Color.clear)
+        case .activePresenting:
+            return RoundedRectangle(cornerRadius: 8)
+                .fill(Color.accentColor.opacity(0.3))
+        }
+    }
+    
+    /// Gets the border style for a verse based on its interaction state
+    private func borderStyle(for index: Int) -> some View {
+        let state = verseInteractionState(for: index)
+        
+        switch state {
+        case .readOnly:
+            return RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.clear, lineWidth: 0)
+        case .availablePresenting:
+            return RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.clear, lineWidth: 0)
+        case .activePresenting:
+            return RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.accentColor, lineWidth: 3)
+        }
+    }
+    
+    /// Gets the scale effect for a verse based on its interaction state
+    private func scaleEffect(for index: Int) -> CGFloat {
+        let state = verseInteractionState(for: index)
+        
+        switch state {
+        case .readOnly, .availablePresenting:
+            return 1.0
+        case .activePresenting:
+            return 1.03
+        }
+    }
+    
+    /// Gets shadow properties for active presenting verses
+    private func shadowStyle(for index: Int) -> some View {
+        let state = verseInteractionState(for: index)
+        
+        if state == .activePresenting {
+            return AnyView(
+                Color.accentColor
+                    .opacity(0.4)
+                    .blur(radius: 8)
+                    .offset(x: 0, y: 2)
+            )
+        } else {
+            return AnyView(Color.clear)
+        }
+    }
     
     private var parts: [(label: String?, lines: [String])] {
         let allBlocks = hymn.parts
@@ -36,40 +124,72 @@ struct LyricsDetailView: View {
                     if hymn.lyrics != nil {
                         ForEach(Array(parts.enumerated()), id: \.offset) { index, part in
                             VStack(alignment: .leading, spacing: 8) {
-                                // Part label (if any)
-                                if let label = part.label {
-                                    Text(label)
-                                        .font(.headline)
-                                        .foregroundColor(.secondary)
-                                } else {
-                                    Text(String(format: NSLocalizedString("external.verse_number", comment: "Verse number format"), parts[0..<index].filter { $0.label == nil }.count + 1))
-                                        .font(.headline)
-                                        .foregroundColor(.secondary)
+                                // Part label with live indicator
+                                HStack {
+                                    if let label = part.label {
+                                        Text(label)
+                                            .font(.headline)
+                                            .foregroundColor(.secondary)
+                                    } else {
+                                        Text(String(format: NSLocalizedString("external.verse_number", comment: "Verse number format"), parts[0..<index].filter { $0.label == nil }.count + 1))
+                                            .font(.headline)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    
+                                    // Live indicator for actively presented verse
+                                    if verseInteractionState(for: index) == .activePresenting {
+                                        HStack(spacing: 4) {
+                                            Circle()
+                                                .fill(Color.red)
+                                                .frame(width: 8, height: 8)
+                                                .opacity(0.8)
+                                                .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: externalDisplayManager.currentVerseIndex)
+                                            
+                                            Text("LIVE")
+                                                .font(.caption2)
+                                                .fontWeight(.bold)
+                                                .foregroundColor(.red)
+                                        }
+                                    }
+                                    
+                                    Spacer()
                                 }
                                 
-                                // Lyrics
+                                // Lyrics with enhanced visual feedback
                                 Text(part.lines.joined(separator: "\n"))
                                     .font(.system(size: lyricsFontSize))
                                     .padding(12)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .background(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .fill(isCurrentVerse(index) ? Color.accentColor.opacity(0.2) : 
-                                                  (isPresenting ? Color(.systemGray6).opacity(0.5) : Color.clear))
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 8)
-                                                    .stroke(isCurrentVerse(index) ? Color.accentColor : Color.clear, lineWidth: 2)
-                                            )
+                                        ZStack {
+                                            // Shadow for active presenting verses
+                                            shadowStyle(for: index)
+                                            // Main background
+                                            backgroundStyle(for: index)
+                                                .overlay(borderStyle(for: index))
+                                        }
                                     )
-                                    .scaleEffect(isCurrentVerse(index) ? 1.02 : 1.0)
+                                    .scaleEffect(scaleEffect(for: index))
                                     .animation(.spring(response: 0.3, dampingFraction: 0.8), value: currentPresentationIndex)
+                                    .animation(.spring(response: 0.2, dampingFraction: 0.9), value: externalDisplayManager.state)
+                                    .animation(.spring(response: 0.2, dampingFraction: 0.9), value: externalDisplayManager.currentVerseIndex)
                                     .onTapGesture {
-                                        if isPresenting && externalDisplayManager.state == .presenting {
+                                        if isInteractiveMode {
+                                            // Provide immediate haptic feedback
+                                            provideHapticFeedback(for: index)
+                                            
+                                            // Navigate to the selected verse
                                             externalDisplayManager.goToVerse(index)
+                                            
+                                            // Provide success feedback after a brief delay
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                                provideNavigationSuccessFeedback()
+                                            }
                                         }
                                     }
-                                    .accessibilityAddTraits(isPresenting ? .isButton : [])
-                                    .accessibilityHint(isPresenting ? NSLocalizedString("verse.tap_to_navigate", comment: "Tap to navigate hint") : "")
+                                    .accessibilityAddTraits(isInteractiveMode ? .isButton : [])
+                                    .accessibilityHint(accessibilityHint(for: index))
+                                    .accessibilityValue(verseInteractionState(for: index) == .activePresenting ? NSLocalizedString("verse.currently_displayed", comment: "Currently displayed") : "")
                             }
                             .id(index) // Add id for scrolling
                         }
@@ -108,5 +228,63 @@ struct LyricsDetailView: View {
     /// Helper function to determine if a verse is currently being presented
     private func isCurrentVerse(_ index: Int) -> Bool {
         return isPresenting && currentPresentationIndex == index
+    }
+    
+    /// Helper function to determine if a verse is currently being displayed on external screen
+    private func isCurrentExternalVerse(_ index: Int) -> Bool {
+        return externalDisplayManager.currentVerseIndex == index
+    }
+    
+    /// Provides accessibility hint based on verse interaction state
+    private func accessibilityHint(for index: Int) -> String {
+        let state = verseInteractionState(for: index)
+        
+        switch state {
+        case .readOnly:
+            return ""
+        case .availablePresenting:
+            return NSLocalizedString("verse.tap_to_navigate", comment: "Tap to navigate hint")
+        case .activePresenting:
+            return NSLocalizedString("verse.tap_to_navigate_current", comment: "Tap to navigate from current verse hint")
+        }
+    }
+    
+    // MARK: - Enhanced Haptic Feedback System
+    
+    /// Provides contextual haptic feedback based on verse interaction type
+    private func provideHapticFeedback(for index: Int) {
+        let state = verseInteractionState(for: index)
+        
+        switch state {
+        case .readOnly:
+            // No haptic feedback for read-only state
+            return
+            
+        case .availablePresenting:
+            // Medium impact for navigating to different verse
+            let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+            impactFeedback.prepare()
+            impactFeedback.impactOccurred()
+            
+        case .activePresenting:
+            // Light impact for staying on current verse (user confirmation)
+            let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+            impactFeedback.prepare()
+            impactFeedback.impactOccurred()
+        }
+    }
+    
+    /// Provides success haptic feedback when verse navigation completes
+    private func provideNavigationSuccessFeedback() {
+        let notificationFeedback = UINotificationFeedbackGenerator()
+        notificationFeedback.prepare()
+        notificationFeedback.notificationOccurred(.success)
+    }
+    
+    /// Provides selection haptic feedback for precise interactions
+    private func provideSelectionFeedback() {
+        let selectionFeedback = UISelectionFeedbackGenerator()
+        selectionFeedback.prepare()
+        selectionFeedback.selectionChanged()
     }
 }

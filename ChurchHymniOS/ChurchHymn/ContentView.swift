@@ -56,6 +56,9 @@ struct ContentView: View {
     // Font size state
     @State private var lyricsFontSize: CGFloat = 16
     
+    // Navigation split view visibility state
+    @State private var columnVisibility: NavigationSplitViewVisibility = .all
+    
     // Operations
     @StateObject private var operations: HymnOperations
     
@@ -90,7 +93,7 @@ struct ContentView: View {
         Group {
             if UIDevice.current.userInterfaceIdiom == .pad {
                 // iPad: Use two-column split view
-                NavigationSplitView {
+                NavigationSplitView(columnVisibility: $columnVisibility) {
                     HymnListView(
                         hymns: hymns,
                         selected: $selected,
