@@ -684,7 +684,7 @@ struct HymnRow: View {
                     .foregroundColor(.secondary)
             }
             
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 12) {
                 Text(hymn.title)
                     .font(.headline)
                     .tag(hymn)
@@ -747,7 +747,7 @@ struct HymnRow: View {
             onSelect()
         }
         .padding(.vertical, 4)
-        .padding(.horizontal, 4)
+        .padding(.horizontal, 12)
         .background(
             Group {
                 if isSelected {
