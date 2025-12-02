@@ -31,8 +31,13 @@ struct HymnListView: View {
     
     @State private var searchText = ""
     @State private var sortOption: SortOption = .title
-    @State private var showServiceFilter = false
     @State private var isReorderMode = false
+    @State private var isServiceManagementMode = false
+    @State private var isServiceBarCollapsed = false
+    @State private var showingClearAllConfirmation = false
+    @State private var showingCompleteServiceConfirmation = false
+    @State private var showingNewServicePrompt = false
+    @State private var showServiceCompletedSuccess = false
     
     // MARK: - Initializers
     init(
@@ -76,13 +81,26 @@ struct HymnListView: View {
         self._serviceOperations = StateObject(wrappedValue: ServiceOperations(context: context))
     }
     
-    enum SortOption: String, CaseIterable, Identifiable {
-        case title = "Title"
-        case number = "Number"
-        case key = "Key"
-        case author = "Author"
+    enum SortOption: CaseIterable, Identifiable {
+        case title
+        case number
+        case key
+        case service
         
         var id: String { self.rawValue }
+        
+        var rawValue: String {
+            switch self {
+            case .title:
+                return NSLocalizedString("sort.title", comment: "Title sort option")
+            case .number:
+                return NSLocalizedString("sort.number", comment: "Number sort option")
+            case .key:
+                return NSLocalizedString("sort.key", comment: "Key sort option")
+            case .service:
+                return NSLocalizedString("sort.service", comment: "Service sort option")
+            }
+        }
     }
     
     // MARK: - Service Helper Methods
@@ -159,40 +177,114 @@ struct HymnListView: View {
         }
     }
     
+    // MARK: - Service Management Bar Actions
+    
+    /// Show confirmation dialog for clearing all hymns
+    private func clearAllHymns() {
+        showingClearAllConfirmation = true
+    }
+    
+    /// Actually clear all hymns from the active service
+    private func performClearAllHymns() {
+        guard let activeService = activeService else { return }
+        
+        Task {
+            let result = await serviceOperations.clearService(activeService)
+            if case .failure(let error) = result {
+                print("Failed to clear service: \(error)")
+            }
+        }
+    }
+    
+    /// Show confirmation dialog for completing service
+    private func completeService() {
+        showingCompleteServiceConfirmation = true
+    }
+    
+    /// Actually complete the current service
+    private func performCompleteService() {
+        guard let activeService = activeService else { return }
+        
+        Task {
+            // Mark service as inactive/completed
+            activeService.setActive(false)
+            
+            // Save the context to persist the change
+            do {
+                try context.save()
+                print("Service completed successfully")
+                
+                // Show brief success feedback
+                await MainActor.run {
+                    showServiceCompletedSuccess = true
+                    // Hide success message after 2 seconds
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        showServiceCompletedSuccess = false
+                    }
+                }
+            } catch {
+                print("Failed to complete service: \(error)")
+            }
+        }
+    }
+    
+    /// Toggle service management mode from the service bar
+    private func toggleServiceManagement() {
+        isServiceManagementMode.toggle()
+    }
+    
+    /// Create a new service (typically after completing previous one)
+    private func createNewService() {
+        Task {
+            let result = await serviceOperations.createTodaysService()
+            switch result {
+            case .success(let service):
+                let setResult = await serviceOperations.setActiveService(service)
+                if case .failure(let error) = setResult {
+                    print("Failed to set new service as active: \(error)")
+                }
+            case .failure(let error):
+                print("Failed to create new service: \(error)")
+            }
+        }
+    }
+    
     var filteredHymns: [Hymn] {
-        // First apply service filter if active
-        let serviceFiltered: [Hymn]
-        if showServiceFilter {
+        // First determine the base hymn list based on sort option
+        let baseHymns: [Hymn]
+        if sortOption == .service {
+            // Service filter mode - show only service hymns
             if let activeService = activeService {
                 // When in reorder mode, maintain service order
                 if isReorderMode {
                     let serviceHymnsSorted = serviceHymns
                         .filter { $0.serviceId == activeService.id }
                         .sorted { $0.order < $1.order }
-                    serviceFiltered = serviceHymnsSorted.compactMap { serviceHymn in
+                    baseHymns = serviceHymnsSorted.compactMap { serviceHymn in
                         hymns.first { $0.id == serviceHymn.hymnId }
                     }
                 } else {
                     let serviceHymnIds = serviceHymns
                         .filter { $0.serviceId == activeService.id }
                         .map { $0.hymnId }
-                    serviceFiltered = hymns.filter { hymn in
+                    baseHymns = hymns.filter { hymn in
                         serviceHymnIds.contains(hymn.id)
                     }
                 }
             } else {
-                serviceFiltered = [] // No active service, show empty list
+                baseHymns = [] // No active service, show empty list
             }
         } else {
-            serviceFiltered = hymns
+            // Regular mode - show all hymns
+            baseHymns = hymns
         }
         
         // Then apply search filter
         let filtered: [Hymn]
         if searchText.isEmpty {
-            filtered = serviceFiltered
+            filtered = baseHymns
         } else {
-            filtered = serviceFiltered.filter { hymn in
+            filtered = baseHymns.filter { hymn in
                 let searchQuery = searchText.lowercased()
                 // Search in title
                 if hymn.title.lowercased().contains(searchQuery) {
@@ -218,7 +310,7 @@ struct HymnListView: View {
         }
         
         // Skip sorting in reorder mode to maintain order
-        if isReorderMode && showServiceFilter {
+        if isReorderMode && sortOption == .service {
             return filtered
         }
         
@@ -234,10 +326,9 @@ struct HymnListView: View {
             return filtered.sorted {
                 ($0.musicalKey ?? "").localizedCaseInsensitiveCompare($1.musicalKey ?? "") == .orderedAscending
             }
-        case .author:
-            return filtered.sorted {
-                ($0.author ?? "").localizedCaseInsensitiveCompare($1.author ?? "") == .orderedAscending
-            }
+        case .service:
+            // Service hymns are already ordered by service order when not in reorder mode
+            return filtered.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
         }
     }
     
@@ -368,45 +459,21 @@ struct HymnListView: View {
                 // .buttonStyle(PlainButtonStyle())
                 // .help("Show import-file help")
                 
-                // Service Filter Toggle with integrated reorder option
+                // Service Management Mode Toggle Button
                 Button(action: {
-                    if showServiceFilter && activeService != nil {
-                        // If already in service mode, toggle reorder
-                        isReorderMode.toggle()
-                    } else {
-                        // Switch to service mode
-                        showServiceFilter.toggle()
-                        isReorderMode = false
-                    }
+                    isServiceManagementMode.toggle()
                 }) {
                     VStack(spacing: 4) {
-                        Image(systemName: getServiceButtonIcon())
+                        Image(systemName: isServiceManagementMode ? "music.note.list" : "music.note")
                             .font(.title)
-                            .foregroundColor(getServiceButtonColor())
-                        Text(getServiceButtonText())
+                            .foregroundColor(isServiceManagementMode ? .orange : .primary)
+                        Text(isServiceManagementMode ? NSLocalizedString("service.management.exit", comment: "Exit service management") : NSLocalizedString("service.management.enter", comment: "Enter service management"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
                 }
                 .buttonStyle(PlainButtonStyle())
-                .help(getServiceButtonHelp())
-                .contextMenu {
-                    if showServiceFilter && activeService != nil {
-                        Button(action: {
-                            showServiceFilter = false
-                            isReorderMode = false
-                        }) {
-                            Label("Show All Hymns", systemImage: "music.note")
-                        }
-                        
-                        Button(action: {
-                            isReorderMode.toggle()
-                        }) {
-                            Label(isReorderMode ? "Exit Reorder" : "Reorder Hymns", 
-                                  systemImage: isReorderMode ? "checkmark" : "arrow.up.arrow.down")
-                        }
-                    }
-                }
+                .help(isServiceManagementMode ? "Exit service management mode" : "Enter service management mode")
                 
                 Spacer()
             }
@@ -415,22 +482,93 @@ struct HymnListView: View {
             
             Divider()
             
-            // Search bar (disabled in reorder mode)
+            // Service Management Bar (shown when service exists) or New Service Prompt
+            if let activeService = activeService {
+                let serviceHymnCount = serviceHymns.filter { $0.serviceId == activeService.id }.count
+                
+                ServiceManagementBar(
+                    activeService: activeService,
+                    hymnCount: serviceHymnCount,
+                    isCollapsed: $isServiceBarCollapsed,
+                    onClearAll: clearAllHymns,
+                    onCompleteService: completeService,
+                    onReorderToggle: {
+                        // Switch to service sort and toggle reorder mode
+                        sortOption = .service
+                        isReorderMode.toggle()
+                    },
+                    onManageToggle: toggleServiceManagement
+                )
+                .padding(.horizontal, 12)
+                .padding(.top, 8)
+                
+                Divider()
+            } else {
+                // New Service Prompt (when no active service) or Success Message
+                if showServiceCompletedSuccess {
+                    ServiceCompletedMessage()
+                        .padding(.horizontal, 12)
+                        .padding(.top, 8)
+                } else {
+                    NewServicePrompt(
+                        onCreateService: createNewService
+                    )
+                    .padding(.horizontal, 12)
+                    .padding(.top, 8)
+                }
+                
+                Divider()
+            }
+            
+            // Search bar (disabled in reorder mode or service management mode)
             SearchBar(text: $searchText)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
                 .background(Color(.systemBackground))
-                .disabled(isReorderMode)
-                .opacity(isReorderMode ? 0.5 : 1.0)
+                .disabled(isReorderMode || isServiceManagementMode)
+                .opacity((isReorderMode || isServiceManagementMode) ? 0.5 : 1.0)
             
-            // Sorting options (disabled in reorder mode)
-            if !isReorderMode {
+            // Sorting options (disabled in reorder mode or service management mode)
+            if !isReorderMode && !isServiceManagementMode {
                 Picker(NSLocalizedString("sort.by", comment: "Sort by picker"), selection: $sortOption) {
                     ForEach(SortOption.allCases) { option in
                         Text(option.rawValue).tag(option as SortOption)
                     }
                 }
+                .onChange(of: sortOption) { oldValue, newValue in
+                    // Exit reorder mode when switching away from service sort
+                    if newValue != .service && isReorderMode {
+                        isReorderMode = false
+                    }
+                    // Exit service management mode when switching to service sort (to avoid confusion)
+                    if newValue == .service && isServiceManagementMode {
+                        isServiceManagementMode = false
+                    }
+                }
                 .pickerStyle(SegmentedPickerStyle())
+                .padding(.horizontal, 12)
+                .padding(.bottom, 8)
+                Divider()
+            }
+            
+            // Reorder button for service filter mode
+            if sortOption == .service && activeService != nil {
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        isReorderMode.toggle()
+                    }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: isReorderMode ? "arrow.up.arrow.down.circle.fill" : "arrow.up.arrow.down.circle")
+                                .foregroundColor(isReorderMode ? .orange : .accentColor)
+                            Text(isReorderMode ? NSLocalizedString("service.reorder.on", comment: "Exit reorder") : NSLocalizedString("service.reorder.off", comment: "Reorder hymns"))
+                                .font(.caption)
+                                .foregroundColor(isReorderMode ? .orange : .accentColor)
+                        }
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    Spacer()
+                }
                 .padding(.horizontal, 12)
                 .padding(.bottom, 8)
                 Divider()
@@ -446,7 +584,8 @@ struct HymnListView: View {
                         isMarkedForDelete: selectedHymnsForDelete.contains(hymn.id),
                         isInService: isHymnInActiveService(hymn),
                         servicePosition: getHymnPositionInService(hymn),
-                        isReorderMode: isReorderMode && showServiceFilter,
+                        isReorderMode: isReorderMode && sortOption == .service,
+                        isServiceManagementMode: isServiceManagementMode,
                         onToggleDelete: {
                             if selectedHymnsForDelete.contains(hymn.id) {
                                 selectedHymnsForDelete.remove(hymn.id)
@@ -483,23 +622,32 @@ struct HymnListView: View {
                     )
                     .listRowBackground((selected?.id == hymn.id) ? Color.accentColor.opacity(0.06) : Color.clear)
                 }
-                .onMove(perform: isReorderMode && showServiceFilter ? moveHymns : nil)
+                .onMove(perform: isReorderMode && sortOption == .service ? moveHymns : nil)
             }
             .listStyle(PlainListStyle())
-            .environment(\.editMode, isReorderMode && showServiceFilter ? .constant(.active) : .constant(.inactive))
+            .environment(\.editMode, isReorderMode && sortOption == .service ? .constant(.active) : .constant(.inactive))
             
             // Footer with total count and service info
             HStack {
                 Spacer()
                 
                 VStack(spacing: 2) {
-                    // Show reorder instructions when in reorder mode
+                    // Show mode-specific instructions
                     if isReorderMode {
                         HStack(spacing: 4) {
                             Image(systemName: "hand.point.up.left.fill")
                                 .font(.caption2)
                                 .foregroundColor(.orange)
                             Text("Drag hymns to reorder")
+                                .font(.caption)
+                                .foregroundColor(.orange)
+                        }
+                    } else if isServiceManagementMode {
+                        HStack(spacing: 4) {
+                            Image(systemName: "plus.minus.circle")
+                                .font(.caption2)
+                                .foregroundColor(.orange)
+                            Text(NSLocalizedString("service.management.instructions", comment: "Service management instructions"))
                                 .font(.caption)
                                 .foregroundColor(.orange)
                         }
@@ -533,6 +681,22 @@ struct HymnListView: View {
             // Ensure there's always a service available for the user
             ensureServiceExists()
         }
+        .alert(NSLocalizedString("service.clear_all_title", comment: "Clear all hymns title"), isPresented: $showingClearAllConfirmation) {
+            Button(NSLocalizedString("btn.cancel", comment: "Cancel"), role: .cancel) { }
+            Button(NSLocalizedString("service.clear_all", comment: "Clear all"), role: .destructive) {
+                performClearAllHymns()
+            }
+        } message: {
+            Text(NSLocalizedString("service.clear_all_message", comment: "Clear all confirmation message"))
+        }
+        .alert(NSLocalizedString("service.complete_title", comment: "Complete service title"), isPresented: $showingCompleteServiceConfirmation) {
+            Button(NSLocalizedString("btn.cancel", comment: "Cancel"), role: .cancel) { }
+            Button(NSLocalizedString("service.complete", comment: "Complete"), role: .destructive) {
+                performCompleteService()
+            }
+        } message: {
+            Text(NSLocalizedString("service.complete_message", comment: "Complete service confirmation message"))
+        }
     }
     
     /// Ensure there's an active service available, creating one if needed
@@ -555,7 +719,7 @@ struct HymnListView: View {
     
     /// Handle reordering hymns in the service
     private func moveHymns(from source: IndexSet, to destination: Int) {
-        guard showServiceFilter, 
+        guard sortOption == .service, 
               let activeService = activeService,
               let sourceIndex = source.first else { return }
         
@@ -576,46 +740,205 @@ struct HymnListView: View {
         }
     }
     
-    // MARK: - Service Button Helper Methods
+}
+
+// New Service Prompt for when no active service exists
+struct NewServicePrompt: View {
+    let onCreateService: () -> Void
     
-    private func getServiceButtonIcon() -> String {
-        if isReorderMode {
-            return "arrow.up.arrow.down.circle.fill"
-        } else if showServiceFilter {
-            return "music.note.list"
-        } else {
-            return "music.note"
+    var body: some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 8) {
+                Image(systemName: "music.note.house")
+                    .font(.title2)
+                    .foregroundColor(.accentColor)
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(NSLocalizedString("service.no_active_title", comment: "No active service title"))
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                    Text(NSLocalizedString("service.no_active_message", comment: "No active service message"))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                Button(action: onCreateService) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.caption)
+                        Text(NSLocalizedString("service.new_service", comment: "New service"))
+                            .font(.caption)
+                            .fontWeight(.medium)
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.accentColor)
+                    .cornerRadius(8)
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(Color(.systemGray6))
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.accentColor.opacity(0.2), lineWidth: 1)
+            )
         }
     }
-    
-    private func getServiceButtonColor() -> Color {
-        if isReorderMode {
-            return .orange
-        } else if showServiceFilter {
-            return .accentColor
-        } else {
-            return .primary
+}
+
+// Service Completed Success Message
+struct ServiceCompletedMessage: View {
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.title2)
+                .foregroundColor(.green)
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(NSLocalizedString("service.completed_success_title", comment: "Service completed title"))
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                Text(NSLocalizedString("service.completed_success_message", comment: "Service completed message"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer()
         }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(Color.green.opacity(0.1))
+        .cornerRadius(8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.green.opacity(0.3), lineWidth: 1)
+        )
     }
+}
+
+// Service Management Bar for quick service actions
+struct ServiceManagementBar: View {
+    let activeService: WorshipService?
+    let hymnCount: Int
+    @Binding var isCollapsed: Bool
     
-    private func getServiceButtonText() -> String {
-        if isReorderMode {
-            return NSLocalizedString("service.reorder.on", comment: "Reorder mode on")
-        } else if showServiceFilter {
-            return NSLocalizedString("service.filter.on", comment: "Service filter on")
-        } else {
-            return NSLocalizedString("service.filter.off", comment: "Service filter off")
-        }
-    }
+    let onClearAll: () -> Void
+    let onCompleteService: () -> Void
+    let onReorderToggle: () -> Void
+    let onManageToggle: () -> Void
     
-    private func getServiceButtonHelp() -> String {
-        if isReorderMode {
-            return "Tap to exit reorder mode, right-click for options"
-        } else if showServiceFilter {
-            return "Tap to reorder service hymns, right-click for options"
-        } else {
-            return "Tap to show today's service hymns"
+    var body: some View {
+        VStack(spacing: 0) {
+            if let service = activeService {
+                // Service header bar
+                HStack(spacing: 8) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "music.note.list")
+                                .font(.caption)
+                                .foregroundColor(.accentColor)
+                            Text(service.displayTitle)
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                            Spacer()
+                            Text("\(hymnCount) \(hymnCount == 1 ? NSLocalizedString("service.hymn_single", comment: "Single hymn") : NSLocalizedString("service.hymn_plural", comment: "Multiple hymns"))")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        if !isCollapsed {
+                            Text(DateFormatter.localizedString(from: service.date, dateStyle: .medium, timeStyle: .none))
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    // Collapse/Expand button
+                    Button(action: {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            isCollapsed.toggle()
+                        }
+                    }) {
+                        Image(systemName: isCollapsed ? "chevron.down" : "chevron.up")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(Color(.systemGray6))
+                
+                // Service actions (when expanded)
+                if !isCollapsed {
+                    HStack(spacing: 12) {
+                        // Clear All button
+                        Button(action: onClearAll) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "trash")
+                                    .font(.caption)
+                                Text(NSLocalizedString("service.clear_all", comment: "Clear all hymns"))
+                                    .font(.caption)
+                            }
+                            .foregroundColor(.red)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.red.opacity(0.1))
+                            .cornerRadius(6)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        
+                        // Complete Service button
+                        Button(action: onCompleteService) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "checkmark.circle")
+                                    .font(.caption)
+                                Text(NSLocalizedString("service.complete", comment: "Complete service"))
+                                    .font(.caption)
+                            }
+                            .foregroundColor(.green)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.green.opacity(0.1))
+                            .cornerRadius(6)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        
+                        Spacer()
+                        
+                        // Quick Manage button
+                        Button(action: onManageToggle) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "plus.minus.circle")
+                                    .font(.caption)
+                                Text(NSLocalizedString("service.quick_manage", comment: "Quick manage"))
+                                    .font(.caption)
+                            }
+                            .foregroundColor(.orange)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.orange.opacity(0.1))
+                            .cornerRadius(6)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.bottom, 8)
+                    .background(Color(.systemGray6))
+                }
+            }
         }
+        .background(Color(.systemGray6))
+        .cornerRadius(8)
+        .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
     }
 }
 
@@ -661,6 +984,7 @@ struct HymnRow: View {
     let isInService: Bool
     let servicePosition: Int?
     let isReorderMode: Bool
+    let isServiceManagementMode: Bool
     let onToggleDelete: () -> Void
     let onSelect: () -> Void
     let onEdit: () -> Void
@@ -682,6 +1006,25 @@ struct HymnRow: View {
                 Image(systemName: "line.3.horizontal")
                     .font(.title2)
                     .foregroundColor(.secondary)
+            } else if isServiceManagementMode {
+                // Service management mode: show add/remove buttons
+                if isInService {
+                    // Remove from service button
+                    Button(action: onRemoveFromService) {
+                        Image(systemName: "minus.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(.red)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                } else {
+                    // Add to service button
+                    Button(action: onAddToService) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(.green)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
             }
             
             VStack(alignment: .leading, spacing: 12) {
@@ -753,6 +1096,9 @@ struct HymnRow: View {
                 if isSelected {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(Color.accentColor.opacity(0.08))
+                } else if isServiceManagementMode {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.orange.opacity(0.05))
                 }
             }
         )
@@ -761,12 +1107,15 @@ struct HymnRow: View {
                 if isSelected {
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(Color.accentColor.opacity(0.35), lineWidth: 1)
+                } else if isServiceManagementMode {
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.orange.opacity(0.2), lineWidth: 1)
                 }
             }
         )
         .contextMenu {
-            // Don't show context menu in reorder mode
-            if !isReorderMode {
+            // Don't show context menu in reorder mode or service management mode
+            if !isReorderMode && !isServiceManagementMode {
                 // Service actions
                 if isInService {
                     Button(NSLocalizedString("service.remove_from_service", comment: "Remove from service")) {

@@ -15,6 +15,7 @@
 "btn.export" = "Export";
 "btn.manage" = "Manage";
 "btn.help" = "Help";
+"btn.settings" = "Settings";
 "btn.present" = "Present";
 "btn.edit" = "Edit";
 "btn.delete" = "Delete";
@@ -248,6 +249,10 @@
 /* Search and Sorting */
 "search.placeholder" = "Search hymns...";
 "sort.by" = "Sort by";
+"sort.service" = "Service";
+"sort.title" = "Title";
+"sort.number" = "Number"; 
+"sort.key" = "Key";
 
 /* Verse Navigation */
 "verse.tap_to_navigate" = "Tap to present this verse";
@@ -259,8 +264,27 @@
 "service.add_to_service" = "Add to Service";
 "service.remove_from_service" = "Remove from Service";
 "service.today_service" = "Today's Service";
-"service.reorder.on" = "Reorder";
-"service.reorder.off" = "Reorder";
+"service.reorder.on" = "Exit Reorder";
+"service.reorder.off" = "Reorder Hymns";
+"service.management.enter" = "Manage";
+"service.management.exit" = "Exit";
+"service.management.add" = "Add";
+"service.management.remove" = "Remove";
+"service.management.instructions" = "Tap + to add or - to remove hymns";
+"service.clear_all" = "Clear All";
+"service.complete" = "Complete";
+"service.quick_manage" = "Quick Manage";
+"service.hymn_single" = "hymn";
+"service.hymn_plural" = "hymns";
+"service.clear_all_title" = "Clear All Hymns";
+"service.clear_all_message" = "Are you sure you want to remove all hymns from this service? This action cannot be undone.";
+"service.complete_title" = "Complete Service";
+"service.complete_message" = "Are you sure you want to mark this service as complete? This will end the current service session.";
+"service.no_active_title" = "No Active Service";
+"service.no_active_message" = "Create a new worship service to get started";
+"service.new_service" = "New Service";
+"service.completed_success_title" = "Service Completed";
+"service.completed_success_message" = "Worship service has been marked as complete";
 
 /* Service Error Messages */
 "service.error.creation_failed" = "Failed to create service";

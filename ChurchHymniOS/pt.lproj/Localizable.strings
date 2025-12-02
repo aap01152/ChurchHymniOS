@@ -15,6 +15,7 @@
 "btn.export" = "Exportar";
 "btn.manage" = "Gerir";
 "btn.help" = "Ajuda";
+"btn.settings" = "Definições";
 "btn.present" = "Apresentar";
 "btn.edit" = "Editar";
 "btn.delete" = "Apagar";
@@ -248,6 +249,10 @@
 /* Search and Sorting */
 "search.placeholder" = "Procurar hinos...";
 "sort.by" = "Ordenar por";
+"sort.service" = "Serviço";
+"sort.title" = "Título";
+"sort.number" = "Número";
+"sort.key" = "Tom";
 
 /* Verse Navigation */
 "verse.tap_to_navigate" = "Toque para apresentar este verso";
@@ -259,8 +264,27 @@
 "service.add_to_service" = "Adicionar ao Serviço";
 "service.remove_from_service" = "Remover do Serviço";
 "service.today_service" = "Serviço de Hoje";
-"service.reorder.on" = "Reordenar";
-"service.reorder.off" = "Reordenar";
+"service.reorder.on" = "Sair da Reordenação";
+"service.reorder.off" = "Reordenar Hinos";
+"service.management.enter" = "Gerir";
+"service.management.exit" = "Sair";
+"service.management.add" = "Adicionar";
+"service.management.remove" = "Remover";
+"service.management.instructions" = "Toque + para adicionar ou - para remover hinos";
+"service.clear_all" = "Limpar Tudo";
+"service.complete" = "Concluir";
+"service.quick_manage" = "Gestão Rápida";
+"service.hymn_single" = "hino";
+"service.hymn_plural" = "hinos";
+"service.clear_all_title" = "Limpar Todos os Hinos";
+"service.clear_all_message" = "Tem a certeza de que deseja remover todos os hinos deste serviço? Esta acção não pode ser desfeita.";
+"service.complete_title" = "Concluir Serviço";
+"service.complete_message" = "Tem a certeza de que deseja marcar este serviço como concluído? Isto irá terminar a sessão de serviço actual.";
+"service.no_active_title" = "Nenhum Serviço Activo";
+"service.no_active_message" = "Crie um novo serviço de adoração para começar";
+"service.new_service" = "Novo Serviço";
+"service.completed_success_title" = "Serviço Concluído";
+"service.completed_success_message" = "O serviço de adoração foi marcado como concluído";
 
 /* Service Error Messages */
 "service.error.creation_failed" = "Falha ao criar serviço";
