@@ -85,8 +85,10 @@ struct ContentView: View {
     }
     
     init() {
-        // Initialize operations with a temporary context - will be updated in onAppear
-        self._operations = StateObject(wrappedValue: HymnOperations(context: ModelContext(try! ModelContainer(for: Hymn.self))))
+        // Initialize operations with a placeholder - will be updated in onAppear with the real context
+        // Using a simple in-memory container to avoid conflicts
+        let tempContainer = try! ModelContainer(for: Hymn.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        self._operations = StateObject(wrappedValue: HymnOperations(context: ModelContext(tempContainer)))
     }
 
     var body: some View {

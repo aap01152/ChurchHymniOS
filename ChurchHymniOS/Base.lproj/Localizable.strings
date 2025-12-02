@@ -251,3 +251,27 @@
 
 /* Verse Navigation */
 "verse.tap_to_navigate" = "Tap to present this verse";
+
+/* Service Management */
+"service.filter.on" = "Service";
+"service.filter.off" = "All Hymns";
+"service.hymn_count" = "%d hymns in %@";
+"service.add_to_service" = "Add to Service";
+"service.remove_from_service" = "Remove from Service";
+"service.today_service" = "Today's Service";
+"service.reorder.on" = "Reorder";
+"service.reorder.off" = "Reorder";
+
+/* Service Error Messages */
+"service.error.creation_failed" = "Failed to create service";
+"service.error.update_failed" = "Failed to update service";
+"service.error.deletion_failed" = "Failed to delete service";
+"service.error.add_hymn_failed" = "Failed to add hymn to service";
+"service.error.remove_hymn_failed" = "Failed to remove hymn from service";
+"service.error.reorder_failed" = "Failed to reorder service hymns";
+"service.error.clear_failed" = "Failed to clear service";
+"service.error.hymn_already_in_service" = "Hymn is already in this service";
+"service.error.hymn_not_in_service" = "Hymn is not in this service";
+"service.error.invalid_reorder" = "Invalid reorder operation";
+"service.error.service_not_found" = "Service not found";
+"service.error.context_error" = "Database context error";

@@ -13,44 +13,15 @@ class ServiceMigrationManager {
     
     /// Creates a properly configured ModelContainer with migration support
     static func createModelContainer() -> ModelContainer {
-        /*
-         Note: SwiftData automatic schema migration
-         
-         SwiftData automatically handles schema evolution when:
-         1. Adding new model classes (WorshipService, ServiceHymn)
-         2. Adding optional properties to existing models
-         3. The existing data structure remains compatible
-         
-         Since we're only adding new models without changing Hymn,
-         SwiftData should handle this automatically.
-         */
+        print("Creating ModelContainer for ChurchHymn app...")
         
-        // Try the primary approach with automatic migration
+        // Simple approach: Let SwiftData handle everything automatically
         do {
-            print("Creating ModelContainer with automatic schema migration...")
-            
-            let schema = Schema([
-                Hymn.self,
-                WorshipService.self,
-                ServiceHymn.self
-            ])
-            
-            let configuration = ModelConfiguration(
-                schema: schema,
-                isStoredInMemoryOnly: false,
-                allowsSave: true,
-                cloudKitDatabase: .none // Disable CloudKit for stability during development
-            )
-            
-            let container = try ModelContainer(
-                for: schema,
-                configurations: [configuration]
-            )
-            
-            print("ModelContainer created successfully with automatic migration")
+            let container = try ModelContainer(for: Hymn.self, WorshipService.self, ServiceHymn.self)
+            print("ModelContainer created successfully")
             return container
         } catch {
-            print("Primary container creation failed: \(error)")
+            print("Standard container creation failed: \(error)")
             return createFallbackContainer()
         }
     }
@@ -59,23 +30,10 @@ class ServiceMigrationManager {
     private static func createFallbackContainer() -> ModelContainer {
         do {
             print("Attempting fallback container creation...")
-            let schema = Schema([
-                Hymn.self,
-                WorshipService.self,
-                ServiceHymn.self
-            ])
-            
-            let configuration = ModelConfiguration(
-                schema: schema,
-                isStoredInMemoryOnly: false,
-                allowsSave: true,
-                cloudKitDatabase: .none // Ensure no CloudKit conflicts
-            )
-            
-            return try ModelContainer(
-                for: schema,
-                configurations: [configuration]
-            )
+            // Try with just the original Hymn model first
+            let container = try ModelContainer(for: Hymn.self)
+            print("Fallback container created with Hymn model only")
+            return container
         } catch {
             print("Fallback container failed, trying emergency reset...")
             return createEmergencyContainer()
@@ -84,36 +42,24 @@ class ServiceMigrationManager {
     
     /// Emergency container creation - clears existing data if necessary
     private static func createEmergencyContainer() -> ModelContainer {
+        print("WARNING: Creating emergency in-memory container")
+        
         do {
-            // This is a last resort - it may result in data loss
-            print("WARNING: Creating emergency container - existing data may be lost")
-            
-            // Try to get the default store URL and remove it
-            let url = URL.applicationSupportDirectory.appending(path: "Model.sqlite")
-            try? FileManager.default.removeItem(at: url)
-            
-            let schema = Schema([
-                Hymn.self,
-                WorshipService.self,
-                ServiceHymn.self
-            ])
-            
-            let configuration = ModelConfiguration(
-                schema: schema,
-                isStoredInMemoryOnly: false,
-                allowsSave: true,
-                cloudKitDatabase: .none
-            )
-            
-            let container = try ModelContainer(
-                for: schema,
-                configurations: [configuration]
-            )
-            
-            print("Emergency container created successfully")
+            // Create an in-memory container as last resort
+            let schema = Schema([Hymn.self, WorshipService.self, ServiceHymn.self])
+            let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+            let container = try ModelContainer(for: schema, configurations: [configuration])
+            print("Emergency in-memory container created successfully")
             return container
         } catch {
-            fatalError("Failed to create emergency ModelContainer: \(error)")
+            // Absolute last resort: just Hymn model in memory
+            do {
+                let container = try ModelContainer(for: Hymn.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+                print("Created minimal in-memory container with Hymn only")
+                return container
+            } catch {
+                fatalError("Failed to create any ModelContainer: \(error)")
+            }
         }
     }
     

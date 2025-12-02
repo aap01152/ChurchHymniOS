@@ -251,3 +251,27 @@
 
 /* Verse Navigation */
 "verse.tap_to_navigate" = "Toque para apresentar este verso";
+
+/* Service Management */
+"service.filter.on" = "Serviço";
+"service.filter.off" = "Todos os Hinos";
+"service.hymn_count" = "%d hinos em %@";
+"service.add_to_service" = "Adicionar ao Serviço";
+"service.remove_from_service" = "Remover do Serviço";
+"service.today_service" = "Serviço de Hoje";
+"service.reorder.on" = "Reordenar";
+"service.reorder.off" = "Reordenar";
+
+/* Service Error Messages */
+"service.error.creation_failed" = "Falha ao criar serviço";
+"service.error.update_failed" = "Falha ao actualizar serviço";
+"service.error.deletion_failed" = "Falha ao apagar serviço";
+"service.error.add_hymn_failed" = "Falha ao adicionar hino ao serviço";
+"service.error.remove_hymn_failed" = "Falha ao remover hino do serviço";
+"service.error.reorder_failed" = "Falha ao reordenar hinos do serviço";
+"service.error.clear_failed" = "Falha ao limpar serviço";
+"service.error.hymn_already_in_service" = "Hino já está neste serviço";
+"service.error.hymn_not_in_service" = "Hino não está neste serviço";
+"service.error.invalid_reorder" = "Operação de reordenação inválida";
+"service.error.service_not_found" = "Serviço não encontrado";
+"service.error.context_error" = "Erro de contexto da base de dados";
