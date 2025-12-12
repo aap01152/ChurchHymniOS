@@ -12,6 +12,8 @@ import Foundation
 @Model
 class Hymn: Identifiable, Codable, @unchecked Sendable {
     @Attribute(.unique) var id: UUID
+    // Store a normalized (e.g. lowercase + trimmed) title for lookups
+    @Attribute(.unique) var normalizedTitle: String
     var title: String
     var lyrics: String?
     var musicalKey: String?
@@ -35,8 +37,10 @@ class Hymn: Identifiable, Codable, @unchecked Sendable {
         songNumber: Int? = nil,
         modelVersion: Int = 2
     ) {
+        let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
         self.id = id
-        self.title = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.title = trimmedTitle
+        self.normalizedTitle = trimmedTitle.lowercased()
         self.lyrics = lyrics?.trimmingCharacters(in: .whitespacesAndNewlines)
         self.musicalKey = musicalKey?.trimmingCharacters(in: .whitespacesAndNewlines)
         self.copyright = copyright?.trimmingCharacters(in: .whitespacesAndNewlines)

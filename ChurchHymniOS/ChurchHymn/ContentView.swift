@@ -4,10 +4,14 @@ import SwiftData
 import Foundation
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var context
-    @Environment(\.openWindow) private var openWindow
+    @EnvironmentObject private var serviceFactory: ServiceFactory
     @EnvironmentObject private var externalDisplayManager: ExternalDisplayManager
-    @Query(sort: \Hymn.title, order: .forward) private var hymns: [Hymn]
+    @Environment(\.openWindow) private var openWindow
+    
+    // Service layer instances
+    @State private var hymnService: HymnService?
+    @State private var serviceService: ServiceService?
+    @State private var servicesInitialized = false
     
     // Core state
     @State private var selected: Hymn? = nil
@@ -20,345 +24,89 @@ struct ContentView: View {
     // Tab selection state
     @State private var selectedTab = 0
     
-    // Import/Export state
-    @State private var exportType: ExportType?
-    @State private var importType: ImportType?
-    @State private var currentImportType: ImportType?
-    @State private var showingImportHelp = false
-    @State private var showingManageWindow = false
-    
-    // Error handling states
-    @State private var importError: ImportError?
-    @State private var showingErrorAlert = false
-    @State private var importSuccessMessage: String?
-    @State private var showingSuccessAlert = false
-    
-    // Import preview states
-    @State private var importPreview: ImportPreview?
-    @State private var showingImportPreview = false
-    @State private var selectedHymnsForImport: Set<UUID> = []
-    @State private var duplicateResolution: DuplicateResolution = .skip
-    
-    // Export selection states
-    @State private var showingExportSelection = false
-    @State private var selectedHymnsForExport: Set<UUID> = []
-    @State private var exportFormat: ExportFormat = .json
+    // Multi-select states for batch operations
+    @State private var selectedHymnsForDelete: Set<UUID> = []
+    @State private var isMultiSelectMode = false
+    @State private var showingBatchDeleteConfirmation = false
     
     // Delete confirmation states
     @State private var showingDeleteConfirmation = false
     @State private var hymnToDelete: Hymn?
     
-    // Multi-select states for batch delete
-    @State private var selectedHymnsForDelete: Set<UUID> = []
-    @State private var isMultiSelectMode = false
-    @State private var showingBatchDeleteConfirmation = false
+    // Service management states
+    @State private var showingServiceManagement = false
+    
+    // Import/Export states
+    @State private var importExportManager: ImportExportManager?
+    @State private var showingImporter = false
+    @State private var showingExporter = false
+    @State private var importType: ImportType = .auto
+    @State private var exportFormat: ExportFormat = .json
+    @State private var selectedHymnsForExport: Set<UUID> = []
+    @State private var showingExportSelection = false
+    @State private var showingImportPreview = false
+    @State private var importPreview: ImportPreview?
+    @State private var exportHymns: [Hymn] = []
     
     // Font size state
     @State private var lyricsFontSize: CGFloat = 16
     
     // Navigation split view visibility state
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
-    
-    // Operations
-    @StateObject private var operations: HymnOperations
-    
-    // Computed bindings to reduce type-check complexity in modifiers
-    private var isImportPresentedBinding: Binding<Bool> {
-        Binding<Bool>(
-            get: { importType != nil },
-            set: { presented in
-                if !presented { importType = nil }
-            }
-        )
-    }
-    
-    private var isExportPresentedBinding: Binding<Bool> {
-        Binding<Bool>(
-            get: { exportType != nil },
-            set: { presented in
-                if !presented {
-                    exportType = nil
-                    cleanupAfterExport()
-                }
-            }
-        )
-    }
-    
-    init() {
-        // Initialize operations with a placeholder - will be updated in onAppear with the real context
-        // Using a simple in-memory container to avoid conflicts
-        let tempContainer = try! ModelContainer(for: Hymn.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
-        self._operations = StateObject(wrappedValue: HymnOperations(context: ModelContext(tempContainer)))
-    }
 
     var body: some View {
         Group {
-            if UIDevice.current.userInterfaceIdiom == .pad {
-                // iPad: Use two-column split view
-                NavigationSplitView(columnVisibility: $columnVisibility) {
-                    HymnListView(
-                        hymns: hymns,
-                        selected: $selected,
-                        selectedHymnsForDelete: $selectedHymnsForDelete,
-                        isMultiSelectMode: $isMultiSelectMode,
-                        editHymn: $editHymn,
-                        showingEdit: $showingEdit,
-                        hymnToDelete: $hymnToDelete,
-                        showingDeleteConfirmation: $showingDeleteConfirmation,
-                        showingBatchDeleteConfirmation: $showingBatchDeleteConfirmation,
-                        newHymn: $newHymn,
-                        importType: $importType,
-                        currentImportType: $currentImportType,
-                        selectedHymnsForExport: $selectedHymnsForExport,
-                        showingExportSelection: $showingExportSelection,
-                        showingImportHelp: $showingImportHelp,
-                        showingManageWindow: $showingManageWindow,
-                        context: context,
-                        onPresent: onPresentHymn
-                    )
-                    .navigationTitle(NSLocalizedString("nav.library", comment: "Navigation title for library"))
-                    .toolbar {
-                        ToolbarItem(placement: .navigationBarTrailing) {
-                            ExternalDisplayNavigationIndicator()
-                        }
-                    }
-                    .frame(minWidth: 320)
-                } detail: {
-                    VStack(spacing: 0) {
-                        HStack {
-                            Spacer()
-                            HymnToolbarView(
-                                hymns: hymns,
-                                selected: $selected,
-                                selectedHymnsForDelete: $selectedHymnsForDelete,
-                                isMultiSelectMode: $isMultiSelectMode,
-                                showingEdit: $showingEdit,
-                                newHymn: $newHymn,
-                                importType: $importType,
-                                currentImportType: $currentImportType,
-                                selectedHymnsForExport: $selectedHymnsForExport,
-                                showingExportSelection: $showingExportSelection,
-                                hymnToDelete: $hymnToDelete,
-                                showingDeleteConfirmation: $showingDeleteConfirmation,
-                                showingBatchDeleteConfirmation: $showingBatchDeleteConfirmation,
-                                lyricsFontSize: $lyricsFontSize,
-                                context: context,
-                                openWindow: openWindow,
-                                onPresent: onPresentHymn
-                            )
-                            Spacer()
-                        }
-                        .padding(.top, 16)
-                        
-                        // External Display Status Bar - PHASE 3 Integration
-                        if externalDisplayManager.state != .disconnected {
-                            VStack(spacing: 0) {
-                                ExternalDisplayStatusBar()
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 8)
-                                
-                                if externalDisplayManager.state == .connected || externalDisplayManager.state == .presenting {
-                                    ExternalDisplayQuickControls(selectedHymn: selected)
-                                        .padding(.horizontal, 16)
-                                        .padding(.bottom, 8)
-                                }
-                            }
-                            .background(Color(.systemBackground))
-                        }
-                        
-                        Divider()
-                        VStack {
-                            if isMultiSelectMode {
-                                MultiSelectDetailView(selectedHymnsForDelete: selectedHymnsForDelete)
-                            } else if let hymn = selected {
-                                DetailView(
-                                    hymn: hymn,
-                                    currentPresentationIndex: presentedHymnIndex,
-                                    isPresenting: isPresenting,
-                                    lyricsFontSize: $lyricsFontSize
-                                )
-                            } else {
-                                EmptyDetailView()
-                            }
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    }
+            if let hymnService = hymnService, let serviceService = serviceService {
+                if UIDevice.current.userInterfaceIdiom == .pad {
+                    // iPad: Use two-column split view
+                    iPadLayout(hymnService: hymnService, serviceService: serviceService)
+                } else {
+                    // iPhone: Use TabView
+                    iPhoneLayout(hymnService: hymnService, serviceService: serviceService)
                 }
-                .navigationSplitViewStyle(.balanced)
             } else {
-                // iPhone: Use TabView as before
-                TabView(selection: $selectedTab) {
-                    // Tab 1: Search & Song List (no detail view)
-                    HymnListView(
-                        hymns: hymns,
-                        selected: $selected,
-                        selectedHymnsForDelete: $selectedHymnsForDelete,
-                        isMultiSelectMode: $isMultiSelectMode,
-                        editHymn: $editHymn,
-                        showingEdit: $showingEdit,
-                        hymnToDelete: $hymnToDelete,
-                        showingDeleteConfirmation: $showingDeleteConfirmation,
-                        showingBatchDeleteConfirmation: $showingBatchDeleteConfirmation,
-                        newHymn: $newHymn,
-                        importType: $importType,
-                        currentImportType: $currentImportType,
-                        selectedHymnsForExport: $selectedHymnsForExport,
-                        showingExportSelection: $showingExportSelection,
-                        showingImportHelp: $showingImportHelp,
-                        showingManageWindow: $showingManageWindow,
-                        context: context,
-                        onPresent: onPresentHymn
-                    )
-                    .tabItem {
-                        Image(systemName: "music.note.list")
-                        Text(NSLocalizedString("nav.library", comment: "Tab title for library"))
+                // Loading view while services are being initialized
+                LoadingServicesView()
+                    .task {
+                        await initializeServices()
                     }
-                    .tag(0)
-                    
-                    
-                    // Tab 2: Toolbar with scrolling detail view
-                    VStack(spacing: 0) {
-                        // Toolbar at the top
-                        HStack {
-                            Spacer()
-                            HymnToolbarView(
-                                hymns: hymns,
-                                selected: $selected,
-                                selectedHymnsForDelete: $selectedHymnsForDelete,
-                                isMultiSelectMode: $isMultiSelectMode,
-                                showingEdit: $showingEdit,
-                                newHymn: $newHymn,
-                                importType: $importType,
-                                currentImportType: $currentImportType,
-                                selectedHymnsForExport: $selectedHymnsForExport,
-                                showingExportSelection: $showingExportSelection,
-                                hymnToDelete: $hymnToDelete,
-                                showingDeleteConfirmation: $showingDeleteConfirmation,
-                                showingBatchDeleteConfirmation: $showingBatchDeleteConfirmation,
-                                lyricsFontSize: $lyricsFontSize,
-                                context: context,
-                                openWindow: openWindow,
-                                onPresent: onPresentHymn
-                            )
-                            Spacer()
-                        }
-                        .padding(.top, 16)
-                        
-                        // External Display Status Bar - PHASE 3 Integration (iPhone)
-                        if externalDisplayManager.state != .disconnected {
-                            VStack(spacing: 0) {
-                                ExternalDisplayStatusBar()
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 8)
-                                
-                                if externalDisplayManager.state == .connected || externalDisplayManager.state == .presenting {
-                                    ExternalDisplayQuickControls(selectedHymn: selected)
-                                        .padding(.horizontal, 16)
-                                        .padding(.bottom, 8)
-                                }
-                            }
-                            .background(Color(.systemBackground))
-                        }
-                        
-                        Divider()
-                        
-                        VStack {
-                            if isMultiSelectMode {
-                                MultiSelectDetailView(selectedHymnsForDelete: selectedHymnsForDelete)
-                                } else if let hymn = selected {
-                                    DetailView(
-                                        hymn: hymn,
-                                        currentPresentationIndex: presentedHymnIndex,
-                                        isPresenting: isPresenting,
-                                        lyricsFontSize: $lyricsFontSize
-                                    )
-                            } else {
-                                EmptyDetailView()
-                            }
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    }
-                    .tabItem {
-                        Image(systemName: "music.note")
-                        Text(NSLocalizedString("nav.song", comment: "Tab title for song"))
-                    }
-                    .tag(1)
-                }
             }
         }
         .overlay {
-            // PHASE 4: External Display Preview Window
+            // External Display Preview Window
             if UIDevice.current.userInterfaceIdiom == .pad {
                 ManagedExternalDisplayPreview()
                     .allowsHitTesting(true)
             }
         }
-        .fileImporter(
-            isPresented: isImportPresentedBinding,
-            allowedContentTypes: importType == .auto ? [UTType.json, UTType.plainText] : (importType == .json ? [UTType.json] : [UTType.plainText]),
-            allowsMultipleSelection: true
-        ) { result in
-            let importTypeToUse = importType ?? currentImportType
-            handleImportResult(result, importType: importTypeToUse)
-        }
-        .fileExporter(
-            isPresented: isExportPresentedBinding,
-            document: exportDocument,
-            contentType: exportContentType,
-            defaultFilename: exportDefaultFilename
-        ) { result in
-            if case let .success(url) = result, let type = exportType {
-                handleExportResult(type, url: url)
-            }
-        }
-        .alert(NSLocalizedString("alert.import_error", comment: "Import error alert title"), isPresented: $showingErrorAlert, presenting: importError) { error in
-            Button(NSLocalizedString("btn.ok", comment: "OK button")) { }
-        } message: { error in
-            Text(error.detailedErrorDescription)
-        }
-        .alert(NSLocalizedString("alert.import_successful", comment: "Import success alert title"), isPresented: $showingSuccessAlert) {
-            Button(NSLocalizedString("btn.ok", comment: "OK button")) { }
-        } message: {
-            Text(importSuccessMessage ?? NSLocalizedString("msg.hymn_imported_successfully", comment: "Default import success message"))
-        }
-        .deleteConfirmationAlerts(
-            hymns: hymns,
-            showingDeleteConfirmation: $showingDeleteConfirmation,
-            showingBatchDeleteConfirmation: $showingBatchDeleteConfirmation,
-            hymnToDelete: $hymnToDelete,
-            selectedHymnsForDelete: $selectedHymnsForDelete,
-            onDeleteHymn: deleteHymn,
-            onDeleteSelectedHymns: deleteSelectedHymns
-        )
-        .contentViewModifiers(
-            hymns: hymns,
-            selected: selected,
-            newHymn: newHymn,
-            context: context,
-            operations: operations,
-            showingEdit: $showingEdit,
-            showingImportPreview: $showingImportPreview,
-            showingExportSelection: $showingExportSelection,
-            importPreview: $importPreview,
-            selectedHymnsForImport: $selectedHymnsForImport,
-            duplicateResolution: $duplicateResolution,
-            selectedHymnsForExport: $selectedHymnsForExport,
-            exportFormat: $exportFormat,
-            onSave: { savedHymn in
-                try? context.save()
-                if newHymn == savedHymn {
-                    newHymn = nil
+        .alert("Delete Hymn", isPresented: $showingDeleteConfirmation, presenting: hymnToDelete) { hymn in
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                Task {
+                    await deleteHymn(hymn)
                 }
-            },
-            onCleanupEmptyHymn: cleanupEmptyHymn,
-            onConfirmImport: confirmImport,
-            onCancelImport: cancelImport,
-            onConfirmExport: confirmExport,
-            onCancelExport: cancelExport
-        )
-        .onAppear {
-            // Update operations context with the actual context
-            operations.updateContext(context)
+            }
+        } message: { hymn in
+            Text("Are you sure you want to delete '\(hymn.title)'?")
+        }
+        .alert("Delete Multiple Hymns", isPresented: $showingBatchDeleteConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                Task {
+                    await deleteSelectedHymns()
+                }
+            }
+        } message: {
+            Text("Are you sure you want to delete \(selectedHymnsForDelete.count) hymns?")
+        }
+        .sheet(isPresented: $showingEdit) {
+            if let hymn = editHymn ?? newHymn {
+                HymnEditView(hymn: hymn) { savedHymn in
+                    Task {
+                        await saveHymn(savedHymn)
+                    }
+                }
+            }
         }
         .fullScreenCover(isPresented: $isPresenting) {
             if let hymn = selected {
@@ -374,12 +122,286 @@ struct ContentView: View {
                 )
             }
         }
+        .sheet(isPresented: $showingServiceManagement) {
+            if let serviceService = serviceService, let hymnService = hymnService {
+                ServiceManagementView(
+                    serviceService: serviceService,
+                    hymnService: hymnService
+                )
+            }
+        }
+        .fileImporter(
+            isPresented: $showingImporter,
+            allowedContentTypes: [UTType.json, UTType.plainText],
+            allowsMultipleSelection: true
+        ) { result in
+            handleImportResult(result)
+        }
+        .fileExporter(
+            isPresented: $showingExporter,
+            document: createExportDocument(),
+            contentType: exportFormat == .json ? UTType.json : UTType.plainText,
+            defaultFilename: createExportFilename()
+        ) { result in
+            handleExportResult(result)
+        }
+        .sheet(isPresented: $showingImportPreview) {
+            if let preview = importPreview, let manager = importExportManager {
+                ImportPreviewView(
+                    preview: preview,
+                    importManager: manager,
+                    onComplete: { success in
+                        showingImportPreview = false
+                        importPreview = nil
+                        if success {
+                            Task {
+                                await hymnService?.loadHymns()
+                            }
+                        }
+                    }
+                )
+            }
+        }
+        .sheet(isPresented: $showingExportSelection) {
+            if let hymnService = hymnService {
+                ExportSelectionView(
+                    hymns: hymnService.hymns,
+                    selectedHymns: $selectedHymnsForExport,
+                    exportFormat: $exportFormat,
+                    onExport: { hymns, format in
+                        exportHymns = hymns
+                        exportFormat = format
+                        showingExportSelection = false
+                        showingExporter = true
+                    }
+                )
+            }
+        }
+    }
+    
+    // MARK: - Layout Components
+    
+    @ViewBuilder
+    private func iPadLayout(hymnService: HymnService, serviceService: ServiceService) -> some View {
+        NavigationSplitView(columnVisibility: $columnVisibility) {
+            HymnListViewNew(
+                hymnService: hymnService,
+                serviceService: serviceService,
+                selected: $selected,
+                selectedHymnsForDelete: $selectedHymnsForDelete,
+                isMultiSelectMode: $isMultiSelectMode,
+                editHymn: $editHymn,
+                showingEdit: $showingEdit,
+                hymnToDelete: $hymnToDelete,
+                showingDeleteConfirmation: $showingDeleteConfirmation,
+                showingBatchDeleteConfirmation: $showingBatchDeleteConfirmation,
+                newHymn: $newHymn,
+                onPresent: onPresentHymn,
+                onAddNew: addNewHymn,
+                onEdit: editCurrentHymn
+            )
+            .navigationTitle("Library")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Services") {
+                        showingServiceManagement = true
+                    }
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    ExternalDisplayNavigationIndicator()
+                }
+            }
+            .frame(minWidth: 320)
+        } detail: {
+            iPadDetailView(hymnService: hymnService, serviceService: serviceService)
+        }
+        .navigationSplitViewStyle(.balanced)
+    }
+    
+    @ViewBuilder
+    private func iPhoneLayout(hymnService: HymnService, serviceService: ServiceService) -> some View {
+        TabView(selection: $selectedTab) {
+            // Tab 1: Search & Song List
+            HymnListViewNew(
+                hymnService: hymnService,
+                serviceService: serviceService,
+                selected: $selected,
+                selectedHymnsForDelete: $selectedHymnsForDelete,
+                isMultiSelectMode: $isMultiSelectMode,
+                editHymn: $editHymn,
+                showingEdit: $showingEdit,
+                hymnToDelete: $hymnToDelete,
+                showingDeleteConfirmation: $showingDeleteConfirmation,
+                showingBatchDeleteConfirmation: $showingBatchDeleteConfirmation,
+                newHymn: $newHymn,
+                onPresent: onPresentHymn,
+                onAddNew: addNewHymn,
+                onEdit: editCurrentHymn
+            )
+            .tabItem {
+                Image(systemName: "music.note.list")
+                Text("Library")
+            }
+            .tag(0)
+            
+            // Tab 2: Detail view with toolbar
+            iPhoneDetailView(hymnService: hymnService, serviceService: serviceService)
+                .tabItem {
+                    Image(systemName: "music.note")
+                    Text("Song")
+                }
+                .tag(1)
+            
+            // Tab 3: Service Management
+            ServiceManagementView(
+                serviceService: serviceService,
+                hymnService: hymnService
+            )
+            .tabItem {
+                Image(systemName: "calendar")
+                Text("Services")
+            }
+            .tag(2)
+        }
+    }
+    
+    @ViewBuilder
+    private func iPadDetailView(hymnService: HymnService, serviceService: ServiceService) -> some View {
+        VStack(spacing: 0) {
+            // Toolbar at the top
+            HymnToolbarViewNew(
+                hymnService: hymnService,
+                serviceService: serviceService,
+                selected: $selected,
+                selectedHymnsForDelete: $selectedHymnsForDelete,
+                isMultiSelectMode: $isMultiSelectMode,
+                showingEdit: $showingEdit,
+                newHymn: $newHymn,
+                hymnToDelete: $hymnToDelete,
+                showingDeleteConfirmation: $showingDeleteConfirmation,
+                showingBatchDeleteConfirmation: $showingBatchDeleteConfirmation,
+                lyricsFontSize: $lyricsFontSize,
+                showingImporter: $showingImporter,
+                showingExportSelection: $showingExportSelection,
+                selectedHymnsForExport: $selectedHymnsForExport,
+                openWindow: openWindow,
+                onPresent: onPresentHymn,
+                onAddNew: addNewHymn,
+                onEdit: editCurrentHymn
+            )
+            .padding(.top, 16)
+            
+            // External Display Status Bar
+            if externalDisplayManager.state != .disconnected {
+                externalDisplayStatusView()
+            }
+            
+            Divider()
+            detailContentView()
+        }
+    }
+    
+    @ViewBuilder
+    private func iPhoneDetailView(hymnService: HymnService, serviceService: ServiceService) -> some View {
+        VStack(spacing: 0) {
+            // Toolbar at the top
+            HymnToolbarViewNew(
+                hymnService: hymnService,
+                serviceService: serviceService,
+                selected: $selected,
+                selectedHymnsForDelete: $selectedHymnsForDelete,
+                isMultiSelectMode: $isMultiSelectMode,
+                showingEdit: $showingEdit,
+                newHymn: $newHymn,
+                hymnToDelete: $hymnToDelete,
+                showingDeleteConfirmation: $showingDeleteConfirmation,
+                showingBatchDeleteConfirmation: $showingBatchDeleteConfirmation,
+                lyricsFontSize: $lyricsFontSize,
+                showingImporter: $showingImporter,
+                showingExportSelection: $showingExportSelection,
+                selectedHymnsForExport: $selectedHymnsForExport,
+                openWindow: openWindow,
+                onPresent: onPresentHymn,
+                onAddNew: addNewHymn,
+                onEdit: editCurrentHymn
+            )
+            .padding(.top, 16)
+            
+            // External Display Status Bar
+            if externalDisplayManager.state != .disconnected {
+                externalDisplayStatusView()
+            }
+            
+            Divider()
+            detailContentView()
+        }
+    }
+    
+    @ViewBuilder
+    private func externalDisplayStatusView() -> some View {
+        VStack(spacing: 0) {
+            ExternalDisplayStatusBar()
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+            
+            if externalDisplayManager.state == .connected || externalDisplayManager.state == .presenting {
+                ExternalDisplayQuickControls(selectedHymn: selected)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 8)
+            }
+        }
+        .background(Color(.systemBackground))
+    }
+    
+    @ViewBuilder
+    private func detailContentView() -> some View {
+        VStack {
+            if isMultiSelectMode {
+                MultiSelectDetailView(selectedHymnsForDelete: selectedHymnsForDelete)
+            } else if let hymn = selected {
+                DetailView(
+                    hymn: hymn,
+                    currentPresentationIndex: presentedHymnIndex,
+                    isPresenting: isPresenting,
+                    lyricsFontSize: $lyricsFontSize
+                )
+            } else {
+                EmptyDetailView()
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
+    // MARK: - Service Initialization
+    
+    private func initializeServices() async {
+        guard !servicesInitialized else { return }
+        
+        do {
+            let hymnService = try await serviceFactory.createHymnService()
+            let serviceService = try await serviceFactory.createServiceService()
+            let operations = try await serviceFactory.createHymnOperations()
+            
+            await MainActor.run {
+                self.hymnService = hymnService
+                self.serviceService = serviceService
+                self.importExportManager = ImportExportManager(
+                    hymnService: hymnService,
+                    serviceService: serviceService,
+                    operations: operations
+                )
+                self.servicesInitialized = true
+            }
+        } catch {
+            print("Failed to initialize services: \(error)")
+        }
+    }
+    
     // MARK: - Actions
     
     private func onPresentHymn(_ hymn: Hymn) {
-        if let index = hymns.firstIndex(where: { $0.id == hymn.id }) {
+        if let index = hymnService?.hymns.firstIndex(where: { $0.id == hymn.id }) {
             presentedHymnIndex = index
             isPresenting = true
         }
@@ -387,76 +409,43 @@ struct ContentView: View {
     
     private func addNewHymn() {
         let hymn = Hymn(title: "")
-        context.insert(hymn)
         newHymn = hymn
         selected = hymn
         showingEdit = true
     }
     
-    private func importHymns() {
-        importType = .auto
-        currentImportType = .auto
-    }
-    
     private func editCurrentHymn() {
-        if selected != nil {
+        if let hymn = selected {
+            editHymn = hymn
             showingEdit = true
         }
     }
     
-    private func exportSelectedHymn() {
-        if let hymn = selected {
-            selectedHymnsForExport = [hymn.id]
-            showingExportSelection = true
-        }
-    }
-    
-    private func exportMultipleHymns() {
-        showingExportSelection = true
-    }
-    
-    private func exportAllHymns() {
-        selectedHymnsForExport = Set(hymns.map { $0.id })
-        showingExportSelection = true
-    }
-    
-    private func present(_ hymn: Hymn) {
-        // iOS/iPadOS presentation - use full screen cover
-        presentedHymnIndex = 0
-        isPresenting = true
-    }
-    
-    private func deleteHymn() {
-        guard let hymn = hymnToDelete else { return }
+    private func saveHymn(_ hymn: Hymn) async {
+        guard let hymnService = hymnService else { return }
         
-        context.delete(hymn)
+        let isNewHymn = newHymn == hymn
         
-        if selected == hymn {
-            selected = nil
+        let success = if isNewHymn {
+            await hymnService.createHymn(hymn)
+        } else {
+            await hymnService.updateHymn(hymn)
         }
-        if editHymn == hymn {
+        
+        if success {
+            if isNewHymn {
+                newHymn = nil
+            }
             editHymn = nil
+            showingEdit = false
         }
-        if newHymn == hymn {
-            newHymn = nil
-        }
-        
-        do {
-            try context.save()
-        } catch {
-            print("Error saving after delete: \(error)")
-        }
-        
-        hymnToDelete = nil
-        showingDeleteConfirmation = false
     }
     
-    private func deleteSelectedHymns() {
-        let hymnsToDelete = hymns.filter { selectedHymnsForDelete.contains($0.id) }
+    private func deleteHymn(_ hymn: Hymn) async {
+        guard let hymnService = hymnService else { return }
         
-        for hymn in hymnsToDelete {
-            context.delete(hymn)
-            
+        let success = await hymnService.deleteHymn(hymn)
+        if success {
             if selected == hymn {
                 selected = nil
             }
@@ -467,568 +456,726 @@ struct ContentView: View {
                 newHymn = nil
             }
         }
+    }
+    
+    private func deleteSelectedHymns() async {
+        guard let hymnService = hymnService else { return }
         
-        do {
-            try context.save()
-        } catch {
-            print("Error saving after batch delete: \(error)")
+        let hymnsToDelete = hymnService.hymns.filter { selectedHymnsForDelete.contains($0.id) }
+        let deletedCount = await hymnService.deleteHymns(hymnsToDelete)
+        
+        if deletedCount > 0 {
+            // Clear selection if any deleted hymns were selected
+            for hymn in hymnsToDelete {
+                if selected == hymn {
+                    selected = nil
+                }
+                if editHymn == hymn {
+                    editHymn = nil
+                }
+                if newHymn == hymn {
+                    newHymn = nil
+                }
+            }
         }
         
         selectedHymnsForDelete.removeAll()
         isMultiSelectMode = false
-        showingBatchDeleteConfirmation = false
     }
     
-    private func cleanupEmptyHymn() {
-        if let hymn = newHymn, hymn.title.trimmingCharacters(in: .whitespaces).isEmpty {
-            context.delete(hymn)
-            
-            if selected == hymn {
-                selected = nil
-            }
-            if editHymn == hymn {
-                editHymn = nil
-            }
-            newHymn = nil
-            
-            do {
-                try context.save()
-            } catch {
-                print("Error saving after cleanup: \(error)")
-            }
-        }
-    }
+    // MARK: - Import/Export Actions
     
-    private func cleanupAfterExport() {
-        selectedHymnsForExport.removeAll()
-    }
-    
-    // MARK: - Import/Export Handlers
-    
-    private func handleImportResult(_ result: Result<[URL], Error>, importType: ImportType?) {
-        print("DEBUG: importType parameter = \(String(describing: importType))")
-        
-        switch result {
-        case .success(let urls):
-            guard !urls.isEmpty else {
-                showError(.unknown("No files selected"))
-                return
-            }
-            
-            guard let importType = importType else {
-                showError(.unknown("Unknown import type"))
-                return
-            }
-            
-            // Process each file
-            Task {
-                var allHymns: [ImportPreviewHymn] = []
-                var allDuplicates: [ImportPreviewHymn] = []
-                var allErrors: [String] = []
-                
-                for (_, url) in urls.enumerated() {
-                    // Start accessing security scoped resource for sandboxed app
-                    let accessing = url.startAccessingSecurityScopedResource()
-                    defer {
-                        if accessing {
-                            url.stopAccessingSecurityScopedResource()
-                        }
-                    }
-                    
-                    // Auto-detect file type and size for intelligent import
-                    let actualImportType = detectImportType(for: url, requestedType: importType)
-                    
-                    do {
-                        let preview: ImportPreview = try await withCheckedThrowingContinuation { continuation in
-                            switch actualImportType {
-                            case .plainText:
-                                operations.importPlainTextHymn(
-                                    from: url,
-                                    hymns: hymns,
-                                    onComplete: { preview in
-                                        continuation.resume(returning: preview)
-                                    },
-                                    onError: { error in
-                                        continuation.resume(throwing: error)
-                                    }
-                                )
-                            case .json:
-                                // Check file size to determine if streaming is needed
-                                let fileSize = (try? FileManager.default.attributesOfItem(atPath: url.path)[.size] as? Int64) ?? 0
-                                let largeFileThreshold = 10 * 1024 * 1024 // 10MB
-                                
-                                if fileSize > largeFileThreshold {
-                                    operations.importLargeJSONStreaming(
-                                        from: url,
-                                        hymns: hymns,
-                                        onComplete: { preview in
-                                            continuation.resume(returning: preview)
-                                        },
-                                        onError: { error in
-                                            continuation.resume(throwing: error)
-                                        }
-                                    )
-                                } else {
-                                    operations.importBatchJSON(
-                                        from: url,
-                                        hymns: hymns,
-                                        onComplete: { preview in
-                                            continuation.resume(returning: preview)
-                                        },
-                                        onError: { error in
-                                            continuation.resume(throwing: error)
-                                        }
-                                    )
-                                }
-                            case .auto:
-                                continuation.resume(throwing: ImportError.unknown("Auto detection failed"))
-                            }
-                        }
-                        
-                        // Collect results from this file
-                        allHymns.append(contentsOf: preview.hymns)
-                        allDuplicates.append(contentsOf: preview.duplicates)
-                        allErrors.append(contentsOf: preview.errors)
-                        
-                    } catch let error as ImportError {
-                        allErrors.append("Error importing \(url.lastPathComponent): \(error.localizedDescription)")
-                    } catch {
-                        allErrors.append("Unexpected error importing \(url.lastPathComponent): \(error.localizedDescription)")
-                    }
-                }
-                
-                // Show combined preview for all files
-                let combinedPreview = ImportPreview(
-                    hymns: allHymns,
-                    duplicates: allDuplicates,
-                    errors: allErrors,
-                    fileName: urls.count == 1 ? urls[0].lastPathComponent : "\(urls.count) files"
-                )
-                
-                await MainActor.run {
-                    operations.isImporting = false  // Reset the importing state
-                    operations.importProgress = 0.0 // Reset progress
-                    operations.progressMessage = "" // Clear message
-                    importPreview = combinedPreview
-                    showingImportPreview = true
-                }
-            }
-            
-        case .failure(let error):
-            let nsError = error as NSError
-            let specificError = getSpecificFileError(nsError)
-            showError(specificError)
-            operations.isImporting = false  // Reset the importing state on error
-            operations.importProgress = 0.0 // Reset progress
-            operations.progressMessage = "" // Clear message
-        }
-        
-        currentImportType = nil
-    }
-    
-    private func handleExportResult(_ type: ExportType, url: URL) {
-        switch type {
-        case .singlePlainText:
-            if let hymn = selected {
-                operations.exportPlainTextHymn(
-                    hymn,
-                    to: url,
-                    onComplete: { },
-                    onError: { error in
-                        showError(error)
-                    }
-                )
-            }
-        case .singleJSON:
-            if let hymn = selected {
-                operations.exportSingleJSONHymn(
-                    hymn,
-                    to: url,
-                    onComplete: { },
-                    onError: { error in
-                        showError(error)
-                    }
-                )
-            }
-        case .multipleJSON:
-            let hymnsToExport = hymns.filter { selectedHymnsForExport.contains($0.id) }
-            let largeCollectionThreshold = 1000 // Use streaming for collections > 1000 hymns
-            
-            if hymnsToExport.count > largeCollectionThreshold {
-                operations.exportLargeJSONStreaming(
-                    hymns: hymnsToExport,
-                    to: url,
-                    onComplete: { },
-                    onError: { error in
-                        showError(error)
-                    }
-                )
-            } else {
-                operations.exportBatchJSON(
-                    hymnsToExport,
-                    to: url,
-                    onComplete: { },
-                    onError: { error in
-                        showError(error)
-                    }
-                )
-            }
-        case .batchJSON:
-            let largeCollectionThreshold = 1000 // Use streaming for collections > 1000 hymns
-            
-            if hymns.count > largeCollectionThreshold {
-                operations.exportLargeJSONStreaming(
-                    hymns: hymns,
-                    to: url,
-                    onComplete: { },
-                    onError: { error in
-                        showError(error)
-                    }
-                )
-            } else {
-                operations.exportBatchJSON(
-                    hymns,
-                    to: url,
-                    onComplete: { },
-                    onError: { error in
-                        showError(error)
-                    }
-                )
-            }
-        }
-    }
-    
-    // MARK: - Import Preview Functions
-    
-    private func confirmImport() {
-        guard let preview = importPreview else { return }
-        
-        let selectedValidHymns = preview.hymns.filter { selectedHymnsForImport.contains($0.id) }
-        let selectedDuplicateHymns = preview.duplicates.filter { selectedHymnsForImport.contains($0.id) }
-        
-        var hymnsToImport: [Hymn] = []
-        var duplicatesToProcess: [DuplicateHymn] = []
-        
-        for previewHymn in selectedValidHymns {
-            let hymn = Hymn(
-                title: previewHymn.title,
-                lyrics: previewHymn.lyrics,
-                musicalKey: previewHymn.musicalKey,
-                copyright: previewHymn.copyright,
-                author: previewHymn.author,
-                tags: previewHymn.tags,
-                notes: previewHymn.notes,
-                songNumber: previewHymn.songNumber
-            )
-            hymnsToImport.append(hymn)
-        }
-        
-        for previewHymn in selectedDuplicateHymns {
-            if let existingHymn = previewHymn.existingHymn {
-                let newHymn = Hymn(
-                    title: previewHymn.title,
-                    lyrics: previewHymn.lyrics,
-                    musicalKey: previewHymn.musicalKey,
-                    copyright: previewHymn.copyright,
-                    author: previewHymn.author,
-                    tags: previewHymn.tags,
-                    notes: previewHymn.notes,
-                    songNumber: previewHymn.songNumber
-                )
-                duplicatesToProcess.append(DuplicateHymn(existing: existingHymn, new: newHymn))
-            }
-        }
-        
-        processFinalImport(validHymns: hymnsToImport, duplicates: duplicatesToProcess, errors: preview.errors)
-    }
-    
-    private func cancelImport() {
-        showingImportPreview = false
-        importPreview = nil
-        selectedHymnsForImport.removeAll()
-        operations.isImporting = false  // Reset the importing state
-        operations.importProgress = 0.0 // Reset progress
-        operations.progressMessage = "" // Clear message
-    }
-    
-    private func processFinalImport(validHymns: [Hymn], duplicates: [DuplicateHymn], errors: [String]) {
+    private func handleImportResult(_ result: Result<[URL], Error>) {
         Task {
-            await MainActor.run {
-                operations.isImporting = true
-                operations.importProgress = 0.0
-                operations.progressMessage = "Processing import..."
-            }
-            
-            do {
-                let totalItems = validHymns.count + duplicates.count
-                var processedItems = 0
-                
-                switch duplicateResolution {
-                case .skip:
-                    break
-                case .merge:
-                    for duplicate in duplicates {
-                        await MainActor.run {
-                            operations.importProgress = Double(processedItems) / Double(totalItems)
-                            operations.progressMessage = "Merging duplicate: \(duplicate.newHymn.title)..."
-                        }
-                        mergeHymnData(existing: duplicate.existingHymn, new: duplicate.newHymn)
-                        processedItems += 1
-                    }
-                case .replace:
-                    for duplicate in duplicates {
-                        await MainActor.run {
-                            operations.importProgress = Double(processedItems) / Double(totalItems)
-                            operations.progressMessage = "Replacing duplicate: \(duplicate.newHymn.title)..."
-                        }
-                        replaceHymnData(existing: duplicate.existingHymn, new: duplicate.newHymn)
-                        processedItems += 1
-                    }
-                }
-                
-                for hymn in validHymns {
-                    await MainActor.run {
-                        operations.importProgress = Double(processedItems) / Double(totalItems)
-                        operations.progressMessage = "Importing hymn: \(hymn.title)..."
-                    }
-                    context.insert(hymn)
-                    processedItems += 1
-                }
+            switch result {
+            case .success(let urls):
+                guard let manager = importExportManager else { return }
+                let importResult = await manager.importHymnsFromFiles(urls, importType: importType)
                 
                 await MainActor.run {
-                    operations.importProgress = 0.9
-                    operations.progressMessage = "Saving to database..."
-                }
-                
-                try context.save()
-                
-                await MainActor.run {
-                    operations.importProgress = 1.0
-                    operations.progressMessage = "Import complete!"
-                }
-                
-                var message = "Successfully imported \(validHymns.count) hymn\(validHymns.count == 1 ? "" : "s")"
-                
-                if !duplicates.isEmpty {
-                    let duplicateCount = duplicates.count
-                    switch duplicateResolution {
-                    case .skip:
-                        message += ". Skipped \(duplicateCount) duplicate\(duplicateCount == 1 ? "" : "s")"
-                    case .merge:
-                        message += ". Merged \(duplicateCount) duplicate\(duplicateCount == 1 ? "" : "s")"
-                    case .replace:
-                        message += ". Replaced \(duplicateCount) duplicate\(duplicateCount == 1 ? "" : "s")"
+                    if let preview = importResult.preview {
+                        importPreview = preview
+                        showingImportPreview = true
                     }
                 }
                 
-                if !errors.isEmpty {
-                    message += ". \(errors.count) error\(errors.count == 1 ? "" : "s") encountered"
-                }
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    operations.isImporting = false
-                    showSuccess(message)
-                }
-                
-            } catch {
-                await MainActor.run {
-                    operations.isImporting = false
-                }
-                showError(.unknown("Failed to save imported hymns: \(error.localizedDescription)"))
+            case .failure(let error):
+                print("Import failed: \(error)")
             }
         }
     }
     
-    // MARK: - Export Functions
+    private func handleExportResult(_ result: Result<URL, Error>) {
+        Task {
+            switch result {
+            case .success(let url):
+                guard let manager = importExportManager else { return }
+                let success = await manager.exportHymns(exportHymns, to: url, format: exportFormat)
+                print(success ? "Export completed successfully" : "Export failed")
+                
+            case .failure(let error):
+                print("Export failed: \(error)")
+            }
+        }
+    }
     
-    private func confirmExport() {
-        let hymnsToExport = hymns.filter { selectedHymnsForExport.contains($0.id) }
+    private func createExportDocument() -> HymnExportDocument? {
+        return HymnExportDocument(hymns: exportHymns, format: exportFormat)
+    }
+    
+    private func createExportFilename() -> String {
+        let count = exportHymns.count
+        let suffix = count == 1 ? exportHymns.first?.title ?? "hymn" : "\(count)_hymns"
+        return "\(suffix).\(exportFormat.fileExtension)"
+    }
+}
+
+// MARK: - Loading View for Services
+
+struct LoadingServicesView: View {
+    var body: some View {
+        VStack(spacing: 20) {
+            ProgressView()
+                .scaleEffect(1.5)
+            
+            Text("Loading Services...")
+                .font(.headline)
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(.systemBackground))
+    }
+}
+
+// MARK: - New UI Components (Simplified implementations)
+
+struct HymnListViewNew: View {
+    @ObservedObject var hymnService: HymnService
+    @ObservedObject var serviceService: ServiceService
+    
+    @Binding var selected: Hymn?
+    @Binding var selectedHymnsForDelete: Set<UUID>
+    @Binding var isMultiSelectMode: Bool
+    @Binding var editHymn: Hymn?
+    @Binding var showingEdit: Bool
+    @Binding var hymnToDelete: Hymn?
+    @Binding var showingDeleteConfirmation: Bool
+    @Binding var showingBatchDeleteConfirmation: Bool
+    @Binding var newHymn: Hymn?
+    
+    let onPresent: (Hymn) -> Void
+    let onAddNew: () -> Void
+    let onEdit: () -> Void
+    
+    @State private var searchText = ""
+    @State private var sortOption: SortOption = .title
+    
+    enum SortOption: CaseIterable, Identifiable {
+        case title
+        case number
+        case key
+        case service
         
-        if hymnsToExport.isEmpty {
-            showError(.unknown("No hymns selected for export"))
-            return
+        var id: String { self.rawValue }
+        
+        var rawValue: String {
+            switch self {
+            case .title:
+                return NSLocalizedString("sort.title", comment: "Title sort option")
+            case .number:
+                return NSLocalizedString("sort.number", comment: "Number sort option")
+            case .key:
+                return NSLocalizedString("sort.key", comment: "Key sort option")
+            case .service:
+                return NSLocalizedString("sort.service", comment: "Service sort option")
+            }
+        }
+    }
+    
+    /// Enhanced search function that searches across all hymn fields
+    /// Optimized for performance with pre-computed normalized values
+    private func searchMatches(hymn: Hymn, query: String) -> Bool {
+        let searchQuery = query.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Early return for empty query
+        if searchQuery.isEmpty { return true }
+        
+        // Search in normalized title (pre-computed for performance)
+        if hymn.normalizedTitle.contains(searchQuery) {
+            return true
         }
         
-        if hymnsToExport.count == 1 {
-            exportType = exportFormat == .json ? .singleJSON : .singlePlainText
+        // Search in song number if present (exact match or partial)
+        if let number = hymn.songNumber {
+            let numberString = String(number)
+            if numberString.contains(searchQuery) || searchQuery.contains(numberString) {
+                return true
+            }
+        }
+        
+        // Search in lyrics if present
+        if let lyrics = hymn.lyrics,
+           !lyrics.isEmpty,
+           lyrics.lowercased().contains(searchQuery) {
+            return true
+        }
+        
+        // Search in author if present
+        if let author = hymn.author,
+           !author.isEmpty,
+           author.lowercased().contains(searchQuery) {
+            return true
+        }
+        
+        // Search in tags if present
+        if let tags = hymn.tags,
+           !tags.isEmpty,
+           tags.contains(where: { $0.lowercased().contains(searchQuery) }) {
+            return true
+        }
+        
+        // Search in notes if present
+        if let notes = hymn.notes,
+           !notes.isEmpty,
+           notes.lowercased().contains(searchQuery) {
+            return true
+        }
+        
+        // Search in musical key if present
+        if let musicalKey = hymn.musicalKey,
+           !musicalKey.isEmpty,
+           musicalKey.lowercased().contains(searchQuery) {
+            return true
+        }
+        
+        // Search in copyright if present
+        if let copyright = hymn.copyright,
+           !copyright.isEmpty,
+           copyright.lowercased().contains(searchQuery) {
+            return true
+        }
+        
+        return false
+    }
+    
+    var filteredHymns: [Hymn] {
+        // First determine the base hymn list based on sort option
+        let baseHymns: [Hymn]
+        if sortOption == .service {
+            // Service filter mode - show only service hymns
+            if let activeService = serviceService.activeService {
+                let serviceHymnIds = serviceService.serviceHymns
+                    .filter { $0.serviceId == activeService.id }
+                    .map { $0.hymnId }
+                baseHymns = hymnService.hymns.filter { hymn in
+                    serviceHymnIds.contains(hymn.id)
+                }
+            } else {
+                baseHymns = [] // No active service, show empty list
+            }
         } else {
-            exportType = exportFormat == .json ? .multipleJSON : .batchJSON
+            // Regular mode - show all hymns
+            baseHymns = hymnService.hymns
         }
         
-        showingExportSelection = false
-    }
-    
-    private func cancelExport() {
-        showingExportSelection = false
-        selectedHymnsForExport.removeAll()
-    }
-    
-    // MARK: - Helper Functions
-    
-    private func showError(_ error: ImportError) {
-        importError = error
-        showingErrorAlert = true
-    }
-    
-    private func showSuccess(_ message: String) {
-        importSuccessMessage = message
-        showingSuccessAlert = true
-    }
-    
-    private func mergeHymnData(existing: Hymn, new: Hymn) {
-        if (existing.lyrics?.isEmpty ?? true) && !(new.lyrics?.isEmpty ?? true) {
-            existing.lyrics = new.lyrics
-        }
-        if (existing.musicalKey?.isEmpty ?? true) && !(new.musicalKey?.isEmpty ?? true) {
-            existing.musicalKey = new.musicalKey
-        }
-        if (existing.author?.isEmpty ?? true) && !(new.author?.isEmpty ?? true) {
-            existing.author = new.author
-        }
-        if (existing.copyright?.isEmpty ?? true) && !(new.copyright?.isEmpty ?? true) {
-            existing.copyright = new.copyright
-        }
-        if (existing.notes?.isEmpty ?? true) && !(new.notes?.isEmpty ?? true) {
-            existing.notes = new.notes
-        }
-        if (existing.tags?.isEmpty ?? true) && !(new.tags?.isEmpty ?? true) {
-            existing.tags = new.tags
-        }
-        if existing.songNumber == nil && new.songNumber != nil {
-            existing.songNumber = new.songNumber
-        }
-    }
-    
-    private func replaceHymnData(existing: Hymn, new: Hymn) {
-        existing.lyrics = new.lyrics
-        existing.musicalKey = new.musicalKey
-        existing.author = new.author
-        existing.copyright = new.copyright
-        existing.notes = new.notes
-        existing.tags = new.tags
-        existing.songNumber = new.songNumber
-    }
-    
-    // MARK: - File Type Detection
-    
-    private func detectImportType(for url: URL, requestedType: ImportType) -> ImportType {
-        // If a specific type was requested, use it
-        if requestedType != .auto {
-            return requestedType
+        // Then apply search filter
+        let filtered: [Hymn]
+        if searchText.isEmpty {
+            filtered = baseHymns
+        } else {
+            filtered = baseHymns.filter { hymn in
+                searchMatches(hymn: hymn, query: searchText)
+            }
         }
         
-        // Auto-detect based on file extension and content
-        let fileExtension = url.pathExtension.lowercased()
-        
-        // Check file extension first
-        if fileExtension == "json" {
-            return .json
-        } else if fileExtension == "txt" || fileExtension.isEmpty {
-            // For .txt files or files without extension, check content
-            return detectContentType(for: url)
-        }
-        
-        // Default to plain text for unknown extensions
-        return .plainText
-    }
-    
-    private func detectContentType(for url: URL) -> ImportType {
-        do {
-            let data = try Data(contentsOf: url)
-            
-            // Try to parse as JSON first
-            if let jsonObject = try? JSONSerialization.jsonObject(with: data) {
-                // If it's valid JSON, check if it looks like hymn data
-                if let jsonDict = jsonObject as? [String: Any] {
-                    // Single hymn object
-                    if jsonDict["title"] != nil {
-                        return .json
-                    }
-                } else if let jsonArray = jsonObject as? [[String: Any]] {
-                    // Array of hymn objects
-                    if !jsonArray.isEmpty && jsonArray.first?["title"] != nil {
-                        return .json
+        // Sort based on selected option
+        switch sortOption {
+        case .title:
+            return filtered.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
+        case .number:
+            return filtered.sorted {
+                ($0.songNumber ?? Int.max) < ($1.songNumber ?? Int.max)
+            }
+        case .key:
+            return filtered.sorted {
+                ($0.musicalKey ?? "").localizedCaseInsensitiveCompare($1.musicalKey ?? "") == .orderedAscending
+            }
+        case .service:
+            // Service hymns ordered by service order, then by title
+            if let activeService = serviceService.activeService {
+                let serviceHymns = serviceService.serviceHymns
+                    .filter { $0.serviceId == activeService.id }
+                    .sorted { $0.order < $1.order }
+                
+                // Create ordered list based on service order
+                var ordered: [Hymn] = []
+                for serviceHymn in serviceHymns {
+                    if let hymn = filtered.first(where: { $0.id == serviceHymn.hymnId }) {
+                        ordered.append(hymn)
                     }
                 }
+                return ordered
+            } else {
+                return filtered.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
+            }
+        }
+    }
+    
+    var body: some View {
+        VStack {
+            // Toolbar
+            HStack {
+                if !isMultiSelectMode {
+                    Button("Add", action: onAddNew)
+                        .foregroundColor(.accentColor)
+                } else {
+                    // Multi-select mode buttons
+                    HStack(spacing: 12) {
+                        if selectedHymnsForDelete.count == filteredHymns.count && !filteredHymns.isEmpty {
+                            Button(NSLocalizedString("btn.deselect_all", comment: "Deselect All")) {
+                                selectedHymnsForDelete.removeAll()
+                            }
+                            .foregroundColor(.accentColor)
+                        } else if !filteredHymns.isEmpty {
+                            Button("\(NSLocalizedString("btn.select_all", comment: "Select All")) (\(filteredHymns.count))") {
+                                selectedHymnsForDelete = Set(filteredHymns.map { $0.id })
+                            }
+                            .foregroundColor(.accentColor)
+                        }
+                    }
+                }
+                
+                Spacer()
+                
+                Button(isMultiSelectMode ? "Done" : "Select") {
+                    isMultiSelectMode.toggle()
+                    if !isMultiSelectMode {
+                        selectedHymnsForDelete.removeAll()
+                    }
+                }
+                
+                if isMultiSelectMode && !selectedHymnsForDelete.isEmpty {
+                    Button("Delete Selected (\(selectedHymnsForDelete.count))") {
+                        showingBatchDeleteConfirmation = true
+                    }
+                    .foregroundColor(.red)
+                }
+            }
+            .padding()
+            
+            // Sort options picker (only show when not in multi-select mode)
+            if !isMultiSelectMode {
+                Picker(NSLocalizedString("sort.by", comment: "Sort by picker"), selection: $sortOption) {
+                    ForEach(SortOption.allCases) { option in
+                        Text(option.rawValue).tag(option as SortOption)
+                    }
+                }
+                .pickerStyle(SegmentedPickerStyle())
+                .padding(.horizontal, 12)
+                .padding(.bottom, 8)
+                
+                Divider()
             }
             
-            // If not JSON, treat as plain text
-            return .plainText
+            // Error display
+            if let error = hymnService.error {
+                HStack {
+                    Image(systemName: "exclamationmark.triangle")
+                        .foregroundColor(.orange)
+                    Text(error.localizedDescription)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Button("Dismiss") {
+                        hymnService.clearError()
+                    }
+                    .font(.caption)
+                }
+                .padding(.horizontal)
+                .padding(.vertical, 8)
+                .background(Color(.secondarySystemBackground))
+            }
             
-        } catch {
-            // If we can't read the file, default to plain text
-            return .plainText
-        }
-    }
-    
-    private func getSpecificFileError(_ error: NSError) -> ImportError {
-        switch error.code {
-        case NSFileReadNoPermissionError:
-            return .permissionDenied
-        case NSFileReadNoSuchFileError:
-            return .fileNotFound
-        case NSFileReadCorruptFileError:
-            return .corruptedData("File appears to be corrupted")
-        case NSFileReadInapplicableStringEncodingError:
-            return .invalidFormat("File encoding is not supported. Please ensure the file uses UTF-8 encoding.")
-        case NSFileReadTooLargeError:
-            return .fileReadFailed("File is too large to read")
-        case NSFileReadUnknownStringEncodingError:
-            return .invalidFormat("Unknown file encoding. Please ensure the file uses UTF-8 encoding.")
-        default:
-            return .fileReadFailed(error.localizedDescription)
-        }
-    }
-    
-    // MARK: - File Exporter Helpers
-    
-    private var exportDocument: some FileDocument {
-        struct ExportDoc: FileDocument {
-            static var readableContentTypes: [UTType] = [.plainText, .json]
-            var data: Data
-            init(data: Data) { self.data = data }
-            init(configuration: ReadConfiguration) throws { self.data = configuration.file.regularFileContents ?? Data() }
-            func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper { .init(regularFileWithContents: data) }
-        }
-        switch exportType {
-        case .singlePlainText:
-            if let hymn = selected {
-                return ExportDoc(data: (hymn.toPlainText().data(using: .utf8) ?? Data()))
+            // Content
+            if hymnService.isLoading {
+                VStack {
+                    ProgressView()
+                    Text("Loading hymns...")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if hymnService.hymns.isEmpty {
+                VStack(spacing: 16) {
+                    Image(systemName: "music.note")
+                        .font(.system(size: 48))
+                        .foregroundColor(.secondary)
+                    
+                    Text("No Hymns")
+                        .font(.title2)
+                        .fontWeight(.medium)
+                    
+                    Text("Tap 'Add' to create your first hymn")
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                    
+                    Button("Add Hymn", action: onAddNew)
+                        .buttonStyle(.borderedProminent)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding()
+            } else {
+                List(filteredHymns) { hymn in
+                    HymnRowView(
+                        hymn: hymn,
+                        isSelected: selected?.id == hymn.id,
+                        isMarkedForDelete: selectedHymnsForDelete.contains(hymn.id),
+                        isMultiSelectMode: isMultiSelectMode,
+                        onTap: {
+                            if isMultiSelectMode {
+                                if selectedHymnsForDelete.contains(hymn.id) {
+                                    selectedHymnsForDelete.remove(hymn.id)
+                                } else {
+                                    selectedHymnsForDelete.insert(hymn.id)
+                                }
+                            } else {
+                                selected = hymn
+                            }
+                        },
+                        onEdit: {
+                            selected = hymn
+                            editHymn = hymn
+                            showingEdit = true
+                        },
+                        onDelete: {
+                            hymnToDelete = hymn
+                            showingDeleteConfirmation = true
+                        },
+                        onPresent: { onPresent(hymn) }
+                    )
+                }
+                .searchable(text: $searchText, prompt: "Search hymns...")
             }
-        case .singleJSON:
-            if let hymn = selected, let data = hymn.toJSON(pretty: true) {
-                return ExportDoc(data: data)
-            }
-        case .multipleJSON:
-            let hymnsToExport = hymns.filter { selectedHymnsForExport.contains($0.id) }
-            if let data = Hymn.arrayToJSON(hymnsToExport, pretty: true) {
-                return ExportDoc(data: data)
-            }
-        case .batchJSON:
-            if let data = Hymn.arrayToJSON(hymns, pretty: true) {
-                return ExportDoc(data: data)
-            }
-        case .none:
-            break
         }
-        return ExportDoc(data: Data())
-    }
-    
-    private var exportContentType: UTType {
-        switch exportType {
-        case .singlePlainText: return .plainText
-        case .singleJSON, .multipleJSON, .batchJSON: return .json
-        default: return .plainText
-        }
-    }
-    
-    private var exportDefaultFilename: String {
-        switch exportType {
-        case .singlePlainText: return (selected?.title ?? NSLocalizedString("nav.song", comment: "Default hymn name")) + ".txt"
-        case .singleJSON: return (selected?.title ?? NSLocalizedString("nav.song", comment: "Default hymn name")) + ".json"
-        case .multipleJSON: return "\(NSLocalizedString("export.selected", comment: "Selected hymns filename"))_Hymns.json"
-        case .batchJSON: return "Hymns.json"
-        default: return NSLocalizedString("btn.export", comment: "Default export filename")
+        .task {
+            if hymnService.hymns.isEmpty && !hymnService.isLoading {
+                await hymnService.loadHymns()
+            }
         }
     }
 }
+
+struct HymnRowView: View {
+    let hymn: Hymn
+    let isSelected: Bool
+    let isMarkedForDelete: Bool
+    let isMultiSelectMode: Bool
+    let onTap: () -> Void
+    let onEdit: () -> Void
+    let onDelete: () -> Void
+    let onPresent: () -> Void
+    
+    var body: some View {
+        HStack {
+            if isMultiSelectMode {
+                Button(action: onTap) {
+                    Image(systemName: isMarkedForDelete ? "checkmark.circle.fill" : "circle")
+                        .foregroundColor(isMarkedForDelete ? .accentColor : .secondary)
+                }
+            }
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(hymn.title.isEmpty ? "Untitled Hymn" : hymn.title)
+                    .font(.headline)
+                    .lineLimit(1)
+                
+                if let author = hymn.author, !author.isEmpty {
+                    Text(author)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                }
+                
+                if let key = hymn.musicalKey, !key.isEmpty {
+                    Text("Key: \(key)")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+            }
+            
+            Spacer()
+            
+            if !isMultiSelectMode {
+                Menu {
+                    Button("Present", action: onPresent)
+                    Button("Edit", action: onEdit)
+                    Button("Delete", role: .destructive, action: onDelete)
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .foregroundColor(.secondary)
+                }
+            }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onTap()
+        }
+        .listRowBackground(isSelected ? Color.accentColor.opacity(0.1) : nil)
+    }
+}
+
+struct HymnToolbarViewNew: View {
+    @ObservedObject var hymnService: HymnService
+    @ObservedObject var serviceService: ServiceService
+    
+    @Binding var selected: Hymn?
+    @Binding var selectedHymnsForDelete: Set<UUID>
+    @Binding var isMultiSelectMode: Bool
+    @Binding var showingEdit: Bool
+    @Binding var newHymn: Hymn?
+    @Binding var hymnToDelete: Hymn?
+    @Binding var showingDeleteConfirmation: Bool
+    @Binding var showingBatchDeleteConfirmation: Bool
+    @Binding var lyricsFontSize: CGFloat
+    
+    // Import/Export bindings
+    @Binding var showingImporter: Bool
+    @Binding var showingExportSelection: Bool
+    @Binding var selectedHymnsForExport: Set<UUID>
+    
+    let openWindow: OpenWindowAction
+    let onPresent: (Hymn) -> Void
+    let onAddNew: () -> Void
+    let onEdit: () -> Void
+    
+    var body: some View {
+        HStack(spacing: 20) {
+            // Primary action buttons - larger icons with labels
+            HStack(spacing: 20) {
+                // Present Button (most important)
+                Button(action: {
+                    if let hymn = selected {
+                        onPresent(hymn)
+                    }
+                }) {
+                    VStack(spacing: 6) {
+                        Image(systemName: "play.circle.fill")
+                            .font(.title)
+                            .foregroundColor(.green)
+                        Text("Present")
+                            .font(.caption)
+                            .foregroundColor(.primary)
+                    }
+                }
+                .disabled(selected == nil)
+                .help("Present selected hymn")
+                
+                // Add Button
+                Button(action: onAddNew) {
+                    VStack(spacing: 6) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title)
+                            .foregroundColor(.blue)
+                        Text("Add")
+                            .font(.caption)
+                            .foregroundColor(.primary)
+                    }
+                }
+                .help("Add new hymn")
+                
+                // Edit Button
+                Button(action: onEdit) {
+                    VStack(spacing: 6) {
+                        Image(systemName: "pencil.circle.fill")
+                            .font(.title)
+                            .foregroundColor(.orange)
+                        Text("Edit")
+                            .font(.caption)
+                            .foregroundColor(.primary)
+                    }
+                }
+                .disabled(selected == nil)
+                .help("Edit selected hymn")
+                
+                // Delete Button
+                Button(action: {
+                    if isMultiSelectMode {
+                        if !selectedHymnsForDelete.isEmpty {
+                            showingBatchDeleteConfirmation = true
+                        }
+                    } else if let hymn = selected {
+                        hymnToDelete = hymn
+                        showingDeleteConfirmation = true
+                    }
+                }) {
+                    VStack(spacing: 6) {
+                        Image(systemName: "trash.circle.fill")
+                            .font(.title)
+                            .foregroundColor(.red)
+                        Text("Delete")
+                            .font(.caption)
+                            .foregroundColor(.primary)
+                    }
+                }
+                .disabled(isMultiSelectMode ? selectedHymnsForDelete.isEmpty : selected == nil)
+                .help(isMultiSelectMode ? "Delete selected hymns" : "Delete selected hymn")
+            }
+            
+            Spacer()
+            
+            // Secondary actions with labels
+            HStack(spacing: 16) {
+                // Import Button
+                Button(action: {
+                    showingImporter = true
+                }) {
+                    VStack(spacing: 6) {
+                        Image(systemName: "square.and.arrow.down.fill")
+                            .font(.title)
+                            .foregroundColor(.purple)
+                        Text("Import")
+                            .font(.caption)
+                            .foregroundColor(.primary)
+                    }
+                }
+                .help("Import hymns from files")
+                
+                // Export Menu with label
+                Menu {
+                    Button("Export Selected") { 
+                        if let hymn = selected {
+                            selectedHymnsForExport = [hymn.id]
+                            showingExportSelection = true
+                        }
+                    }
+                    .disabled(selected == nil)
+                    
+                    Button("Export Multiple") { 
+                        showingExportSelection = true
+                    }
+                    .disabled(hymnService.hymns.isEmpty)
+                    
+                    Button("Export All") { 
+                        selectedHymnsForExport = Set(hymnService.hymns.map { $0.id })
+                        showingExportSelection = true
+                    }
+                    .disabled(hymnService.hymns.isEmpty)
+                } label: {
+                    VStack(spacing: 6) {
+                        Image(systemName: "square.and.arrow.up.fill")
+                            .font(.title)
+                            .foregroundColor(.blue)
+                        Text("Export")
+                            .font(.caption)
+                            .foregroundColor(.primary)
+                    }
+                }
+                .help("Export hymns to files")
+                
+                // External Display Button with label
+                Button(action: {
+                    switch externalDisplayManager.state {
+                    case .disconnected:
+                        break
+                    case .connected:
+                        if let hymn = selected {
+                            do {
+                                try externalDisplayManager.startPresentation(hymn: hymn)
+                            } catch {
+                                print("External display error: \(error)")
+                            }
+                        }
+                    case .presenting:
+                        externalDisplayManager.stopPresentation()
+                    }
+                }) {
+                    VStack(spacing: 6) {
+                        Image(systemName: externalDisplayIconName)
+                            .font(.title)
+                            .foregroundColor(externalDisplayColor)
+                        Text(externalDisplayText)
+                            .font(.caption)
+                            .foregroundColor(.primary)
+                    }
+                }
+                .disabled(externalDisplayManager.state == .disconnected || 
+                         (externalDisplayManager.state == .connected && selected == nil))
+                .help(externalDisplayHelpText)
+                
+                // Font Size Controls with label
+                Menu {
+                    VStack(spacing: 12) {
+                        Text("Font Size: \(Int(lyricsFontSize))")
+                            .font(.headline)
+                        HStack {
+                            Button("-") { 
+                                lyricsFontSize = max(12, lyricsFontSize - 2)
+                            }
+                            .disabled(lyricsFontSize <= 12)
+                            .buttonStyle(.bordered)
+                            
+                            Spacer()
+                            
+                            Button("+") { 
+                                lyricsFontSize = min(32, lyricsFontSize + 2)
+                            }
+                            .disabled(lyricsFontSize >= 32)
+                            .buttonStyle(.bordered)
+                        }
+                    }
+                    .padding()
+                } label: {
+                    VStack(spacing: 6) {
+                        Image(systemName: "textformat.size")
+                            .font(.title)
+                            .foregroundColor(.secondary)
+                        Text("Font Size")
+                            .font(.caption)
+                            .foregroundColor(.primary)
+                    }
+                }
+                .help("Adjust font size")
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+    }
+    
+    // Helper computed properties for external display
+    @EnvironmentObject private var externalDisplayManager: ExternalDisplayManager
+    
+    private var externalDisplayIconName: String {
+        switch externalDisplayManager.state {
+        case .disconnected: return "tv.slash"
+        case .connected: return "tv"
+        case .presenting: return "tv.fill"
+        }
+    }
+    
+    private var externalDisplayColor: Color {
+        switch externalDisplayManager.state {
+        case .disconnected: return .gray
+        case .connected: return .green
+        case .presenting: return .orange
+        }
+    }
+    
+    private var externalDisplayText: String {
+        switch externalDisplayManager.state {
+        case .disconnected: return "No Display"
+        case .connected: return "External"
+        case .presenting: return "Stop External"
+        }
+    }
+    
+    private var externalDisplayHelpText: String {
+        switch externalDisplayManager.state {
+        case .disconnected: return "No external display"
+        case .connected: return "Present to external display"
+        case .presenting: return "Stop external presentation"
+        }
+    }
+}
+
+
