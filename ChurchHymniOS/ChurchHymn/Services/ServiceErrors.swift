@@ -117,3 +117,78 @@ enum WorshipServiceError: LocalizedError, Identifiable, Sendable {
         }
     }
 }
+
+/// Import/Export operation errors with detailed user feedback
+enum ImportExportError: LocalizedError, Identifiable, Sendable {
+    case fileNotFound(String)
+    case invalidFileFormat(String)
+    case emptyFile(String)
+    case permissionDenied(String)
+    case hymnTitleMissing(String)
+    case fileCorrupted(String)
+    case unexpectedError(String)
+    case invalidJSON(String)
+    case autoDetectionFailed(String)
+    
+    var id: String {
+        switch self {
+        case .fileNotFound: return "fileNotFound"
+        case .invalidFileFormat: return "invalidFileFormat"
+        case .emptyFile: return "emptyFile"
+        case .permissionDenied: return "permissionDenied"
+        case .hymnTitleMissing: return "hymnTitleMissing"
+        case .fileCorrupted: return "fileCorrupted"
+        case .unexpectedError: return "unexpectedError"
+        case .invalidJSON: return "invalidJSON"
+        case .autoDetectionFailed: return "autoDetectionFailed"
+        }
+    }
+    
+    var errorDescription: String? {
+        switch self {
+        case .fileNotFound(let filename):
+            return NSLocalizedString("msg.file_not_found", comment: "File not found error") + ": \(filename)"
+        case .invalidFileFormat(let format):
+            return NSLocalizedString("msg.invalid_file_format", comment: "Invalid file format error") + ": \(format)"
+        case .emptyFile(let filename):
+            return NSLocalizedString("msg.file_empty", comment: "Empty file error") + ": \(filename)"
+        case .permissionDenied(let filename):
+            return NSLocalizedString("msg.permission_denied", comment: "Permission denied error") + ": \(filename)"
+        case .hymnTitleMissing(let details):
+            return NSLocalizedString("msg.hymn_missing_title", comment: "Hymn title missing error") + ": \(details)"
+        case .fileCorrupted(let filename):
+            return NSLocalizedString("msg.file_corrupted", comment: "File corrupted error") + ": \(filename)"
+        case .unexpectedError(let details):
+            return NSLocalizedString("msg.unexpected_error", comment: "Unexpected error") + ": \(details)"
+        case .invalidJSON(let details):
+            return NSLocalizedString("msg.invalid_file_format", comment: "Invalid JSON format") + ": \(details)"
+        case .autoDetectionFailed(let filename):
+            return NSLocalizedString("msg.auto_detection_failed", comment: "Auto detection failed") + ": \(filename)"
+        }
+    }
+    
+    var detailedErrorDescription: String {
+        let baseError = errorDescription ?? "Unknown error"
+        let recovery = recoverySuggestion ?? ""
+        return recovery.isEmpty ? baseError : "\(baseError)\n\n\(recovery)"
+    }
+    
+    var recoverySuggestion: String? {
+        switch self {
+        case .fileNotFound:
+            return NSLocalizedString("error.ensure_file_exists", comment: "File not found recovery")
+        case .invalidFileFormat, .invalidJSON:
+            return NSLocalizedString("error.check_format_docs", comment: "Invalid format recovery")
+        case .emptyFile:
+            return NSLocalizedString("error.select_file_with_data", comment: "Empty file recovery")
+        case .permissionDenied:
+            return NSLocalizedString("error.try_different_file", comment: "Permission denied recovery")
+        case .hymnTitleMissing:
+            return NSLocalizedString("error.add_titles", comment: "Missing titles recovery")
+        case .fileCorrupted:
+            return NSLocalizedString("error.try_different_file_damaged", comment: "Corrupted file recovery")
+        case .unexpectedError, .autoDetectionFailed:
+            return NSLocalizedString("error.try_again_contact_support", comment: "Unexpected error recovery")
+        }
+    }
+}

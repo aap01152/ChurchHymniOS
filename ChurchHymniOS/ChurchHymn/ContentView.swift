@@ -49,6 +49,14 @@ struct ContentView: View {
     @State private var importPreview: ImportPreview?
     @State private var exportHymns: [Hymn] = []
     
+    // Alert states for import/export
+    @State private var importError: ImportExportError?
+    @State private var showingImportErrorAlert = false
+    @State private var importSuccessMessage: String?
+    @State private var showingImportSuccessAlert = false
+    @State private var exportSuccessMessage: String?
+    @State private var showingExportSuccessAlert = false
+    
     // Font size state
     @State private var lyricsFontSize: CGFloat = 16
     
@@ -99,6 +107,21 @@ struct ContentView: View {
             }
         } message: {
             Text("Are you sure you want to delete \(selectedHymnsForDelete.count) hymns?")
+        }
+        .alert(NSLocalizedString("alert.import_error", comment: "Import error alert title"), isPresented: $showingImportErrorAlert, presenting: importError) { error in
+            Button(NSLocalizedString("btn.ok", comment: "OK button")) { }
+        } message: { error in
+            Text(error.detailedErrorDescription)
+        }
+        .alert(NSLocalizedString("alert.import_successful", comment: "Import success alert title"), isPresented: $showingImportSuccessAlert) {
+            Button(NSLocalizedString("btn.ok", comment: "OK button")) { }
+        } message: {
+            Text(importSuccessMessage ?? NSLocalizedString("msg.hymn_imported_successfully", comment: "Default import success message"))
+        }
+        .alert("Export Successful", isPresented: $showingExportSuccessAlert) {
+            Button(NSLocalizedString("btn.ok", comment: "OK button")) { }
+        } message: {
+            Text(exportSuccessMessage ?? "Hymns exported successfully")
         }
         .sheet(isPresented: $showingEdit) {
             if let hymn = editHymn ?? newHymn {
@@ -153,12 +176,26 @@ struct ContentView: View {
                     importManager: manager,
                     onComplete: { success in
                         showingImportPreview = false
-                        importPreview = nil
                         if success {
+                            // Show success alert with statistics
+                            let totalHymns = preview.hymns.count + preview.duplicates.count
+                            let newHymns = preview.hymns.count
+                            let duplicates = totalHymns - newHymns
+                            
+                            var message = "Successfully imported \(newHymns) new hymn(s)"
+                            if duplicates > 0 {
+                                message += ", \(duplicates) duplicate(s) skipped"
+                            }
+                            message += " from \(preview.fileName)"
+                            
+                            importSuccessMessage = message
+                            showingImportSuccessAlert = true
+                            
                             Task {
                                 await hymnService?.loadHymns()
                             }
                         }
+                        importPreview = nil
                     }
                 )
             }
@@ -497,11 +534,18 @@ struct ContentView: View {
                     if let preview = importResult.preview {
                         importPreview = preview
                         showingImportPreview = true
+                    } else if !importResult.errors.isEmpty {
+                        // Show import error alert
+                        importError = convertToImportExportError(ImportResultError(messages: importResult.errors))
+                        showingImportErrorAlert = true
                     }
                 }
                 
             case .failure(let error):
-                print("Import failed: \(error)")
+                await MainActor.run {
+                    importError = ImportExportError.unexpectedError(error.localizedDescription)
+                    showingImportErrorAlert = true
+                }
             }
         }
     }
@@ -512,11 +556,57 @@ struct ContentView: View {
             case .success(let url):
                 guard let manager = importExportManager else { return }
                 let success = await manager.exportHymns(exportHymns, to: url, format: exportFormat)
-                print(success ? "Export completed successfully" : "Export failed")
+                
+                await MainActor.run {
+                    if success {
+                        let count = exportHymns.count
+                        let hymnWord = count == 1 ? NSLocalizedString("service.hymn_single", comment: "hymn") : NSLocalizedString("service.hymn_plural", comment: "hymns")
+                        exportSuccessMessage = "Successfully exported \(count) \(hymnWord) to \(url.lastPathComponent)"
+                        showingExportSuccessAlert = true
+                    } else {
+                        importError = ImportExportError.unexpectedError("Failed to export hymns")
+                        showingImportErrorAlert = true
+                    }
+                }
                 
             case .failure(let error):
-                print("Export failed: \(error)")
+                await MainActor.run {
+                    importError = ImportExportError.permissionDenied(error.localizedDescription)
+                    showingImportErrorAlert = true
+                }
             }
+        }
+    }
+    
+    // Helper error type for import results
+    private struct ImportResultError: Error {
+        let messages: [String]
+        
+        var localizedDescription: String {
+            messages.joined(separator: "\n")
+        }
+    }
+    
+    // Helper function to convert error types to ImportExportError
+    private func convertToImportExportError(_ error: Error) -> ImportExportError {
+        let errorString = error.localizedDescription.lowercased()
+        
+        if errorString.contains("file not found") || errorString.contains("no such file") {
+            return ImportExportError.fileNotFound(error.localizedDescription)
+        } else if errorString.contains("permission") || errorString.contains("access") {
+            return ImportExportError.permissionDenied(error.localizedDescription)
+        } else if errorString.contains("empty") {
+            return ImportExportError.emptyFile(error.localizedDescription)
+        } else if errorString.contains("format") || errorString.contains("invalid") {
+            return ImportExportError.invalidFileFormat(error.localizedDescription)
+        } else if errorString.contains("json") {
+            return ImportExportError.invalidJSON(error.localizedDescription)
+        } else if errorString.contains("title") {
+            return ImportExportError.hymnTitleMissing(error.localizedDescription)
+        } else if errorString.contains("corrupt") {
+            return ImportExportError.fileCorrupted(error.localizedDescription)
+        } else {
+            return ImportExportError.unexpectedError(error.localizedDescription)
         }
     }
     
@@ -530,6 +620,7 @@ struct ContentView: View {
         return "\(suffix).\(exportFormat.fileExtension)"
     }
 }
+
 
 
 // MARK: - Loading View for Services
@@ -572,6 +663,11 @@ struct HymnListViewNew: View {
     @State private var searchText = ""
     @State private var sortOption: SortOption = .title
     @State private var isServiceBarCollapsed = false
+    
+    // Service management alerts
+    @State private var showingClearAllConfirmation = false
+    @State private var showingCompleteServiceConfirmation = false
+    @State private var showingServiceCompletedSuccess = false
     
     enum SortOption: CaseIterable, Identifiable {
         case title
@@ -891,33 +987,56 @@ struct HymnListViewNew: View {
                 await hymnService.loadHymns()
             }
         }
+        // Service Confirmation Alerts
+        .alert(NSLocalizedString("service.clear_all_title", comment: "Clear all hymns title"), isPresented: $showingClearAllConfirmation) {
+            Button(NSLocalizedString("btn.cancel", comment: "Cancel"), role: .cancel) { }
+            Button(NSLocalizedString("service.clear_all", comment: "Clear all"), role: .destructive) {
+                Task {
+                    guard let activeService = serviceService.activeService else { return }
+                    let success = await serviceService.clearAllHymnsFromService(activeService.id)
+                    if success {
+                        print("Successfully cleared all hymns from service")
+                    } else {
+                        print("Failed to clear hymns from service")
+                    }
+                }
+            }
+        } message: {
+            Text(NSLocalizedString("service.clear_all_message", comment: "Clear all confirmation message"))
+        }
+        .alert(NSLocalizedString("service.complete_title", comment: "Complete service title"), isPresented: $showingCompleteServiceConfirmation) {
+            Button(NSLocalizedString("btn.cancel", comment: "Cancel"), role: .cancel) { }
+            Button(NSLocalizedString("service.complete", comment: "Complete"), role: .destructive) {
+                Task {
+                    guard let activeService = serviceService.activeService else { return }
+                    let success = await serviceService.completeService(activeService.id)
+                    if success {
+                        showingServiceCompletedSuccess = true
+                    } else {
+                        print("Failed to complete service")
+                    }
+                }
+            }
+        } message: {
+            Text(NSLocalizedString("service.complete_message", comment: "Complete service confirmation message"))
+        }
+        .alert(NSLocalizedString("service.completed_success_title", comment: "Service completed success title"), isPresented: $showingServiceCompletedSuccess) {
+            Button(NSLocalizedString("btn.ok", comment: "OK button")) { }
+        } message: {
+            Text(NSLocalizedString("service.completed_success_message", comment: "Service completed success message"))
+        }
     }
     
     // MARK: - Service Management Actions
     
     private func clearAllServiceHymns() {
-        Task {
-            guard let activeService = serviceService.activeService else { return }
-            let success = await serviceService.clearAllHymnsFromService(activeService.id)
-            if success {
-                print("Successfully cleared all hymns from service")
-            } else {
-                print("Failed to clear hymns from service")
-            }
-        }
+        showingClearAllConfirmation = true
     }
     
     private func completeActiveService() {
-        Task {
-            guard let activeService = serviceService.activeService else { return }
-            let success = await serviceService.completeService(activeService.id)
-            if success {
-                print("Successfully completed service")
-            } else {
-                print("Failed to complete service")
-            }
-        }
+        showingCompleteServiceConfirmation = true
     }
+    
     
     private func toggleServiceReorderMode() {
         // Switch to service sort when entering reorder mode
@@ -929,6 +1048,7 @@ struct HymnListViewNew: View {
         print("Service management mode toggled")
     }
 }
+
 
 struct HymnRowView: View {
     let hymn: Hymn
