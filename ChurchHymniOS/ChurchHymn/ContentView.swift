@@ -35,6 +35,7 @@ struct ContentView: View {
     
     // Service management states
     @State private var showingServiceManagement = false
+    @State private var isServiceBarCollapsed = false
     
     // Import/Export states
     @State private var importExportManager: ImportExportManager?
@@ -530,6 +531,7 @@ struct ContentView: View {
     }
 }
 
+
 // MARK: - Loading View for Services
 
 struct LoadingServicesView: View {
@@ -569,6 +571,7 @@ struct HymnListViewNew: View {
     
     @State private var searchText = ""
     @State private var sortOption: SortOption = .title
+    @State private var isServiceBarCollapsed = false
     
     enum SortOption: CaseIterable, Identifiable {
         case title
@@ -721,8 +724,33 @@ struct HymnListViewNew: View {
         }
     }
     
+    // Helper computed property for service management bar
+    private var activeServiceHymnCount: Int {
+        guard let activeService = serviceService.activeService else { return 0 }
+        return serviceService.serviceHymns
+            .filter { $0.serviceId == activeService.id }
+            .count
+    }
+    
     var body: some View {
         VStack {
+            // Service Management Bar (when active service exists)
+            if serviceService.activeService != nil {
+                ServiceManagementBar(
+                    activeService: serviceService.activeService,
+                    hymnCount: activeServiceHymnCount,
+                    isCollapsed: $isServiceBarCollapsed,
+                    onClearAll: clearAllServiceHymns,
+                    onCompleteService: completeActiveService,
+                    onReorderToggle: toggleServiceReorderMode,
+                    onManageToggle: toggleServiceManagement
+                )
+                .padding(.horizontal, 12)
+                .padding(.top, 8)
+                
+                Divider()
+            }
+            
             // Toolbar
             HStack {
                 if !isMultiSelectMode {
@@ -863,6 +891,42 @@ struct HymnListViewNew: View {
                 await hymnService.loadHymns()
             }
         }
+    }
+    
+    // MARK: - Service Management Actions
+    
+    private func clearAllServiceHymns() {
+        Task {
+            guard let activeService = serviceService.activeService else { return }
+            let success = await serviceService.clearAllHymnsFromService(activeService.id)
+            if success {
+                print("Successfully cleared all hymns from service")
+            } else {
+                print("Failed to clear hymns from service")
+            }
+        }
+    }
+    
+    private func completeActiveService() {
+        Task {
+            guard let activeService = serviceService.activeService else { return }
+            let success = await serviceService.completeService(activeService.id)
+            if success {
+                print("Successfully completed service")
+            } else {
+                print("Failed to complete service")
+            }
+        }
+    }
+    
+    private func toggleServiceReorderMode() {
+        // Switch to service sort when entering reorder mode
+        sortOption = .service
+        print("Service reorder mode toggled")
+    }
+    
+    private func toggleServiceManagement() {
+        print("Service management mode toggled")
     }
 }
 

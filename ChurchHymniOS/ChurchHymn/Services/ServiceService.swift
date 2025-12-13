@@ -317,6 +317,64 @@ class ServiceService: ObservableObject {
         }
     }
     
+    func clearAllHymnsFromService(_ serviceId: UUID) async -> Bool {
+        guard !isPerformingServiceOperation else { return false }
+        
+        isPerformingServiceOperation = true
+        serviceOperationError = nil
+        
+        do {
+            try await serviceHymnRepository.clearService(serviceId)
+            
+            // Update local array if this is the active service
+            if activeService?.id == serviceId {
+                serviceHymns.removeAll()
+            }
+            
+            isPerformingServiceOperation = false
+            return true
+        } catch {
+            self.serviceOperationError = .invalidServiceConfiguration("Failed to clear hymns from service: \(error.localizedDescription)")
+            isPerformingServiceOperation = false
+            return false
+        }
+    }
+    
+    func completeService(_ serviceId: UUID) async -> Bool {
+        guard !isPerformingServiceOperation else { return false }
+        
+        isPerformingServiceOperation = true
+        serviceOperationError = nil
+        
+        do {
+            // Get the service and mark it as completed
+            if let service = services.first(where: { $0.id == serviceId }) {
+                var updatedService = service
+                updatedService.isCompleted = true
+                updatedService.completedAt = Date()
+                
+                let completedService = try await serviceRepository.updateService(updatedService)
+                
+                // Update local array
+                if let index = services.firstIndex(where: { $0.id == serviceId }) {
+                    services[index] = completedService
+                }
+                
+                // If this was the active service, deactivate it
+                if activeService?.id == serviceId {
+                    await deactivateAllServices()
+                }
+            }
+            
+            isPerformingServiceOperation = false
+            return true
+        } catch {
+            self.serviceOperationError = .invalidServiceConfiguration("Failed to complete service: \(error.localizedDescription)")
+            isPerformingServiceOperation = false
+            return false
+        }
+    }
+    
     // MARK: - Query Operations
     
     func getServicesForDate(_ date: Date) async -> [WorshipService] {

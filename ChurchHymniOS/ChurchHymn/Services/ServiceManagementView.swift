@@ -40,7 +40,11 @@ struct ServiceManagementView: View {
                                     date: Date(),
                                     notes: nil
                                 )
-                                _ = await serviceService.createService(todayService)
+                                let success = await serviceService.createService(todayService)
+                                if success {
+                                    // Automatically activate the newly created service
+                                    await serviceService.setActiveService(todayService)
+                                }
                             }
                         }
                     )
@@ -97,6 +101,14 @@ struct ServiceManagementView: View {
             }
             if hymnService.hymns.isEmpty && !hymnService.isLoading {
                 await hymnService.loadHymns()
+            }
+        }
+        .onChange(of: serviceService.activeService) { _, newActiveService in
+            // Refresh service hymns when active service changes
+            if let activeService = newActiveService {
+                Task {
+                    await serviceService.loadServiceHymns(for: activeService.id)
+                }
             }
         }
     }
@@ -556,6 +568,10 @@ struct ServiceDetailsView: View {
                     }
                 }
             }
+        }
+        .task {
+            // Load service hymns when the details view appears
+            await serviceService.loadServiceHymns(for: service.id)
         }
         .sheet(isPresented: $showingAddHymn) {
             AddHymnToServiceSheet(

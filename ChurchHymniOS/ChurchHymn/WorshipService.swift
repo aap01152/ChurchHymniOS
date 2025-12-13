@@ -15,6 +15,8 @@ class WorshipService: Identifiable, Codable, @unchecked Sendable {
     var title: String
     var date: Date
     var isActive: Bool
+    var isCompleted: Bool
+    var completedAt: Date?
     var notes: String?
     var createdAt: Date
     var updatedAt: Date
@@ -25,6 +27,8 @@ class WorshipService: Identifiable, Codable, @unchecked Sendable {
         title: String,
         date: Date = Date(),
         isActive: Bool = false,
+        isCompleted: Bool = false,
+        completedAt: Date? = nil,
         notes: String? = nil,
         modelVersion: Int = 1
     ) {
@@ -32,6 +36,8 @@ class WorshipService: Identifiable, Codable, @unchecked Sendable {
         self.title = title.trimmingCharacters(in: .whitespacesAndNewlines)
         self.date = date
         self.isActive = isActive
+        self.isCompleted = isCompleted
+        self.completedAt = completedAt
         self.notes = notes?.trimmingCharacters(in: .whitespacesAndNewlines)
         self.createdAt = Date()
         self.updatedAt = Date()
@@ -82,7 +88,7 @@ class WorshipService: Identifiable, Codable, @unchecked Sendable {
 
     // MARK: - Codable Implementation
     enum CodingKeys: String, CodingKey {
-        case id, title, date, isActive, notes, createdAt, updatedAt, modelVersion
+        case id, title, date, isActive, isCompleted, completedAt, notes, createdAt, updatedAt, modelVersion
     }
 
     required convenience init(from decoder: Decoder) throws {
@@ -91,6 +97,8 @@ class WorshipService: Identifiable, Codable, @unchecked Sendable {
         let title = try container.decode(String.self, forKey: .title)
         let date = try container.decode(Date.self, forKey: .date)
         let isActive = try container.decodeIfPresent(Bool.self, forKey: .isActive) ?? false
+        let isCompleted = try container.decodeIfPresent(Bool.self, forKey: .isCompleted) ?? false
+        let completedAt = try container.decodeIfPresent(Date.self, forKey: .completedAt)
         let notes = try container.decodeIfPresent(String.self, forKey: .notes)
         let modelVersion = try container.decodeIfPresent(Int.self, forKey: .modelVersion) ?? 1
         
@@ -99,6 +107,8 @@ class WorshipService: Identifiable, Codable, @unchecked Sendable {
             title: title,
             date: date,
             isActive: isActive,
+            isCompleted: isCompleted,
+            completedAt: completedAt,
             notes: notes,
             modelVersion: modelVersion
         )
@@ -118,6 +128,8 @@ class WorshipService: Identifiable, Codable, @unchecked Sendable {
         try container.encode(title, forKey: .title)
         try container.encode(date, forKey: .date)
         try container.encode(isActive, forKey: .isActive)
+        try container.encode(isCompleted, forKey: .isCompleted)
+        try container.encodeIfPresent(completedAt, forKey: .completedAt)
         try container.encodeIfPresent(notes, forKey: .notes)
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(updatedAt, forKey: .updatedAt)
