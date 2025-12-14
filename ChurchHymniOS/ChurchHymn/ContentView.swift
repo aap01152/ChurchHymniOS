@@ -13,6 +13,9 @@ struct ContentView: View {
     @State private var serviceService: ServiceService?
     @State private var servicesInitialized = false
     
+    // Help system
+    @StateObject private var helpSystem = HelpSystem()
+    
     // Core state
     @State private var selected: Hymn? = nil
     @State private var newHymn: Hymn? = nil
@@ -215,6 +218,9 @@ struct ContentView: View {
                 )
             }
         }
+        .sheet(isPresented: $helpSystem.isHelpSheetPresented) {
+            HelpSheetView(helpSystem: helpSystem)
+        }
     }
     
     // MARK: - Layout Components
@@ -234,6 +240,7 @@ struct ContentView: View {
                 showingDeleteConfirmation: $showingDeleteConfirmation,
                 showingBatchDeleteConfirmation: $showingBatchDeleteConfirmation,
                 newHymn: $newHymn,
+                helpSystem: helpSystem,
                 onPresent: onPresentHymn,
                 onAddNew: addNewHymn,
                 onEdit: editCurrentHymn
@@ -273,6 +280,7 @@ struct ContentView: View {
                 showingDeleteConfirmation: $showingDeleteConfirmation,
                 showingBatchDeleteConfirmation: $showingBatchDeleteConfirmation,
                 newHymn: $newHymn,
+                helpSystem: helpSystem,
                 onPresent: onPresentHymn,
                 onAddNew: addNewHymn,
                 onEdit: editCurrentHymn
@@ -323,6 +331,7 @@ struct ContentView: View {
                 showingImporter: $showingImporter,
                 showingExportSelection: $showingExportSelection,
                 selectedHymnsForExport: $selectedHymnsForExport,
+                helpSystem: helpSystem,
                 openWindow: openWindow,
                 onPresent: onPresentHymn,
                 onAddNew: addNewHymn,
@@ -359,6 +368,7 @@ struct ContentView: View {
                 showingImporter: $showingImporter,
                 showingExportSelection: $showingExportSelection,
                 selectedHymnsForExport: $selectedHymnsForExport,
+                helpSystem: helpSystem,
                 openWindow: openWindow,
                 onPresent: onPresentHymn,
                 onAddNew: addNewHymn,
@@ -656,6 +666,8 @@ struct HymnListViewNew: View {
     @Binding var showingBatchDeleteConfirmation: Bool
     @Binding var newHymn: Hymn?
     
+    @ObservedObject var helpSystem: HelpSystem
+    
     let onPresent: (Hymn) -> Void
     let onAddNew: () -> Void
     let onEdit: () -> Void
@@ -944,8 +956,15 @@ struct HymnListViewNew: View {
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
                     
-                    Button("Add Hymn", action: onAddNew)
-                        .buttonStyle(.borderedProminent)
+                    HStack(spacing: 12) {
+                        Button("Add Hymn", action: onAddNew)
+                            .buttonStyle(.borderedProminent)
+                        
+                        Button("Get Help") {
+                            helpSystem.showHelp(for: .addingFirstHymn)
+                        }
+                        .buttonStyle(.bordered)
+                    }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding()
@@ -1128,6 +1147,9 @@ struct HymnToolbarViewNew: View {
     @Binding var showingExportSelection: Bool
     @Binding var selectedHymnsForExport: Set<UUID>
     
+    // Help system
+    @ObservedObject var helpSystem: HelpSystem
+    
     let openWindow: OpenWindowAction
     let onPresent: (Hymn) -> Void
     let onAddNew: () -> Void
@@ -1211,9 +1233,17 @@ struct HymnToolbarViewNew: View {
             // Secondary actions with labels
             HStack(spacing: 16) {
                 // Import Button
-                Button(action: {
-                    showingImporter = true
-                }) {
+                Menu {
+                    Button("Import Files") {
+                        showingImporter = true
+                    }
+                    
+                    Divider()
+                    
+                    Button("Import Help") {
+                        helpSystem.showHelp(for: .importingHymns)
+                    }
+                } label: {
                     VStack(spacing: 6) {
                         Image(systemName: "square.and.arrow.down.fill")
                             .font(.title)
@@ -1245,6 +1275,12 @@ struct HymnToolbarViewNew: View {
                         showingExportSelection = true
                     }
                     .disabled(hymnService.hymns.isEmpty)
+                    
+                    Divider()
+                    
+                    Button("Export Help") {
+                        helpSystem.showHelp(for: .exportingHymns)
+                    }
                 } label: {
                     VStack(spacing: 6) {
                         Image(systemName: "square.and.arrow.up.fill")
@@ -1320,6 +1356,14 @@ struct HymnToolbarViewNew: View {
                     }
                 }
                 .help("Adjust font size")
+                
+                // Help Button (iPad only)
+                if UIDevice.current.userInterfaceIdiom == .pad {
+                    HelpButton(
+                        helpSystem: helpSystem,
+                        context: getHelpContext()
+                    )
+                }
             }
         }
         .padding(.horizontal, 20)
@@ -1359,6 +1403,22 @@ struct HymnToolbarViewNew: View {
         case .connected: return "Present to external display"
         case .presenting: return "Stop external presentation"
         }
+    }
+    
+    // Helper method to determine contextual help
+    private func getHelpContext() -> HelpContext? {
+        if isMultiSelectMode {
+            return .multiSelectMode
+        } else if selected != nil {
+            return .hymnSelected
+        } else if hymnService.hymns.isEmpty {
+            return .emptyHymnList
+        } else if externalDisplayManager.state != .disconnected {
+            return .externalDisplay
+        } else if serviceService.activeService != nil {
+            return .serviceManagement
+        }
+        return nil
     }
 }
 
