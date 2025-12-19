@@ -869,12 +869,9 @@ struct HymnListViewNew: View {
                 Divider()
             }
             
-            // Toolbar
-            HStack {
-                if !isMultiSelectMode {
-                    Button("Add", action: onAddNew)
-                        .foregroundColor(.accentColor)
-                } else {
+            // Multi-select mode toolbar (only shown when in selection mode)
+            if isMultiSelectMode {
+                HStack {
                     // Multi-select mode buttons
                     HStack(spacing: 12) {
                         if selectedHymnsForDelete.count == filteredHymns.count && !filteredHymns.isEmpty {
@@ -889,25 +886,23 @@ struct HymnListViewNew: View {
                             .foregroundColor(.accentColor)
                         }
                     }
-                }
-                
-                Spacer()
-                
-                Button(isMultiSelectMode ? "Done" : "Select") {
-                    isMultiSelectMode.toggle()
-                    if !isMultiSelectMode {
+                    
+                    Spacer()
+                    
+                    Button("Done") {
+                        isMultiSelectMode = false
                         selectedHymnsForDelete.removeAll()
                     }
-                }
-                
-                if isMultiSelectMode && !selectedHymnsForDelete.isEmpty {
-                    Button("Delete Selected (\(selectedHymnsForDelete.count))") {
-                        showingBatchDeleteConfirmation = true
+                    
+                    if !selectedHymnsForDelete.isEmpty {
+                        Button("Delete Selected (\(selectedHymnsForDelete.count))") {
+                            showingBatchDeleteConfirmation = true
+                        }
+                        .foregroundColor(.red)
                     }
-                    .foregroundColor(.red)
                 }
+                .padding()
             }
-            .padding()
             
             // Sort options picker (only show when not in multi-select mode)
             if !isMultiSelectMode {
@@ -961,7 +956,7 @@ struct HymnListViewNew: View {
                         .font(.title2)
                         .fontWeight(.medium)
                     
-                    Text("Tap 'Add' to create your first hymn")
+                    Text("Use the toolbar to add your first hymn")
                         .font(.body)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -1005,7 +1000,18 @@ struct HymnListViewNew: View {
                             hymnToDelete = hymn
                             showingDeleteConfirmation = true
                         },
-                        onPresent: { onPresent(hymn) }
+                        onPresent: { onPresent(hymn) },
+                        onLongPress: {
+                            // Enter selection mode on long press
+                            if !isMultiSelectMode {
+                                // Provide haptic feedback
+                                let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+                                impactFeedback.impactOccurred()
+                                
+                                isMultiSelectMode = true
+                                selectedHymnsForDelete.insert(hymn.id)
+                            }
+                        }
                     )
                 }
                 .searchable(text: $searchText, prompt: "Search hymns...")
@@ -1088,6 +1094,7 @@ struct HymnRowView: View {
     let onEdit: () -> Void
     let onDelete: () -> Void
     let onPresent: () -> Void
+    let onLongPress: () -> Void
     
     var body: some View {
         HStack {
@@ -1133,6 +1140,9 @@ struct HymnRowView: View {
         .contentShape(Rectangle())
         .onTapGesture {
             onTap()
+        }
+        .onLongPressGesture {
+            onLongPress()
         }
         .listRowBackground(isSelected ? Color.accentColor.opacity(0.1) : nil)
     }
@@ -1243,17 +1253,9 @@ struct HymnToolbarViewNew: View {
             // Secondary actions with labels
             HStack(spacing: 16) {
                 // Import Button
-                Menu {
-                    Button("Import Files") {
-                        showingImporter = true
-                    }
-                    
-                    Divider()
-                    
-                    Button("Import Help") {
-                        helpSystem.showHelp(for: .importingHymns)
-                    }
-                } label: {
+                Button(action: {
+                    showingImporter = true
+                }) {
                     VStack(spacing: 6) {
                         Image(systemName: "square.and.arrow.down.fill")
                             .font(.title)
@@ -1355,21 +1357,8 @@ struct HymnToolbarViewNew: View {
                     VStack(spacing: 12) {
                         Text("Font Size: \(Int(lyricsFontSize))")
                             .font(.headline)
-                        HStack {
-                            Button("-") { 
-                                lyricsFontSize = max(12, lyricsFontSize - 2)
-                            }
-                            .disabled(lyricsFontSize <= 12)
-                            .buttonStyle(.bordered)
-                            
-                            Spacer()
-                            
-                            Button("+") { 
-                                lyricsFontSize = min(32, lyricsFontSize + 2)
-                            }
-                            .disabled(lyricsFontSize >= 32)
-                            .buttonStyle(.bordered)
-                        }
+                        
+                        Slider(value: $lyricsFontSize, in: 12...32, step: 1)
                     }
                     .padding()
                 } label: {
