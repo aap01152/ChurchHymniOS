@@ -23,7 +23,7 @@ struct HymnEditView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: 32) {
                     // Header section with basic info
                     VStack(alignment: .leading, spacing: 16) {
                         Text(NSLocalizedString("form.hymn_details", comment: "Hymn details section title"))
@@ -83,15 +83,6 @@ struct HymnEditView: View {
                                 }
                             }
                             
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text(NSLocalizedString("form.copyright", comment: "Copyright field label"))
-                                    .font(.headline)
-                                    .foregroundColor(.primary)
-                                
-                                TextField(NSLocalizedString("placeholder.copyright", comment: "Copyright placeholder"), text: $hymn.copyright.unwrap(or: ""))
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    .font(.body)
-                            }
                             
                             VStack(alignment: .leading, spacing: 8) {
                                 Text(NSLocalizedString("form.tags", comment: "Tags field label"))
@@ -116,7 +107,7 @@ struct HymnEditView: View {
                         
                         TextEditor(text: $hymn.lyrics.unwrap(or: ""))
                             .font(.system(.body, design: .monospaced))
-                            .frame(minHeight: 300)
+                            .frame(minHeight: 400, maxHeight: 600)
                             .padding(16)
                             .background(Color(.systemGray6))
                             .cornerRadius(12)
@@ -136,8 +127,20 @@ struct HymnEditView: View {
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .font(.body)
                     }
+                    
+                    // Copyright section (moved to bottom)
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text(NSLocalizedString("form.copyright", comment: "Copyright field label"))
+                            .font(.title)
+                            .fontWeight(.bold)
+                        
+                        TextField(NSLocalizedString("placeholder.copyright", comment: "Copyright placeholder"), text: $hymn.copyright.unwrap(or: ""))
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .font(.body)
+                    }
                 }
-                .padding(24)
+                .padding(.horizontal, 32)
+                .padding(.vertical, 24)
             }
             .navigationTitle(NSLocalizedString("nav.edit_hymn", comment: "Edit hymn navigation title"))
             .navigationBarTitleDisplayMode(.inline)
@@ -160,6 +163,8 @@ struct HymnEditView: View {
                 }
             }
         }
+        .frame(minWidth: 500, minHeight: 700)
+        .frame(idealWidth: 600, idealHeight: 800)
     }
 }
 

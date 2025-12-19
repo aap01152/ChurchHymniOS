@@ -126,7 +126,14 @@ struct ContentView: View {
         } message: {
             Text(exportSuccessMessage ?? "Hymns exported successfully")
         }
-        .sheet(isPresented: $showingEdit) {
+        .sheet(isPresented: $showingEdit, onDismiss: {
+            // Clean up state when sheet is dismissed without saving
+            if newHymn != nil {
+                newHymn = nil
+                selected = nil
+            }
+            editHymn = nil
+        }) {
             if let hymn = editHymn ?? newHymn {
                 HymnEditView(hymn: hymn) { savedHymn in
                     Task {
@@ -459,6 +466,7 @@ struct ContentView: View {
     private func addNewHymn() {
         let hymn = Hymn(title: "")
         newHymn = hymn
+        editHymn = nil // Clear any lingering edit hymn state
         selected = hymn
         showingEdit = true
     }
@@ -466,6 +474,7 @@ struct ContentView: View {
     private func editCurrentHymn() {
         if let hymn = selected {
             editHymn = hymn
+            newHymn = nil // Clear any lingering new hymn state
             showingEdit = true
         }
     }
@@ -1196,10 +1205,10 @@ struct HymnToolbarViewNew: View {
                     VStack(spacing: 6) {
                         Image(systemName: "pencil.circle.fill")
                             .font(.title)
-                            .foregroundColor(.orange)
+                            .foregroundColor(selected == nil ? .gray : .orange)
                         Text("Edit")
                             .font(.caption)
-                            .foregroundColor(.primary)
+                            .foregroundColor(selected == nil ? .gray : .primary)
                     }
                 }
                 .disabled(selected == nil)
