@@ -299,3 +299,106 @@
 "service.error.invalid_reorder" = "Invalid reorder operation";
 "service.error.service_not_found" = "Service not found";
 "service.error.context_error" = "Database context error";
+
+/* New Navigation Titles */
+"nav.library" = "Library";
+"nav.services" = "Services";
+"nav.service_details" = "Service Details";
+
+/* New Button Labels */
+"btn.create" = "Create";
+"btn.done" = "Done";
+"btn.new_service" = "New Service";
+"btn.add_hymn" = "Add Hymn";
+"btn.activate" = "Activate";
+"btn.details" = "Details";
+"btn.remove" = "Remove";
+"btn.create_service" = "Create Service";
+"btn.create_your_first_service" = "Create Your First Service";
+"btn.add_first_hymn" = "Add First Hymn";
+"btn.import_files" = "Import Files";
+"btn.import_help" = "Import Help";
+"btn.export_help" = "Export Help";
+"btn.export_selected" = "Export Selected";
+"btn.export_multiple" = "Export Multiple";
+"btn.export_all" = "Export All";
+"btn.start_worship" = "Start Worship";
+"btn.stop_worship" = "Stop Worship";
+"btn.present" = "Present";
+"btn.stop_presentation" = "Stop Presentation";
+"btn.stop_first" = "Stop First";
+
+/* Status Messages */
+"status.no_external_display" = "No External Display";
+"status.external_display_ready" = "External Display Ready";
+"status.worship_session_active" = "Worship Session Active";
+"status.present_externally" = "Present Externally";
+"status.ready" = "Ready";
+"status.active" = "Active";
+"status.live" = "LIVE";
+"status.active_service" = "Active Service";
+"status.no_active_service" = "No Active Service";
+"status.no_display" = "No Display";
+
+/* Content States */
+"content.no_content" = "No Content";
+"content.loading_services" = "Loading Services...";
+"content.loading_hymns" = "Loading hymns...";
+"content.no_hymns" = "No Hymns";
+"content.no_hymns_available" = "No hymns available";
+"content.no_services_created" = "No services created yet";
+"content.no_hymns_added" = "No hymns added yet";
+
+/* User Guidance */
+"guidance.tap_add_first_hymn" = "Tap 'Add' to create your first hymn";
+"guidance.create_service_to_start" = "Create or activate a service to start managing hymns for worship";
+"guidance.add_hymns_to_service" = "Add hymns to this service to organize worship music";
+"guidance.add_hymns_first" = "Please add some hymns first before creating services";
+"guidance.drag_to_reorder" = "Drag hymns to reorder";
+"guidance.no_help_topics" = "No help topics found";
+"guidance.try_different_search" = "Try different search terms or browse categories";
+"guidance.search_results" = "Search Results";
+"guidance.related_topics" = "Related Topics";
+
+/* Alert Titles */
+"alert.worship_session_error" = "Worship Session Error";
+"alert.export_successful" = "Export Successful";
+
+/* Form Labels */
+"form.service_title" = "Service Title";
+"form.notes_optional" = "Notes (Optional)";
+"placeholder.search_help" = "Search help topics...";
+"form.resolution" = "Resolution";
+"form.format" = "Format";
+"form.date" = "Date";
+
+/* Worship Session Interface */
+"worship.no_external_display" = "No External Display";
+"worship.ready_for_worship" = "Ready for Worship";
+"worship.individual_presentation" = "Individual Presentation";
+"worship.connect_projector" = "Connect a projector to start worship";
+"worship.start_worship_session" = "Start worship session to begin";
+"worship.stop_to_enable" = "Stop to enable worship session";
+"worship.ready_for_hymn" = "Ready for hymn presentation";
+"worship.presenting_hymn" = "Presenting: %@";
+"worship.hymn_being_presented" = "Hymn being presented";
+
+/* Help Text */
+"help.connect_external_first" = "Connect an external display first";
+"help.start_worship_background" = "Start worship session with background display";
+"help.stop_presentation_first" = "Stop current presentation to enable worship session";
+"help.stop_worship_return" = "Stop worship session and return to normal mode";
+
+/* Import/Export Interface */
+"import.preview" = "Import Preview";
+"import.duplicate_resolution" = "Duplicate Resolution";
+"export.hymns" = "Export Hymns";
+"export.auto_detect" = "Auto-detect";
+"export.plain_text" = "Plain Text";
+
+/* Progress Messages */
+"progress.initializing" = "Initializing ChurchHymn...";
+
+/* Worship Background */
+"worship_bg.church_hymn" = "ChurchHymn";
+"worship_bg.session_active" = "Worship Session Active";

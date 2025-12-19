@@ -299,3 +299,106 @@
 "service.error.invalid_reorder" = "Operação de reordenação inválida";
 "service.error.service_not_found" = "Serviço não encontrado";
 "service.error.context_error" = "Erro de contexto da base de dados";
+
+/* New Navigation Titles */
+"nav.library" = "Biblioteca";
+"nav.services" = "Serviços";
+"nav.service_details" = "Detalhes do Serviço";
+
+/* New Button Labels */
+"btn.create" = "Criar";
+"btn.done" = "Terminado";
+"btn.new_service" = "Novo Serviço";
+"btn.add_hymn" = "Adicionar Hino";
+"btn.activate" = "Activar";
+"btn.details" = "Detalhes";
+"btn.remove" = "Remover";
+"btn.create_service" = "Criar Serviço";
+"btn.create_your_first_service" = "Criar o Seu Primeiro Serviço";
+"btn.add_first_hymn" = "Adicionar Primeiro Hino";
+"btn.import_files" = "Importar Ficheiros";
+"btn.import_help" = "Ajuda da Importação";
+"btn.export_help" = "Ajuda da Exportação";
+"btn.export_selected" = "Exportar Seleccionados";
+"btn.export_multiple" = "Exportar Múltiplos";
+"btn.export_all" = "Exportar Todos";
+"btn.start_worship" = "Iniciar Culto";
+"btn.stop_worship" = "Parar Culto";
+"btn.present" = "Apresentar";
+"btn.stop_presentation" = "Parar Apresentação";
+"btn.stop_first" = "Parar Primeiro";
+
+/* Status Messages */
+"status.no_external_display" = "Sem Ecrã Externo";
+"status.external_display_ready" = "Ecrã Externo Pronto";
+"status.worship_session_active" = "Sessão de Culto Activa";
+"status.present_externally" = "Apresentar Externamente";
+"status.ready" = "Pronto";
+"status.active" = "Activo";
+"status.live" = "AO VIVO";
+"status.active_service" = "Serviço Activo";
+"status.no_active_service" = "Sem Serviço Activo";
+"status.no_display" = "Sem Ecrã";
+
+/* Content States */
+"content.no_content" = "Sem Conteúdo";
+"content.loading_services" = "A carregar serviços...";
+"content.loading_hymns" = "A carregar hinos...";
+"content.no_hymns" = "Sem Hinos";
+"content.no_hymns_available" = "Nenhum hino disponível";
+"content.no_services_created" = "Ainda não foram criados serviços";
+"content.no_hymns_added" = "Ainda não foram adicionados hinos";
+
+/* User Guidance */
+"guidance.tap_add_first_hymn" = "Toque em 'Adicionar' para criar o seu primeiro hino";
+"guidance.create_service_to_start" = "Criar ou activar um serviço para começar a gerir hinos para o culto";
+"guidance.add_hymns_to_service" = "Adicionar hinos a este serviço para organizar música de culto";
+"guidance.add_hymns_first" = "Por favor, adicione primeiro alguns hinos antes de criar serviços";
+"guidance.drag_to_reorder" = "Arraste hinos para reordenar";
+"guidance.no_help_topics" = "Nenhum tópico de ajuda encontrado";
+"guidance.try_different_search" = "Tente termos de pesquisa diferentes ou navegue pelas categorias";
+"guidance.search_results" = "Resultados da Pesquisa";
+"guidance.related_topics" = "Tópicos Relacionados";
+
+/* Alert Titles */
+"alert.worship_session_error" = "Erro da Sessão de Culto";
+"alert.export_successful" = "Exportação Bem-sucedida";
+
+/* Form Labels */
+"form.service_title" = "Título do Serviço";
+"form.notes_optional" = "Notas (Opcional)";
+"placeholder.search_help" = "Pesquisar tópicos de ajuda...";
+"form.resolution" = "Resolução";
+"form.format" = "Formato";
+"form.date" = "Data";
+
+/* Worship Session Interface */
+"worship.no_external_display" = "Sem Ecrã Externo";
+"worship.ready_for_worship" = "Pronto para o Culto";
+"worship.individual_presentation" = "Apresentação Individual";
+"worship.connect_projector" = "Conecte um projector para iniciar o culto";
+"worship.start_worship_session" = "Iniciar sessão de culto para começar";
+"worship.stop_to_enable" = "Pare para activar sessão de culto";
+"worship.ready_for_hymn" = "Pronto para apresentação de hino";
+"worship.presenting_hymn" = "A apresentar: %@";
+"worship.hymn_being_presented" = "Hino a ser apresentado";
+
+/* Help Text */
+"help.connect_external_first" = "Conecte primeiro um ecrã externo";
+"help.start_worship_background" = "Iniciar sessão de culto com ecrã de fundo";
+"help.stop_presentation_first" = "Pare a apresentação actual para activar sessão de culto";
+"help.stop_worship_return" = "Parar sessão de culto e voltar ao modo normal";
+
+/* Import/Export Interface */
+"import.preview" = "Pré-visualização da Importação";
+"import.duplicate_resolution" = "Resolução de Duplicados";
+"export.hymns" = "Exportar Hinos";
+"export.auto_detect" = "Detecção Automática";
+"export.plain_text" = "Texto Simples";
+
+/* Progress Messages */
+"progress.initializing" = "A inicializar ChurchHymn...";
+
+/* Worship Background */
+"worship_bg.church_hymn" = "ChurchHymn";
+"worship_bg.session_active" = "Sessão de Culto Activa";
