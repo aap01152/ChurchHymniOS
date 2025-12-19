@@ -61,7 +61,7 @@ struct ContentView: View {
     @State private var showingExportSuccessAlert = false
     
     // Font size state
-    @State private var lyricsFontSize: CGFloat = 16
+    @State private var lyricsFontSize: CGFloat = 24
     
     // Navigation split view visibility state
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
@@ -396,15 +396,9 @@ struct ContentView: View {
     @ViewBuilder
     private func externalDisplayStatusView() -> some View {
         VStack(spacing: 0) {
-            ExternalDisplayStatusBar()
+            ExternalDisplayStatusBar(selectedHymn: selected)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
-            
-            if externalDisplayManager.state == .connected || externalDisplayManager.state == .presenting {
-                ExternalDisplayQuickControls(selectedHymn: selected)
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 8)
-            }
         }
         .background(Color(.systemBackground))
     }

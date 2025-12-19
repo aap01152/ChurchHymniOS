@@ -178,10 +178,12 @@ struct WorshipSessionControls: View {
     
     private var worshipSessionButtonBackgroundColor: Color {
         switch externalDisplayManager.state {
-        case .disconnected, .presenting:
+        case .disconnected:
             return Color.gray.opacity(0.2)
         case .connected:
             return Color.green
+        case .presenting:
+            return Color.orange
         case .worshipMode, .worshipPresenting:
             return Color.red
         }
@@ -189,9 +191,11 @@ struct WorshipSessionControls: View {
     
     private var worshipSessionButtonTextColor: Color {
         switch externalDisplayManager.state {
-        case .disconnected, .presenting:
+        case .disconnected:
             return .gray
         case .connected:
+            return .white
+        case .presenting:
             return .white
         case .worshipMode, .worshipPresenting:
             return .white
@@ -215,9 +219,9 @@ struct WorshipSessionControls: View {
     
     private var canToggleWorshipSession: Bool {
         switch externalDisplayManager.state {
-        case .disconnected, .presenting:
+        case .disconnected:
             return false
-        case .connected, .worshipMode, .worshipPresenting:
+        case .connected, .presenting, .worshipMode, .worshipPresenting:
             return true
         }
     }
@@ -260,6 +264,9 @@ struct WorshipSessionControls: View {
                 switch externalDisplayManager.state {
                 case .connected:
                     try await worshipSessionManager.startWorshipSession()
+                case .presenting:
+                    // Stop individual presentation
+                    externalDisplayManager.stopPresentation()
                 case .worshipMode, .worshipPresenting:
                     await worshipSessionManager.stopWorshipSession()
                 default:

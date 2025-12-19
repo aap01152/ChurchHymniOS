@@ -40,35 +40,6 @@ struct ContentViewModifiers: ViewModifier {
                     onCleanupEmptyHymn()
                 }
             }
-            // Note: Import/Export sheets commented out due to architecture changes
-            // These features are now handled directly in the main ContentView
-            // with the new ImportExportManager integration
-            /*
-            .sheet(isPresented: $showingImportPreview) {
-                if let preview = importPreview {
-                    ImportPreviewView(
-                        preview: preview,
-                        selectedHymns: $selectedHymnsForImport,
-                        duplicateResolution: $duplicateResolution,
-                        onConfirm: onConfirmImport,
-                        onCancel: onCancelImport
-                    )
-                    .presentationDetents([.large])
-                    .presentationDragIndicator(.visible)
-                }
-            }
-            .sheet(isPresented: $showingExportSelection) {
-                ExportSelectionView(
-                    hymns: hymns,
-                    selectedHymns: $selectedHymnsForExport,
-                    exportFormat: $exportFormat,
-                    onConfirm: onConfirmExport,
-                    onCancel: onCancelExport
-                )
-                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
-            }
-            */
             .overlay(
                 Group {
                     if operations.isImporting || operations.isExporting {

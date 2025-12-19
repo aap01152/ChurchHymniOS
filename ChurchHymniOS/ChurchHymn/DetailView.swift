@@ -11,78 +11,53 @@ struct DetailView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Title and metadata
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(alignment: .top) {
+            // Compact title and metadata
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .center) {
                     Text(hymn.title)
-                        .font(.largeTitle)
+                        .font(.title2)
                         .fontWeight(.bold)
+                        .lineLimit(2)
                     
                     Spacer()
                     
-                    HStack(spacing: 16) {
+                    HStack(spacing: 12) {
                         if let number = hymn.songNumber {
-                            HStack(spacing: 4) {
-                                Image(systemName: "number.circle.fill")
-                                    .foregroundColor(.blue.opacity(0.4))
-                                Text("#\(number)")
-                                    .fontWeight(.medium)
-                            }
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                            Text("#\(number)")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                                .foregroundColor(.secondary)
                         }
                         
                         if let key = hymn.musicalKey {
-                            HStack(spacing: 4) {
-                                Image(systemName: "music.note")
-                                    .foregroundColor(.blue.opacity(0.4))
-                                Text(key)
-                                    .fontWeight(.medium)
-                            }
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        }
-                        
-                        if let author = hymn.author {
-                            HStack(spacing: 4) {
-                                Image(systemName: "person.circle.fill")
-                                    .foregroundColor(.blue.opacity(0.4))
-                                Text(author)
-                                    .fontWeight(.medium)
-                            }
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                            Text(key)
+                                .font(.caption)
+                                .fontWeight(.medium)
+                                .foregroundColor(.secondary)
                         }
                     }
                 }
                 
-                if let copyright = hymn.copyright {
-                    HStack(spacing: 4) {
-                        Image(systemName: "c.circle")
-                            .foregroundColor(.blue.opacity(0.4))
+                HStack {
+                    if let author = hymn.author {
+                        Text(author)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    }
+                    
+                    Spacer()
+                    
+                    if let copyright = hymn.copyright {
                         Text(copyright)
-                            .font(.subheadline)
+                            .font(.caption)
                             .foregroundColor(.secondary)
-                    }
-                }
-                
-                if let tags = hymn.tags, !tags.isEmpty {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            ForEach(tags, id: \.self) { tag in
-                                Text(tag)
-                                    .font(.caption)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(Color(.systemGray6))
-                                    .cornerRadius(12)
-                            }
-                        }
-                        .padding(.horizontal, 4)
+                            .lineLimit(1)
                     }
                 }
             }
-            .padding(24)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color(.systemBackground))
             

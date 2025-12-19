@@ -14,6 +14,10 @@ import SwiftUI
 
 struct ExternalDisplayStatusBar: View {
     @EnvironmentObject private var externalDisplayManager: ExternalDisplayManager
+    let selectedHymn: Hymn?
+    
+    @State private var showingErrorAlert = false
+    @State private var errorMessage = ""
     
     var body: some View {
         HStack(spacing: 12) {
@@ -46,6 +50,11 @@ struct ExternalDisplayStatusBar: View {
                 .stroke(statusBorderColor, lineWidth: 1)
         )
         .shadow(color: statusShadowColor, radius: 2, x: 0, y: 1)
+        .alert("External Display Error", isPresented: $showingErrorAlert) {
+            Button("OK") { }
+        } message: {
+            Text(errorMessage)
+        }
     }
     
     @ViewBuilder
@@ -191,16 +200,18 @@ struct ExternalDisplayStatusBar: View {
                 .font(.title3)
                 .foregroundColor(.gray)
         case .connected:
-            // Show ready indicator
-            HStack(spacing: 4) {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.title3)
-                    .foregroundColor(.blue)
-                Text("Ready")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(.blue)
+            // Show Present button
+            Button(action: startExternalPresentation) {
+                HStack(spacing: 6) {
+                    Image(systemName: "play.circle.fill")
+                    Text("Present")
+                }
+                .font(.subheadline)
+                .fontWeight(.medium)
             }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.small)
+            .disabled(selectedHymn == nil)
         case .presenting:
             // Show presentation controls
             HStack(spacing: 8) {
@@ -265,6 +276,17 @@ struct ExternalDisplayStatusBar: View {
                 }
                 .buttonStyle(.plain)
             }
+        }
+    }
+    
+    private func startExternalPresentation() {
+        guard let hymn = selectedHymn else { return }
+        
+        do {
+            try externalDisplayManager.startPresentation(hymn: hymn)
+        } catch {
+            errorMessage = error.localizedDescription
+            showingErrorAlert = true
         }
     }
 }

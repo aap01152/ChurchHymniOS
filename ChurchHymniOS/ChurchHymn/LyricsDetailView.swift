@@ -119,7 +119,7 @@ struct LyricsDetailView: View {
     
     var body: some View {
         ScrollViewReader { proxy in
-            ScrollView(showsIndicators: true) {
+            ScrollView(.vertical, showsIndicators: true) {
                 VStack(alignment: .leading, spacing: 16) {
                     if hymn.lyrics != nil {
                         ForEach(Array(parts.enumerated()), id: \.offset) { index, part in
@@ -158,13 +158,18 @@ struct LyricsDetailView: View {
                                 // Lyrics with enhanced visual feedback
                                 Text(part.lines.joined(separator: "\n"))
                                     .font(.system(size: lyricsFontSize))
-                                    .padding(12)
+                                    .lineSpacing(4)
+                                    .padding(16)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .background(
                                         ZStack {
                                             // Shadow for active presenting verses
                                             shadowStyle(for: index)
-                                            // Main background
+                                            // Main background with subtle border for better definition
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .fill(Color(.systemBackground))
+                                                .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+                                            // Enhanced background for active state
                                             backgroundStyle(for: index)
                                                 .overlay(borderStyle(for: index))
                                         }
@@ -199,18 +204,47 @@ struct LyricsDetailView: View {
                             .frame(maxWidth: .infinity, alignment: .center)
                     }
                 }
-                .padding()
+                .padding(.horizontal, 16)
+                .padding(.vertical, 20)
+                .padding(.bottom, 40) // Extra bottom padding to ensure last verse is fully visible
+            }
+            .background(Color(.systemGroupedBackground))
+            .overlay(alignment: .bottom) {
+                // Subtle gradient to indicate scrollability at bottom
+                LinearGradient(
+                    colors: [Color.clear, Color(.systemGroupedBackground).opacity(0.8)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: 20)
+                .allowsHitTesting(false)
             }
             .onChange(of: currentPresentationIndex) { _, newIndex in
                 if let index = newIndex {
                     // Scroll to the current verse with animation
                     withAnimation(.easeInOut(duration: 0.3)) {
-                        proxy.scrollTo(index, anchor: .center)
+                        proxy.scrollTo(index, anchor: .top)
                     }
                 } else {
                     // When presentation ends, scroll to top
                     withAnimation(.easeInOut(duration: 0.3)) {
                         proxy.scrollTo(0, anchor: .top)
+                    }
+                }
+            }
+            .onChange(of: externalDisplayManager.currentVerseIndex) { _, newVerseIndex in
+                // Auto-scroll to top when verse changes on external display
+                if externalDisplayManager.state.isPresenting {
+                    withAnimation(.easeInOut(duration: 0.4)) {
+                        proxy.scrollTo(newVerseIndex, anchor: .top)
+                    }
+                }
+            }
+            .onChange(of: externalDisplayManager.state) { _, newState in
+                // Auto-scroll when external presentation starts
+                if newState.isPresenting {
+                    withAnimation(.easeInOut(duration: 0.4)) {
+                        proxy.scrollTo(externalDisplayManager.currentVerseIndex, anchor: .top)
                     }
                 }
             }

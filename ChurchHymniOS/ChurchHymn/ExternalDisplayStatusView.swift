@@ -9,16 +9,30 @@ import SwiftUI
 
 struct ExternalDisplayStatusView: View {
     @EnvironmentObject private var externalDisplayManager: ExternalDisplayManager
+    let selectedHymn: Hymn?
+    
+    @State private var showingErrorAlert = false
+    @State private var errorMessage = ""
     
     var body: some View {
         HStack(spacing: 8) {
             statusIcon
             statusText
+            
+            // Add Present button when display is ready
+            if externalDisplayManager.state == .connected {
+                presentButton
+            }
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
         .background(statusBackgroundColor)
         .cornerRadius(6)
+        .alert("External Display Error", isPresented: $showingErrorAlert) {
+            Button("OK") { }
+        } message: {
+            Text(errorMessage)
+        }
     }
     
     private var statusIcon: some View {
@@ -80,6 +94,31 @@ struct ExternalDisplayStatusView: View {
             return Color.purple.opacity(0.1)
         case .worshipPresenting:
             return Color.green.opacity(0.1)
+        }
+    }
+    
+    private var presentButton: some View {
+        Button(action: startExternalPresentation) {
+            HStack(spacing: 4) {
+                Image(systemName: "tv")
+                Text("Present")
+            }
+            .font(.caption)
+            .fontWeight(.medium)
+        }
+        .buttonStyle(.borderedProminent)
+        .controlSize(.small)
+        .disabled(selectedHymn == nil)
+    }
+    
+    private func startExternalPresentation() {
+        guard let hymn = selectedHymn else { return }
+        
+        do {
+            try externalDisplayManager.startPresentation(hymn: hymn)
+        } catch {
+            errorMessage = error.localizedDescription
+            showingErrorAlert = true
         }
     }
 }
