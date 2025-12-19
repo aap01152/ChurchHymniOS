@@ -65,6 +65,16 @@ struct ExternalDisplayStatusBar: View {
                     .font(.title2)
                     .foregroundColor(.green)
                     .symbolEffect(.pulse)
+            case .worshipMode:
+                Image(systemName: "tv.fill")
+                    .font(.title2)
+                    .foregroundColor(.purple)
+                    .symbolEffect(.pulse)
+            case .worshipPresenting:
+                Image(systemName: "tv.fill")
+                    .font(.title2)
+                    .foregroundColor(.green)
+                    .symbolEffect(.pulse)
             }
         }
         .frame(width: 32, height: 32)
@@ -82,6 +92,14 @@ struct ExternalDisplayStatusBar: View {
             } else {
                 return "Presenting to External Display"
             }
+        case .worshipMode:
+            return "Worship Session Active"
+        case .worshipPresenting:
+            if let hymn = externalDisplayManager.currentHymn {
+                return "Worship: \(hymn.title)"
+            } else {
+                return "Worship Session - Presenting"
+            }
         }
     }
     
@@ -97,6 +115,10 @@ struct ExternalDisplayStatusBar: View {
             }
         case .presenting:
             return externalDisplayManager.currentVerseInfo
+        case .worshipMode:
+            return "Showing background - Ready for hymn presentation"
+        case .worshipPresenting:
+            return externalDisplayManager.currentVerseInfo
         }
     }
     
@@ -107,6 +129,10 @@ struct ExternalDisplayStatusBar: View {
         case .connected:
             return .blue
         case .presenting:
+            return .green
+        case .worshipMode:
+            return .purple
+        case .worshipPresenting:
             return .green
         }
     }
@@ -119,6 +145,10 @@ struct ExternalDisplayStatusBar: View {
             return Color.blue.opacity(0.1)
         case .presenting:
             return Color.green.opacity(0.1)
+        case .worshipMode:
+            return Color.purple.opacity(0.1)
+        case .worshipPresenting:
+            return Color.green.opacity(0.1)
         }
     }
     
@@ -130,6 +160,10 @@ struct ExternalDisplayStatusBar: View {
             return Color.blue.opacity(0.3)
         case .presenting:
             return Color.green.opacity(0.3)
+        case .worshipMode:
+            return Color.purple.opacity(0.3)
+        case .worshipPresenting:
+            return Color.green.opacity(0.3)
         }
     }
     
@@ -140,6 +174,10 @@ struct ExternalDisplayStatusBar: View {
         case .connected:
             return Color.blue.opacity(0.1)
         case .presenting:
+            return Color.green.opacity(0.2)
+        case .worshipMode:
+            return Color.purple.opacity(0.2)
+        case .worshipPresenting:
             return Color.green.opacity(0.2)
         }
     }
@@ -184,6 +222,46 @@ struct ExternalDisplayStatusBar: View {
                     Image(systemName: "stop.circle.fill")
                         .font(.title3)
                         .foregroundColor(.red)
+                }
+                .buttonStyle(.plain)
+            }
+        case .worshipMode:
+            // Show worship session active indicator
+            HStack(spacing: 4) {
+                Image(systemName: "infinity.circle.fill")
+                    .font(.title3)
+                    .foregroundColor(.purple)
+                    .symbolEffect(.pulse)
+                Text("Active")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(.purple)
+            }
+        case .worshipPresenting:
+            // Show worship presentation controls
+            HStack(spacing: 8) {
+                Text("\(externalDisplayManager.currentVerseIndex + 1)/\(externalDisplayManager.totalVerses)")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(.green)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 2)
+                    .background(Color.green.opacity(0.2))
+                    .cornerRadius(8)
+                
+                // Preview toggle for iPad
+                if UIDevice.current.userInterfaceIdiom == .pad {
+                    ExternalDisplayPreviewQuickToggle()
+                }
+                
+                Button(action: { 
+                    Task { 
+                        await externalDisplayManager.stopHymnInWorshipMode() 
+                    }
+                }) {
+                    Image(systemName: "stop.circle.fill")
+                        .font(.title3)
+                        .foregroundColor(.orange)
                 }
                 .buttonStyle(.plain)
             }

@@ -348,6 +348,10 @@ struct ExternalDisplayButton: View {
             return "tv"
         case .presenting:
             return "tv.fill"
+        case .worshipMode:
+            return "tv.fill"
+        case .worshipPresenting:
+            return "tv.fill"
         }
     }
     
@@ -358,6 +362,10 @@ struct ExternalDisplayButton: View {
         case .connected:
             return .green
         case .presenting:
+            return .orange
+        case .worshipMode:
+            return .purple
+        case .worshipPresenting:
             return .orange
         }
     }
@@ -370,6 +378,10 @@ struct ExternalDisplayButton: View {
             return "External"
         case .presenting:
             return "Stop External"
+        case .worshipMode:
+            return "Worship"
+        case .worshipPresenting:
+            return "Stop Hymn"
         }
     }
     
@@ -381,6 +393,10 @@ struct ExternalDisplayButton: View {
             return "Present to external display"
         case .presenting:
             return "Stop external presentation"
+        case .worshipMode:
+            return "Present hymn in worship session"
+        case .worshipPresenting:
+            return "Stop hymn presentation (return to worship background)"
         }
     }
     
@@ -391,6 +407,10 @@ struct ExternalDisplayButton: View {
         case .connected:
             return selectedHymn == nil
         case .presenting:
+            return false
+        case .worshipMode:
+            return selectedHymn == nil
+        case .worshipPresenting:
             return false
         }
     }
@@ -403,6 +423,10 @@ struct ExternalDisplayButton: View {
             startExternalPresentation()
         case .presenting:
             externalDisplayManager.stopPresentation()
+        case .worshipMode:
+            startWorshipHymnPresentation()
+        case .worshipPresenting:
+            stopWorshipHymnPresentation()
         }
     }
     
@@ -414,6 +438,27 @@ struct ExternalDisplayButton: View {
         } catch {
             errorMessage = error.localizedDescription
             showingErrorAlert = true
+        }
+    }
+    
+    private func startWorshipHymnPresentation() {
+        guard let hymn = selectedHymn else { return }
+        
+        Task {
+            do {
+                try await externalDisplayManager.presentHymnInWorshipMode(hymn)
+            } catch {
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                    showingErrorAlert = true
+                }
+            }
+        }
+    }
+    
+    private func stopWorshipHymnPresentation() {
+        Task {
+            await externalDisplayManager.stopHymnInWorshipMode()
         }
     }
 }

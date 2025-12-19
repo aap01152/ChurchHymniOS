@@ -33,6 +33,12 @@ struct ExternalDisplayStatusView: View {
             case .presenting:
                 Image(systemName: "tv.fill")
                     .foregroundColor(.green)
+            case .worshipMode:
+                Image(systemName: "tv.fill")
+                    .foregroundColor(.purple)
+            case .worshipPresenting:
+                Image(systemName: "tv.fill")
+                    .foregroundColor(.green)
             }
         }
         .font(.system(size: 16))
@@ -50,6 +56,12 @@ struct ExternalDisplayStatusView: View {
             case .presenting:
                 Text(externalDisplayManager.currentVerseInfo)
                     .foregroundColor(.green)
+            case .worshipMode:
+                Text("Worship Session Active")
+                    .foregroundColor(.purple)
+            case .worshipPresenting:
+                Text(externalDisplayManager.currentVerseInfo)
+                    .foregroundColor(.green)
             }
         }
         .font(.caption)
@@ -63,6 +75,10 @@ struct ExternalDisplayStatusView: View {
         case .connected:
             return Color.blue.opacity(0.1)
         case .presenting:
+            return Color.green.opacity(0.1)
+        case .worshipMode:
+            return Color.purple.opacity(0.1)
+        case .worshipPresenting:
             return Color.green.opacity(0.1)
         }
     }

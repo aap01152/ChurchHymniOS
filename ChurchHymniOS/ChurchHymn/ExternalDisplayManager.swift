@@ -20,6 +20,18 @@ class ExternalDisplayManager: ObservableObject {
     private var externalWindow: UIWindow?
     private var cancellables = Set<AnyCancellable>()
     
+    // MARK: - Worship Session Properties
+    
+    /// Whether currently in worship session mode
+    var isInWorshipMode: Bool {
+        return state.isWorshipSession
+    }
+    
+    /// Whether can start worship session
+    var canStartWorshipMode: Bool {
+        return state.canStartWorshipSession
+    }
+    
     init() {
         setupSceneNotifications()
         checkForExternalDisplays()
@@ -112,7 +124,9 @@ class ExternalDisplayManager: ObservableObject {
             isPresenting = true
             state = .presenting
             
-            updateExternalDisplay()
+            Task {
+                await updateExternalDisplay()
+            }
         } catch {
             throw ExternalDisplayError.presentationFailed(error.localizedDescription)
         }
@@ -137,13 +151,127 @@ class ExternalDisplayManager: ObservableObject {
         }
     }
     
+    // MARK: - Worship Session Methods
+    
+    /// Start worship mode - shows background image on external display
+    func startWorshipMode() async throws {
+        guard state == .connected, let displayInfo = externalDisplayInfo else {
+            throw ExternalDisplayError.noExternalDisplayFound
+        }
+        
+        do {
+            try createExternalWindow(for: displayInfo.scene)
+            state = .worshipMode
+            await showWorshipBackground()
+            print("Worship mode started")
+        } catch {
+            throw ExternalDisplayError.presentationFailed("Failed to start worship mode: \(error.localizedDescription)")
+        }
+    }
+    
+    /// Stop worship mode - return to connected state
+    func stopWorshipMode() async {
+        externalWindow?.isHidden = true
+        externalWindow = nil
+        currentHymn = nil
+        currentVerseIndex = 0
+        isPresenting = false
+        
+        // Return to connected state if display is still connected
+        let externalScenes = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .filter { isExternalDisplay($0) }
+        
+        if !externalScenes.isEmpty {
+            state = .connected
+        } else {
+            state = .disconnected
+        }
+        
+        print("Worship mode stopped")
+    }
+    
+    /// Present hymn within worship session
+    func presentHymnInWorshipMode(_ hymn: Hymn, startingAtVerse: Int = 0) async throws {
+        guard state == .worshipMode, let displayInfo = externalDisplayInfo else {
+            throw ExternalDisplayError.noExternalDisplayFound
+        }
+        
+        do {
+            currentHymn = hymn
+            currentVerseIndex = startingAtVerse
+            isPresenting = true
+            state = .worshipPresenting
+            
+            await updateExternalDisplay()
+            print("Hymn '\(hymn.title)' presented in worship mode")
+        } catch {
+            throw ExternalDisplayError.presentationFailed("Failed to present hymn in worship mode: \(error.localizedDescription)")
+        }
+    }
+    
+    /// Stop hymn presentation within worship session - return to background
+    func stopHymnInWorshipMode() async {
+        guard state == .worshipPresenting else { return }
+        
+        currentHymn = nil
+        currentVerseIndex = 0
+        isPresenting = false
+        state = .worshipMode
+        
+        // Return to worship background
+        await showWorshipBackground()
+        print("Hymn presentation stopped - returned to worship background")
+    }
+    
+    /// Show worship background image on external display
+    private func showWorshipBackground() async {
+        guard let window = externalWindow, state == .worshipMode else { 
+            print("Cannot show worship background: window=\(externalWindow != nil), state=\(state)")
+            return 
+        }
+        
+        print("Showing worship background on external display")
+        
+        let hostingController = UIHostingController(
+            rootView: WorshipBackgroundView(imageName: "serene")
+        )
+        
+        // Configure the hosting controller for optimal external display
+        hostingController.view.backgroundColor = .black
+        hostingController.view.isOpaque = true
+        
+        // Simple transition to background
+        if let currentController = window.rootViewController {
+            UIView.transition(
+                with: window,
+                duration: 0.1,
+                options: [.transitionCrossDissolve],
+                animations: {
+                    window.rootViewController = hostingController
+                },
+                completion: { _ in
+                    print("Worship background displayed successfully")
+                }
+            )
+        } else {
+            // Direct assignment if no current controller
+            window.rootViewController = hostingController
+            print("Worship background displayed successfully")
+        }
+        
+        window.makeKeyAndVisible()
+    }
+    
     func nextVerse() {
         guard let hymn = currentHymn, isPresenting else { return }
         
         let maxIndex = hymn.parts.isEmpty ? 0 : hymn.parts.count - 1
         if currentVerseIndex < maxIndex {
             currentVerseIndex += 1
-            updateExternalDisplay()
+            Task {
+                await updateExternalDisplay()
+            }
         }
     }
     
@@ -152,7 +280,9 @@ class ExternalDisplayManager: ObservableObject {
         
         if currentVerseIndex > 0 {
             currentVerseIndex -= 1
-            updateExternalDisplay()
+            Task {
+                await updateExternalDisplay()
+            }
         }
     }
     
@@ -162,7 +292,9 @@ class ExternalDisplayManager: ObservableObject {
         let maxIndex = hymn.parts.isEmpty ? 0 : hymn.parts.count - 1
         if index >= 0 && index <= maxIndex {
             currentVerseIndex = index
-            updateExternalDisplay()
+            Task {
+                await updateExternalDisplay()
+            }
         }
     }
     
@@ -176,12 +308,15 @@ class ExternalDisplayManager: ObservableObject {
         externalWindow = window
     }
     
-    private func updateExternalDisplay() {
+    private func updateExternalDisplay() async {
         guard let window = externalWindow,
               let hymn = currentHymn,
-              isPresenting else {
+              state.isPresenting else {
+            print("Cannot update external display: window=\(externalWindow != nil), hymn=\(currentHymn != nil), state=\(state)")
             return 
         }
+        
+        print("Updating external display: \(hymn.title), verse \(currentVerseIndex + 1)")
         
         let hostingController = UIHostingController(
             rootView: ExternalPresenterView(
@@ -190,8 +325,29 @@ class ExternalDisplayManager: ObservableObject {
             )
         )
         
+        // Configure the hosting controller for optimal external display
         hostingController.view.backgroundColor = .black
-        window.rootViewController = hostingController
+        hostingController.view.isOpaque = true
+        
+        // Simple transition for hymn presentation
+        if let currentController = window.rootViewController {
+            UIView.transition(
+                with: window,
+                duration: 0.1,
+                options: [.transitionCrossDissolve],
+                animations: {
+                    window.rootViewController = hostingController
+                },
+                completion: { _ in
+                    print("External display updated successfully")
+                }
+            )
+        } else {
+            // Direct assignment if no current controller
+            window.rootViewController = hostingController
+            print("External display updated successfully")
+        }
+        
         window.makeKeyAndVisible()
     }
     

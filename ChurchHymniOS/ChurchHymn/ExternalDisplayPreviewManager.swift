@@ -205,6 +205,16 @@ class ExternalDisplayPreviewManager: ObservableObject {
             }
         case .connected:
             break
+        case .worshipMode:
+            // Show preview when worship session starts
+            if autoShowOnPresentation && !isPreviewVisible {
+                showPreview()
+            }
+        case .worshipPresenting:
+            // Keep preview visible during worship hymn presentation
+            if autoShowOnPresentation && !isPreviewVisible {
+                showPreview()
+            }
         }
     }
 }

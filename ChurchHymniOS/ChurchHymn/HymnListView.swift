@@ -644,7 +644,7 @@ struct HymnListView: View {
                         }
                     } else if isServiceManagementMode {
                         HStack(spacing: 4) {
-                            Image(systemName: "plus.minus.circle")
+                            Image(systemName: "plus.circle")
                                 .font(.caption2)
                                 .foregroundColor(.orange)
                             Text(NSLocalizedString("service.management.instructions", comment: "Service management instructions"))
@@ -917,7 +917,7 @@ struct ServiceManagementBar: View {
                         // Quick Manage button
                         Button(action: onManageToggle) {
                             HStack(spacing: 4) {
-                                Image(systemName: "plus.minus.circle")
+                                Image(systemName: "plus.circle")
                                     .font(.caption)
                                 Text(NSLocalizedString("service.quick_manage", comment: "Quick manage"))
                                     .font(.caption)

@@ -48,6 +48,10 @@ struct ExternalDisplayNavigationIndicator: View {
             return "tv"
         case .presenting:
             return "tv.fill"
+        case .worshipMode:
+            return "tv.fill"
+        case .worshipPresenting:
+            return "tv.fill"
         }
     }
     
@@ -58,6 +62,10 @@ struct ExternalDisplayNavigationIndicator: View {
         case .connected:
             return .blue
         case .presenting:
+            return .green
+        case .worshipMode:
+            return .purple
+        case .worshipPresenting:
             return .green
         }
     }
@@ -70,6 +78,10 @@ struct ExternalDisplayNavigationIndicator: View {
             return "Ready"
         case .presenting:
             return "Live"
+        case .worshipMode:
+            return "Worship"
+        case .worshipPresenting:
+            return "Live"
         }
     }
     
@@ -81,6 +93,10 @@ struct ExternalDisplayNavigationIndicator: View {
             return Color.blue.opacity(0.1)
         case .presenting:
             return Color.green.opacity(0.1)
+        case .worshipMode:
+            return Color.purple.opacity(0.1)
+        case .worshipPresenting:
+            return Color.green.opacity(0.1)
         }
     }
     
@@ -91,6 +107,10 @@ struct ExternalDisplayNavigationIndicator: View {
         case .connected:
             return Color.blue.opacity(0.3)
         case .presenting:
+            return Color.green.opacity(0.3)
+        case .worshipMode:
+            return Color.purple.opacity(0.3)
+        case .worshipPresenting:
             return Color.green.opacity(0.3)
         }
     }

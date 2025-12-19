@@ -8,10 +8,55 @@
 import Foundation
 import SwiftUI
 
-enum ExternalDisplayState {
-    case disconnected
-    case connected
-    case presenting
+enum ExternalDisplayState: String, CaseIterable {
+    case disconnected       // No external display connected
+    case connected         // Display connected, not in use
+    case presenting        // Individual hymn presentation (existing behavior)
+    
+    // WORSHIP SESSION STATES
+    case worshipMode       // Worship session active, showing background
+    case worshipPresenting // Worship session active, presenting hymn
+    
+    // Computed properties for state checking
+    var isWorshipSession: Bool {
+        switch self {
+        case .worshipMode, .worshipPresenting:
+            return true
+        case .disconnected, .connected, .presenting:
+            return false
+        }
+    }
+    
+    var isConnected: Bool {
+        switch self {
+        case .disconnected:
+            return false
+        case .connected, .presenting, .worshipMode, .worshipPresenting:
+            return true
+        }
+    }
+    
+    var isPresenting: Bool {
+        switch self {
+        case .presenting, .worshipPresenting:
+            return true
+        case .disconnected, .connected, .worshipMode:
+            return false
+        }
+    }
+    
+    var canStartWorshipSession: Bool {
+        return self == .connected
+    }
+    
+    var canPresentHymn: Bool {
+        switch self {
+        case .connected, .worshipMode:
+            return true
+        case .disconnected, .presenting, .worshipPresenting:
+            return false
+        }
+    }
 }
 
 enum ExternalDisplayError: Error, LocalizedError {

@@ -339,6 +339,13 @@ struct ContentView: View {
             )
             .padding(.top, 16)
             
+            // Worship Session Controls (iPad only - prominent placement)
+            if externalDisplayManager.state != .disconnected {
+                WorshipSessionControls()
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 8)
+            }
+            
             // External Display Status Bar
             if externalDisplayManager.state != .disconnected {
                 externalDisplayStatusView()
@@ -1308,6 +1315,20 @@ struct HymnToolbarViewNew: View {
                         }
                     case .presenting:
                         externalDisplayManager.stopPresentation()
+                    case .worshipMode:
+                        if let hymn = selected {
+                            Task {
+                                do {
+                                    try await externalDisplayManager.presentHymnInWorshipMode(hymn)
+                                } catch {
+                                    print("Worship hymn presentation error: \(error)")
+                                }
+                            }
+                        }
+                    case .worshipPresenting:
+                        Task {
+                            await externalDisplayManager.stopHymnInWorshipMode()
+                        }
                     }
                 }) {
                     VStack(spacing: 6) {
@@ -1322,6 +1343,9 @@ struct HymnToolbarViewNew: View {
                 .disabled(externalDisplayManager.state == .disconnected || 
                          (externalDisplayManager.state == .connected && selected == nil))
                 .help(externalDisplayHelpText)
+                
+                // Worship Session Control
+                CompactWorshipSessionControl()
                 
                 // Font Size Controls with label
                 Menu {
@@ -1378,6 +1402,8 @@ struct HymnToolbarViewNew: View {
         case .disconnected: return "tv.slash"
         case .connected: return "tv"
         case .presenting: return "tv.fill"
+        case .worshipMode: return "tv.fill"
+        case .worshipPresenting: return "tv.fill"
         }
     }
     
@@ -1386,6 +1412,8 @@ struct HymnToolbarViewNew: View {
         case .disconnected: return .gray
         case .connected: return .green
         case .presenting: return .orange
+        case .worshipMode: return .purple
+        case .worshipPresenting: return .orange
         }
     }
     
@@ -1394,6 +1422,8 @@ struct HymnToolbarViewNew: View {
         case .disconnected: return "No Display"
         case .connected: return "External"
         case .presenting: return "Stop External"
+        case .worshipMode: return "Worship"
+        case .worshipPresenting: return "Stop Hymn"
         }
     }
     
@@ -1402,6 +1432,8 @@ struct HymnToolbarViewNew: View {
         case .disconnected: return "No external display"
         case .connected: return "Present to external display"
         case .presenting: return "Stop external presentation"
+        case .worshipMode: return "Present hymn in worship session"
+        case .worshipPresenting: return "Stop hymn (return to worship background)"
         }
     }
     

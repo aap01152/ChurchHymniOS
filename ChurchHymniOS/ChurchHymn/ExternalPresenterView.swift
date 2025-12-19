@@ -38,18 +38,15 @@ struct ExternalPresenterView: View {
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
-                headerSection
-                    .frame(height: geometry.size.height * 0.15)
+                titleSection
+                    .frame(height: geometry.size.height * 0.1)
                 
                 Spacer()
                 
                 lyricsSection
-                    .frame(maxHeight: geometry.size.height * 0.7)
+                    .frame(maxHeight: geometry.size.height * 0.9)
                 
                 Spacer()
-                
-                footerSection
-                    .frame(height: geometry.size.height * 0.15)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.black)
@@ -57,31 +54,14 @@ struct ExternalPresenterView: View {
         .ignoresSafeArea()
     }
     
-    private var headerSection: some View {
-        VStack(spacing: 12) {
-            HStack {
-                Spacer()
-                VStack(spacing: 8) {
-                    // Large, bold title for maximum readability at distance
-                    Text(hymn.title)
-                        .font(.system(size: 64, weight: .heavy, design: .rounded))
-                        .foregroundColor(.white)
-                        .multilineTextAlignment(.center)
-                        .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 1)
-                    
-                    // Musical key in high-contrast yellow
-                    if let key = hymn.musicalKey, !key.isEmpty {
-                        Text(String(format: NSLocalizedString("external.key_prefix", comment: "Key prefix for musical key"), key))
-                            .font(.system(size: 40, weight: .bold, design: .rounded))
-                            .foregroundColor(.yellow)
-                            .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 1)
-                    }
-                }
-                Spacer()
-            }
-        }
-        .padding(.horizontal, 40)
-        .padding(.top, 32)
+    private var titleSection: some View {
+        Text(hymn.title)
+            .font(.system(size: 36, weight: .semibold, design: .rounded))
+            .foregroundColor(.white.opacity(0.8))
+            .multilineTextAlignment(.center)
+            .shadow(color: .black.opacity(0.5), radius: 1, x: 0, y: 1)
+            .padding(.horizontal, 20)
+            .padding(.top, 16)
     }
     
     private var lyricsSection: some View {
@@ -124,67 +104,4 @@ struct ExternalPresenterView: View {
         }
     }
     
-    private var footerSection: some View {
-        HStack {
-            // Copyright and author info with better contrast
-            VStack(alignment: .leading, spacing: 6) {
-                if let copyright = hymn.copyright, !copyright.isEmpty {
-                    Text(copyright)
-                        .font(.system(size: 24, weight: .medium, design: .rounded))
-                        .foregroundColor(.white.opacity(0.8))
-                        .shadow(color: .black.opacity(0.3), radius: 1, x: 0, y: 1)
-                }
-                
-                if let author = hymn.author, !author.isEmpty {
-                    Text(String(format: NSLocalizedString("external.by_author", comment: "By author prefix"), author))
-                        .font(.system(size: 22, weight: .medium, design: .rounded))
-                        .foregroundColor(.white.opacity(0.7))
-                        .shadow(color: .black.opacity(0.3), radius: 1, x: 0, y: 1)
-                }
-            }
-            
-            Spacer()
-            
-            // Verse indicator with enhanced visibility
-            if !presentationParts.isEmpty {
-                verseIndicator
-            }
-        }
-        .padding(.horizontal, 40)
-        .padding(.bottom, 32)
-    }
-    
-    private var verseIndicator: some View {
-        VStack(alignment: .trailing, spacing: 6) {
-            // Current verse/chorus label with high visibility
-            if verseIndex < presentationParts.count {
-                let currentPart = presentationParts[verseIndex]
-                if let label = currentPart.label {
-                    Text(label)
-                        .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundColor(.yellow)
-                        .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 1)
-                } else {
-                    let verseNumber = presentationParts[0...verseIndex].filter { $0.label == nil }.count
-                    Text(String(format: NSLocalizedString("external.verse_number", comment: "Verse number format"), verseNumber))
-                        .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundColor(.yellow)
-                        .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 1)
-                }
-            }
-            
-            // Progress indicator with better visibility
-            Text(String(format: NSLocalizedString("external.verse_progress", comment: "Verse progress format"), verseIndex + 1, presentationParts.count))
-                .font(.system(size: 24, weight: .medium, design: .rounded))
-                .foregroundColor(.white.opacity(0.8))
-                .shadow(color: .black.opacity(0.3), radius: 1, x: 0, y: 1)
-        }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 16)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.black.opacity(0.3))
-                .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
-        )
-    }
 }

@@ -13,11 +13,24 @@ struct ChurchHymniOSApp: App {
     @StateObject private var externalDisplayManager = ExternalDisplayManager()
     @StateObject private var serviceFactory = ServiceFactoryManager()
     
+    // Worship session manager depends on external display manager
+    @StateObject private var worshipSessionManager: WorshipSessionManager
+    
+    init() {
+        let externalDisplayManager = ExternalDisplayManager()
+        let worshipSessionManager = WorshipSessionManager(externalDisplayManager: externalDisplayManager)
+        
+        self._externalDisplayManager = StateObject(wrappedValue: externalDisplayManager)
+        self._worshipSessionManager = StateObject(wrappedValue: worshipSessionManager)
+        self._serviceFactory = StateObject(wrappedValue: ServiceFactoryManager())
+    }
+    
     var body: some Scene {
         WindowGroup {
             if serviceFactory.isInitialized, let factory = serviceFactory.factory {
                 ContentView()
                     .environmentObject(externalDisplayManager)
+                    .environmentObject(worshipSessionManager)
                     .environmentObject(factory)
             } else {
                 LoadingView()
