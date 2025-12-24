@@ -18,7 +18,7 @@ class ServiceService: ObservableObject {
     
     private let serviceRepository: ServiceRepositoryProtocol
     private let hymnRepository: HymnRepositoryProtocol
-    private let serviceHymnRepository: ServiceHymnRepositoryProtocol
+    let serviceHymnRepository: ServiceHymnRepositoryProtocol
     private let maxHymnsPerService = 50
     
     // MARK: - Initialization

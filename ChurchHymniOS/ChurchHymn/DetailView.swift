@@ -6,6 +6,8 @@ struct DetailView: View {
     var currentPresentationIndex: Int?
     var isPresenting: Bool
     @Binding var lyricsFontSize: CGFloat
+    let serviceService: ServiceService?
+    let hymnService: HymnService?
     
     @EnvironmentObject private var externalDisplayManager: ExternalDisplayManager
     
@@ -47,6 +49,15 @@ struct DetailView: View {
                     }
                     
                     Spacer()
+                    
+                    // Quick add to service button
+                    if let serviceService = serviceService, let hymnService = hymnService {
+                        ServiceQuickAddView(
+                            serviceService: serviceService,
+                            hymnService: hymnService,
+                            hymn: hymn
+                        )
+                    }
                     
                     if let copyright = hymn.copyright {
                         Text(copyright)

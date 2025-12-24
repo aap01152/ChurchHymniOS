@@ -185,10 +185,31 @@ final class HymnRepository: HymnRepositoryProtocol {
         // Validate hymn data
         try validateHymn(hymn)
         
-        // Check for duplicates
+        // Check for duplicates by title
         if try await hymnExists(title: hymn.title, excludingId: nil) {
             logger.warning("Attempted to create duplicate hymn: \(hymn.title)")
             throw RepositoryError.duplicateEntity("Hymn with title '\(hymn.title)' already exists")
+        }
+        
+        // Check for UUID collisions (extremely rare but possible)
+        let uuidExists = try await dataManager.exists(
+            for: Hymn.self, 
+            predicate: #Predicate<Hymn> { $0.id == hymn.id }
+        )
+        if uuidExists {
+            logger.warning("UUID collision detected for hymn: \(hymn.title), ID: \(hymn.id)")
+            // Generate a new UUID and try again
+            let newHymn = Hymn(
+                title: hymn.title,
+                lyrics: hymn.lyrics,
+                musicalKey: hymn.musicalKey,
+                copyright: hymn.copyright,
+                author: hymn.author,
+                tags: hymn.tags,
+                notes: hymn.notes,
+                songNumber: hymn.songNumber
+            )
+            return try await createHymn(newHymn) // Recursive call with new UUID
         }
         
         do {

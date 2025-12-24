@@ -14,6 +14,8 @@ import Combine
 enum WorshipSessionError: LocalizedError {
     case sessionAlreadyActive
     case externalDisplayNotReady(state: ExternalDisplayState)
+    case noActiveService
+    case serviceHasNoHymns
     case failedToStart(underlying: Error)
     
     var errorDescription: String? {
@@ -22,6 +24,10 @@ enum WorshipSessionError: LocalizedError {
             return "Worship session is already active"
         case .externalDisplayNotReady(let state):
             return "External display not ready for worship session. Current state: \(state.rawValue)"
+        case .noActiveService:
+            return "No active service found"
+        case .serviceHasNoHymns:
+            return "Cannot start worship session with empty service"
         case .failedToStart(let underlying):
             return "Failed to start worship session: \(underlying.localizedDescription)"
         }
@@ -33,6 +39,10 @@ enum WorshipSessionError: LocalizedError {
             return "Stop the current worship session before starting a new one"
         case .externalDisplayNotReady:
             return "Ensure external display is connected and in ready state"
+        case .noActiveService:
+            return "Create and activate a service before starting worship session"
+        case .serviceHasNoHymns:
+            return "Add at least one hymn to your active service before starting worship session"
         case .failedToStart:
             return "Check external display connection and try again"
         }
@@ -58,13 +68,20 @@ final class WorshipSessionManager: ObservableObject {
     // MARK: - Dependencies
     
     private let externalDisplayManager: ExternalDisplayManager
+    private var serviceService: ServiceService?
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Initialization
     
-    init(externalDisplayManager: ExternalDisplayManager) {
+    init(externalDisplayManager: ExternalDisplayManager, serviceService: ServiceService? = nil) {
         self.externalDisplayManager = externalDisplayManager
+        self.serviceService = serviceService
         setupStateObservation()
+    }
+    
+    /// Update the service service reference after initialization
+    func setServiceService(_ serviceService: ServiceService) {
+        self.serviceService = serviceService
     }
     
     deinit {
@@ -103,6 +120,18 @@ final class WorshipSessionManager: ObservableObject {
         
         guard externalDisplayManager.state.canStartWorshipSession else {
             throw WorshipSessionError.externalDisplayNotReady(state: externalDisplayManager.state)
+        }
+        
+        // Validate active service has hymns
+        if let serviceService = serviceService {
+            guard let activeService = serviceService.activeService else {
+                throw WorshipSessionError.noActiveService
+            }
+            
+            let hymnCount = serviceService.serviceHymns.filter { $0.serviceId == activeService.id }.count
+            guard hymnCount > 0 else {
+                throw WorshipSessionError.serviceHasNoHymns
+            }
         }
         
         // Validate background image exists

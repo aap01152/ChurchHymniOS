@@ -133,7 +133,7 @@ struct HymnListView: View {
         return nil
     }
     
-    /// Add a hymn to the active service
+    /// Add a hymn to the active service with enhanced feedback
     private func addToService(_ hymn: Hymn) {
         guard let activeService = activeService else {
             // Create today's service if none exists
@@ -146,6 +146,12 @@ struct HymnListView: View {
                         let addResult = await serviceOperations.addHymnToService(hymnId: hymn.id, service: service)
                         if case .failure(let error) = addResult {
                             print("Failed to add hymn to service: \(error)")
+                        } else {
+                            // Provide haptic feedback on success
+                            #if os(iOS)
+                            let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                            impactFeedback.impactOccurred()
+                            #endif
                         }
                     } else if case .failure(let error) = setResult {
                         print("Failed to set active service: \(error)")
@@ -161,6 +167,14 @@ struct HymnListView: View {
             let result = await serviceOperations.addHymnToService(hymnId: hymn.id, service: activeService)
             if case .failure(let error) = result {
                 print("Failed to add hymn to service: \(error)")
+            } else {
+                // Provide haptic feedback on success
+                #if os(iOS)
+                await MainActor.run {
+                    let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                    impactFeedback.impactOccurred()
+                }
+                #endif
             }
         }
     }
@@ -586,6 +600,7 @@ struct HymnListView: View {
                         servicePosition: getHymnPositionInService(hymn),
                         isReorderMode: isReorderMode && sortOption == .service,
                         isServiceManagementMode: isServiceManagementMode,
+                        hasActiveService: activeService != nil,
                         onToggleDelete: {
                             if selectedHymnsForDelete.contains(hymn.id) {
                                 selectedHymnsForDelete.remove(hymn.id)
@@ -847,15 +862,30 @@ struct ServiceManagementBar: View {
                                 .font(.subheadline)
                                 .fontWeight(.medium)
                             Spacer()
-                            Text("\(hymnCount) \(hymnCount == 1 ? NSLocalizedString("service.hymn_single", comment: "Single hymn") : NSLocalizedString("service.hymn_plural", comment: "Multiple hymns"))")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                            HStack(spacing: 4) {
+                                Image(systemName: "music.note")
+                                    .font(.caption2)
+                                Text("\(hymnCount) \(hymnCount == 1 ? NSLocalizedString("service.hymn_single", comment: "Single hymn") : NSLocalizedString("service.hymn_plural", comment: "Multiple hymns"))")
+                                    .font(.caption)
+                            }
+                            .foregroundColor(.secondary)
                         }
                         
                         if !isCollapsed {
-                            Text(DateFormatter.localizedString(from: service.date, dateStyle: .medium, timeStyle: .none))
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(DateFormatter.localizedString(from: service.date, dateStyle: .medium, timeStyle: .none))
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                                
+                                HStack(spacing: 4) {
+                                    Image(systemName: "plus.circle.fill")
+                                        .font(.caption2)
+                                        .foregroundColor(.green)
+                                    Text("Green + buttons add hymns to service")
+                                        .font(.caption2)
+                                        .foregroundColor(.green)
+                                }
+                            }
                         }
                     }
                     
@@ -985,6 +1015,7 @@ struct HymnRow: View {
     let servicePosition: Int?
     let isReorderMode: Bool
     let isServiceManagementMode: Bool
+    let hasActiveService: Bool
     let onToggleDelete: () -> Void
     let onSelect: () -> Void
     let onEdit: () -> Void
@@ -994,7 +1025,7 @@ struct HymnRow: View {
     
     var body: some View {
         HStack(spacing: 12) {
-            // Show appropriate icon based on mode
+            // Always show service buttons when there's an active service (unless in special modes)
             if isMultiSelectMode {
                 Image(systemName: isMarkedForDelete ? "checkmark.circle.fill" : "circle")
                     .font(.title2)
@@ -1006,24 +1037,31 @@ struct HymnRow: View {
                 Image(systemName: "line.3.horizontal")
                     .font(.title2)
                     .foregroundColor(.secondary)
-            } else if isServiceManagementMode {
-                // Service management mode: show add/remove buttons
+            } else if hasActiveService {
+                // Always show service buttons when there's an active service
                 if isInService {
-                    // Remove from service button
+                    // Show remove button for hymns in service
                     Button(action: onRemoveFromService) {
                         Image(systemName: "minus.circle.fill")
                             .font(.title2)
                             .foregroundColor(.red)
                     }
                     .buttonStyle(PlainButtonStyle())
+                    .help("Remove from service")
                 } else {
-                    // Add to service button
+                    // Show add button for hymns not in service
                     Button(action: onAddToService) {
                         Image(systemName: "plus.circle.fill")
                             .font(.title2)
-                            .foregroundColor(.green)
+                            .foregroundColor(.white)
+                            .background(
+                                Circle()
+                                    .fill(Color.green)
+                                    .frame(width: 32, height: 32)
+                            )
                     }
                     .buttonStyle(PlainButtonStyle())
+                    .help("Add to service")
                 }
             }
             
@@ -1063,22 +1101,27 @@ struct HymnRow: View {
                             .cornerRadius(4)
                     }
                     
-                    // Service indicator
+                    // Simplified service indicator
                     if isInService {
-                        HStack(spacing: 2) {
-                            Image(systemName: "music.note")
+                        if let position = servicePosition {
+                            Text("#\(position)")
                                 .font(.caption2)
-                            if let position = servicePosition {
-                                Text("\(position)")
-                                    .font(.caption2)
-                                    .fontWeight(.medium)
-                            }
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.green)
+                                .cornerRadius(8)
+                        } else {
+                            Text("✓")
+                                .font(.caption)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.green)
+                                .cornerRadius(8)
                         }
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(Color.accentColor)
-                        .cornerRadius(4)
                     }
                 }
             }

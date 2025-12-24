@@ -41,6 +41,12 @@ class ExternalDisplayManager: ObservableObject {
         cancellables.removeAll()
     }
     
+    /// Public method to refresh external display state when app becomes active
+    func refreshExternalDisplayState() {
+        print("Refreshing external display state...")
+        checkForExternalDisplays()
+    }
+    
     private func setupSceneNotifications() {
         // Use modern scene-based notifications instead of deprecated UIScreen notifications
         NotificationCenter.default.publisher(for: UIScene.willConnectNotification)

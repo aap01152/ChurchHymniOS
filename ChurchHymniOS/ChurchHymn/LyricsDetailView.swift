@@ -25,15 +25,15 @@ struct LyricsDetailView: View {
     
     /// Determines if verse interaction is enabled based on external display state
     private var isInteractiveMode: Bool {
-        externalDisplayManager.state == .presenting
+        externalDisplayManager.state == .presenting || externalDisplayManager.state == .worshipPresenting
     }
     
     /// Gets the interaction state for a specific verse
     private func verseInteractionState(for index: Int) -> VerseInteractionState {
-        if externalDisplayManager.state == .presenting && isCurrentExternalVerse(index) {
+        if (externalDisplayManager.state == .presenting || externalDisplayManager.state == .worshipPresenting) && isCurrentExternalVerse(index) {
             return .activePresenting
         }
-        if externalDisplayManager.state == .presenting {
+        if externalDisplayManager.state == .presenting || externalDisplayManager.state == .worshipPresenting {
             return .availablePresenting
         }
         return .readOnly

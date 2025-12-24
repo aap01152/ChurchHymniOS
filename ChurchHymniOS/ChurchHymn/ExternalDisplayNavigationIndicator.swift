@@ -13,6 +13,7 @@ import SwiftUI
 
 struct ExternalDisplayNavigationIndicator: View {
     @EnvironmentObject private var externalDisplayManager: ExternalDisplayManager
+    @Environment(\.scenePhase) private var scenePhase
     
     var body: some View {
         HStack(spacing: 4) {
@@ -38,6 +39,13 @@ struct ExternalDisplayNavigationIndicator: View {
             Capsule()
                 .strokeBorder(statusBorderColor, lineWidth: 0.5)
         )
+        .onChange(of: scenePhase) { oldPhase, newPhase in
+            if newPhase == .active {
+                // Force refresh external display state when app becomes active
+                print("ExternalDisplayNavigationIndicator: App became active, current state: \(externalDisplayManager.state)")
+                externalDisplayManager.refreshExternalDisplayState()
+            }
+        }
     }
     
     private var statusIcon: String {

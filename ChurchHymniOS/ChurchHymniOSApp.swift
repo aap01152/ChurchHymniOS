@@ -32,6 +32,10 @@ struct ChurchHymniOSApp: App {
                     .environmentObject(externalDisplayManager)
                     .environmentObject(worshipSessionManager)
                     .environmentObject(factory)
+                    .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+                        // Refresh external display state when app becomes active
+                        externalDisplayManager.refreshExternalDisplayState()
+                    }
             } else {
                 LoadingView()
                     .task {

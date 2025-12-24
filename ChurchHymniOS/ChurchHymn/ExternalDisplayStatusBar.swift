@@ -213,68 +213,155 @@ struct ExternalDisplayStatusBar: View {
             .controlSize(.small)
             .disabled(selectedHymn == nil)
         case .presenting:
-            // Show presentation controls
+            // Show presentation controls with prominent navigation
             HStack(spacing: 8) {
-                Text("\(externalDisplayManager.currentVerseIndex + 1)/\(externalDisplayManager.totalVerses)")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(.green)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 2)
-                    .background(Color.green.opacity(0.2))
-                    .cornerRadius(8)
-                
-                // Preview toggle for iPad
-                if UIDevice.current.userInterfaceIdiom == .pad {
-                    ExternalDisplayPreviewQuickToggle()
+                // Previous verse button
+                Button(action: externalDisplayManager.previousVerse) {
+                    CompactControlButton(
+                        icon: "chevron.left.circle.fill",
+                        text: "Previous"
+                    )
                 }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .disabled(!externalDisplayManager.canGoToPreviousVerse)
                 
+                // Current verse indicator
+                VStack(spacing: 2) {
+                    Text("\(externalDisplayManager.currentVerseIndex + 1)/\(externalDisplayManager.totalVerses)")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .foregroundColor(.green)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Color.green.opacity(0.2))
+                        .cornerRadius(8)
+                    
+                    Text(externalDisplayManager.currentVerseInfo)
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+                .frame(minWidth: 70)
+                
+                // Next verse button
+                Button(action: externalDisplayManager.nextVerse) {
+                    CompactControlButton(
+                        icon: "chevron.right.circle.fill",
+                        text: "Next"
+                    )
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .disabled(!externalDisplayManager.canGoToNextVerse)
+                
+                Spacer()
+                
+                // COMMENTED OUT: Preview toggle for iPad - preview window disabled
+                // if UIDevice.current.userInterfaceIdiom == .pad {
+                //     ExternalDisplayPreviewQuickToggle()
+                // }
+                
+                // Stop presentation button
                 Button(action: externalDisplayManager.stopPresentation) {
-                    Image(systemName: "stop.circle.fill")
-                        .font(.title3)
-                        .foregroundColor(.red)
+                    CompactControlButton(
+                        icon: "stop.circle.fill",
+                        text: "Stop"
+                    )
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.bordered)
+                .controlSize(.small)
             }
         case .worshipMode:
-            // Show worship session active indicator
-            HStack(spacing: 4) {
-                Image(systemName: "infinity.circle.fill")
-                    .font(.title3)
-                    .foregroundColor(.purple)
-                    .symbolEffect(.pulse)
-                Text("Active")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(.purple)
-            }
-        case .worshipPresenting:
-            // Show worship presentation controls
-            HStack(spacing: 8) {
-                Text("\(externalDisplayManager.currentVerseIndex + 1)/\(externalDisplayManager.totalVerses)")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(.green)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 2)
-                    .background(Color.green.opacity(0.2))
-                    .cornerRadius(8)
-                
-                // Preview toggle for iPad
-                if UIDevice.current.userInterfaceIdiom == .pad {
-                    ExternalDisplayPreviewQuickToggle()
+            // Show worship session active indicator and present hymn button
+            HStack(spacing: 12) {
+                // Worship session status
+                HStack(spacing: 4) {
+                    Image(systemName: "infinity.circle.fill")
+                        .font(.title3)
+                        .foregroundColor(.purple)
+                        .symbolEffect(.pulse)
+                    Text("Worship Active")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(.purple)
                 }
                 
+                Spacer()
+                
+                // Present hymn button
+                Button(action: presentSelectedHymnInWorship) {
+                    CompactControlButton(
+                        icon: "play.circle.fill",
+                        text: selectedHymn?.title ?? "No Hymn"
+                    )
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .disabled(selectedHymn == nil)
+                .help(selectedHymn != nil ? "Present \(selectedHymn!.title) in worship session" : "Select a hymn to present in worship session")
+            }
+        case .worshipPresenting:
+            // Show worship presentation controls with prominent navigation
+            HStack(spacing: 8) {
+                // Previous verse button
+                Button(action: externalDisplayManager.previousVerse) {
+                    CompactControlButton(
+                        icon: "chevron.left.circle.fill",
+                        text: "Previous"
+                    )
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .disabled(!externalDisplayManager.canGoToPreviousVerse)
+                
+                // Current verse indicator
+                VStack(spacing: 2) {
+                    Text("\(externalDisplayManager.currentVerseIndex + 1)/\(externalDisplayManager.totalVerses)")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .foregroundColor(.green)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Color.green.opacity(0.2))
+                        .cornerRadius(8)
+                    
+                    Text(externalDisplayManager.currentVerseInfo)
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+                .frame(minWidth: 70)
+                
+                // Next verse button
+                Button(action: externalDisplayManager.nextVerse) {
+                    CompactControlButton(
+                        icon: "chevron.right.circle.fill",
+                        text: "Next"
+                    )
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .disabled(!externalDisplayManager.canGoToNextVerse)
+                
+                Spacer()
+                
+                // COMMENTED OUT: Preview toggle for iPad - preview window disabled
+                // if UIDevice.current.userInterfaceIdiom == .pad {
+                //     ExternalDisplayPreviewQuickToggle()
+                // }
+                
+                // Stop presentation button
                 Button(action: { 
                     Task { 
                         await externalDisplayManager.stopHymnInWorshipMode() 
                     }
                 }) {
-                    Image(systemName: "stop.circle.fill")
-                        .font(.title3)
-                        .foregroundColor(.orange)
+                    CompactControlButton(
+                        icon: "stop.circle.fill",
+                        text: "Stop"
+                    )
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.bordered)
+                .controlSize(.small)
             }
         }
     }
@@ -289,6 +376,21 @@ struct ExternalDisplayStatusBar: View {
             showingErrorAlert = true
         }
     }
+    
+    private func presentSelectedHymnInWorship() {
+        guard let hymn = selectedHymn else { return }
+        
+        Task {
+            do {
+                try await externalDisplayManager.presentHymnInWorshipMode(hymn)
+            } catch {
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                    showingErrorAlert = true
+                }
+            }
+        }
+    }
 }
 
 struct ExternalDisplayQuickControls: View {
@@ -301,15 +403,12 @@ struct ExternalDisplayQuickControls: View {
         HStack(spacing: 16) {
             if externalDisplayManager.state == .presenting {
                 // Presentation controls
-                HStack(spacing: 12) {
+                HStack(spacing: 8) {
                     Button(action: externalDisplayManager.previousVerse) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.left")
-                            Text("Previous")
-                        }
-                        .font(.caption)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
+                        CompactControlButton(
+                            icon: "chevron.left.circle.fill",
+                            text: "Previous"
+                        )
                     }
                     .buttonStyle(.bordered)
                     .disabled(!externalDisplayManager.canGoToPreviousVerse)
@@ -322,16 +421,13 @@ struct ExternalDisplayQuickControls: View {
                             .font(.caption2)
                             .foregroundColor(.secondary)
                     }
-                    .frame(minWidth: 80)
+                    .frame(minWidth: 70)
                     
                     Button(action: externalDisplayManager.nextVerse) {
-                        HStack(spacing: 4) {
-                            Text("Next")
-                            Image(systemName: "chevron.right")
-                        }
-                        .font(.caption)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
+                        CompactControlButton(
+                            icon: "chevron.right.circle.fill",
+                            text: "Next"
+                        )
                     }
                     .buttonStyle(.bordered)
                     .disabled(!externalDisplayManager.canGoToNextVerse)

@@ -6,7 +6,9 @@ import Foundation
 struct ContentView: View {
     @EnvironmentObject private var serviceFactory: ServiceFactory
     @EnvironmentObject private var externalDisplayManager: ExternalDisplayManager
+    @EnvironmentObject private var worshipSessionManager: WorshipSessionManager
     @Environment(\.openWindow) private var openWindow
+    @Environment(\.scenePhase) private var scenePhase
     
     // Service layer instances
     @State private var hymnService: HymnService?
@@ -65,6 +67,9 @@ struct ContentView: View {
     
     // Navigation split view visibility state
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
+    
+    // Force toolbar refresh when app becomes active
+    @State private var toolbarRefreshTrigger = false
 
     var body: some View {
         Group {
@@ -84,6 +89,10 @@ struct ContentView: View {
                     }
             }
         }
+        // COMMENTED OUT: External Display Preview Window
+        // Disabled floating preview window as there's already sufficient feedback
+        // about external display state in the status bar
+        /*
         .overlay {
             // External Display Preview Window
             if UIDevice.current.userInterfaceIdiom == .pad {
@@ -91,6 +100,7 @@ struct ContentView: View {
                     .allowsHitTesting(true)
             }
         }
+        */
         .alert("Delete Hymn", isPresented: $showingDeleteConfirmation, presenting: hymnToDelete) { hymn in
             Button("Cancel", role: .cancel) { }
             Button("Delete", role: .destructive) {
@@ -126,29 +136,60 @@ struct ContentView: View {
         } message: {
             Text(exportSuccessMessage ?? "Hymns exported successfully")
         }
-        .sheet(isPresented: $showingEdit, onDismiss: {
-            // Clean up state when sheet is dismissed without saving
-            if newHymn != nil {
-                newHymn = nil
-                selected = nil
-            }
-            editHymn = nil
-        }) {
-            if let hymn = editHymn ?? newHymn {
-                HymnEditView(hymn: hymn) { savedHymn in
-                    Task {
-                        await saveHymn(savedHymn)
+        .sheet(isPresented: $showingEdit) {
+            Group {
+                if let hymn = editHymn {
+                    HymnEditView(
+                        hymn: hymn, 
+                        onSave: { savedHymn in
+                            Task {
+                                await saveHymn(savedHymn)
+                            }
+                        },
+                        onCancel: {
+                            // Clean up edit state on cancel
+                            editHymn = nil
+                        }
+                    )
+                } else if let hymn = newHymn {
+                    HymnEditView(
+                        hymn: hymn, 
+                        onSave: { savedHymn in
+                            Task {
+                                await saveHymn(savedHymn)
+                            }
+                        },
+                        onCancel: {
+                            // Clean up new hymn state on cancel
+                            newHymn = nil
+                        }
+                    )
+                } else {
+                    // Fallback: Create a new hymn if both editHymn and newHymn are nil
+                    HymnEditView(
+                        hymn: Hymn(title: ""), 
+                        onSave: { savedHymn in
+                            Task {
+                                await saveHymn(savedHymn)
+                            }
+                        },
+                        onCancel: {
+                            // Clean up state on cancel
+                            newHymn = nil
+                        }
+                    )
+                    .onAppear {
+                        print("WARNING: Sheet presented with no hymn - creating fallback new hymn")
+                        newHymn = Hymn(title: "")
                     }
                 }
             }
         }
         .fullScreenCover(isPresented: $isPresenting) {
-            if let hymn = selected {
-                PresenterView(
-                    hymn: hymn,
-                    onIndexChange: { index in
-                        presentedHymnIndex = index
-                    },
+            if let hymnService = hymnService {
+                DynamicPresenterView(
+                    hymnService: hymnService,
+                    selected: $selected,
                     onDismiss: {
                         presentedHymnIndex = nil
                         isPresenting = false
@@ -256,12 +297,27 @@ struct ContentView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Services") {
+                        print("Services button tapped")
                         showingServiceManagement = true
+                    }
+                    .id("services-button-\(toolbarRefreshTrigger)")
+                    .onAppear {
+                        print("Services button appeared in toolbar")
+                    }
+                    .onDisappear {
+                        print("Services button disappeared from toolbar")
                     }
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     ExternalDisplayNavigationIndicator()
+                        .id("external-display-\(toolbarRefreshTrigger)")
+                        .onAppear {
+                            print("External display indicator appeared in toolbar")
+                        }
+                        .onDisappear {
+                            print("External display indicator disappeared from toolbar")
+                        }
                 }
             }
             .frame(minWidth: 320)
@@ -348,7 +404,7 @@ struct ContentView: View {
             
             // Worship Session Controls (iPad only - prominent placement)
             if externalDisplayManager.state != .disconnected {
-                WorshipSessionControls()
+                WorshipSessionControls(serviceService: serviceService)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 8)
             }
@@ -420,16 +476,42 @@ struct ContentView: View {
                     hymn: hymn,
                     currentPresentationIndex: presentedHymnIndex,
                     isPresenting: isPresenting,
-                    lyricsFontSize: $lyricsFontSize
+                    lyricsFontSize: $lyricsFontSize,
+                    serviceService: serviceService,
+                    hymnService: hymnService
                 )
             } else {
                 EmptyDetailView()
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .onChange(of: scenePhase) { oldPhase, newPhase in
+            if newPhase == .active {
+                // Refresh services and external display when app becomes active
+                print("App became active - refreshing services and external display state")
+                Task {
+                    await refreshServicesOnAppActivation()
+                }
+            }
+        }
     }
 
     // MARK: - Service Initialization
+    
+    private func refreshServicesOnAppActivation() async {
+        // Only refresh if services are already initialized
+        guard servicesInitialized else { return }
+        
+        // Refresh hymn and service data
+        await hymnService?.loadHymns()
+        await serviceService?.loadServices()
+        
+        // Force toolbar UI refresh by toggling the refresh trigger
+        await MainActor.run {
+            toolbarRefreshTrigger.toggle()
+            print("Services and toolbar refreshed after app activation - trigger: \(toolbarRefreshTrigger)")
+        }
+    }
     
     private func initializeServices() async {
         guard !servicesInitialized else { return }
@@ -442,6 +524,10 @@ struct ContentView: View {
             await MainActor.run {
                 self.hymnService = hymnService
                 self.serviceService = serviceService
+                
+                // Connect ServiceService to WorshipSessionManager for validation
+                self.worshipSessionManager.setServiceService(serviceService)
+                
                 self.importExportManager = ImportExportManager(
                     hymnService: hymnService,
                     serviceService: serviceService,
@@ -459,16 +545,37 @@ struct ContentView: View {
     private func onPresentHymn(_ hymn: Hymn) {
         if let index = hymnService?.hymns.firstIndex(where: { $0.id == hymn.id }) {
             presentedHymnIndex = index
-            isPresenting = true
+            
+            // If already presenting, just change the selected hymn
+            if isPresenting {
+                selected = hymn
+                print("Switching to hymn: \(hymn.title) during presentation")
+            } else {
+                // Start new presentation
+                selected = hymn // Ensure the hymn is selected before presenting
+                isPresenting = true
+                print("Starting presentation of hymn: \(hymn.title)")
+            }
         }
     }
     
     private func addNewHymn() {
+        // Prevent multiple rapid taps
+        guard !showingEdit else {
+            print("Edit sheet already showing, ignoring duplicate add request")
+            return
+        }
+        
+        print("Creating new hymn for editing")
+        
+        // Create new hymn and set state atomically
         let hymn = Hymn(title: "")
         newHymn = hymn
         editHymn = nil // Clear any lingering edit hymn state
-        selected = hymn
+        
+        // Show sheet immediately - no async dispatch needed since we're already on main thread
         showingEdit = true
+        print("Sheet presentation triggered with newHymn: \(newHymn?.id.uuidString ?? "nil")")
     }
     
     private func editCurrentHymn() {
@@ -479,10 +586,50 @@ struct ContentView: View {
         }
     }
     
+    @State private var isSaving = false
+    
     private func saveHymn(_ hymn: Hymn) async {
         guard let hymnService = hymnService else { return }
         
-        let isNewHymn = newHymn == hymn
+        // Prevent multiple simultaneous save operations
+        guard !isSaving else {
+            print("Save operation already in progress, ignoring duplicate call")
+            return
+        }
+        
+        isSaving = true
+        defer { isSaving = false }
+        
+        // Use proper ID-based detection instead of reference equality
+        let isNewHymn = if let newHymn = newHymn {
+            newHymn.id == hymn.id
+        } else {
+            false
+        }
+        
+        print("Saving hymn: \(hymn.title), isNewHymn: \(isNewHymn), ID: \(hymn.id)")
+        print("Hymn fields - Number: \(hymn.songNumber?.description ?? "nil"), Tags: \(hymn.tags?.description ?? "nil"), Author: \(hymn.author ?? "nil")")
+        
+        // Additional safety check for new hymns
+        if isNewHymn {
+            // Ensure this hymn doesn't already exist in the service
+            if hymnService.hymns.contains(where: { $0.id == hymn.id }) {
+                print("ERROR: Attempting to save new hymn that already exists in hymns array: \(hymn.title)")
+                print("This suggests the hymn was incorrectly identified as 'new' when it should be 'edit'")
+                print("Switching to update mode...")
+                // Switch to update mode instead of failing
+                let success = await hymnService.updateHymn(hymn)
+                if success {
+                    print("Successfully updated hymn via fallback: \(hymn.title)")
+                    newHymn = nil
+                    editHymn = nil
+                    showingEdit = false
+                } else {
+                    print("Fallback update failed for: \(hymn.title)")
+                }
+                return
+            }
+        }
         
         let success = if isNewHymn {
             await hymnService.createHymn(hymn)
@@ -491,11 +638,16 @@ struct ContentView: View {
         }
         
         if success {
+            print("Save successful for: \(hymn.title)")
+            // Proper state cleanup
             if isNewHymn {
                 newHymn = nil
+                selected = hymn // Set selection to the newly created hymn
             }
             editHymn = nil
             showingEdit = false
+        } else {
+            print("Save failed for: \(hymn.title)")
         }
     }
     
@@ -691,6 +843,9 @@ struct HymnListViewNew: View {
     @State private var showingCompleteServiceConfirmation = false
     @State private var showingServiceCompletedSuccess = false
     
+    // Service reorder mode
+    @State private var isServiceReorderMode = false
+    
     enum SortOption: CaseIterable, Identifiable {
         case title
         case number
@@ -842,6 +997,23 @@ struct HymnListViewNew: View {
         }
     }
     
+    // MARK: - Service Position Helpers
+    
+    /// Get the position of a hymn in the active service (1-based for display)
+    private func getHymnPositionInService(_ hymn: Hymn) -> Int? {
+        guard let activeService = serviceService.activeService else { return nil }
+        
+        let serviceHymns = serviceService.serviceHymns
+            .filter { $0.serviceId == activeService.id }
+            .sorted { $0.order < $1.order }
+        
+        if let index = serviceHymns.firstIndex(where: { $0.hymnId == hymn.id }) {
+            return index + 1 // Convert to 1-based for display
+        }
+        
+        return nil
+    }
+    
     // Helper computed property for service management bar
     private var activeServiceHymnCount: Int {
         guard let activeService = serviceService.activeService else { return 0 }
@@ -904,14 +1076,44 @@ struct HymnListViewNew: View {
                 .padding()
             }
             
-            // Sort options picker (only show when not in multi-select mode)
+            // Sort options picker and reorder controls (only show when not in multi-select mode)
             if !isMultiSelectMode {
-                Picker(NSLocalizedString("sort.by", comment: "Sort by picker"), selection: $sortOption) {
-                    ForEach(SortOption.allCases) { option in
-                        Text(option.rawValue).tag(option as SortOption)
+                VStack(spacing: 8) {
+                    Picker(NSLocalizedString("sort.by", comment: "Sort by picker"), selection: $sortOption) {
+                        ForEach(SortOption.allCases) { option in
+                            Text(option.rawValue).tag(option as SortOption)
+                        }
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .disabled(isServiceReorderMode)
+                    .opacity(isServiceReorderMode ? 0.5 : 1.0)
+                    .onChange(of: sortOption) { _, newValue in
+                        // Exit reorder mode when switching away from service sort
+                        if newValue != .service && isServiceReorderMode {
+                            isServiceReorderMode = false
+                        }
+                    }
+                    
+                    // Show reorder button when service sort is active and has hymns
+                    if sortOption == .service && activeServiceHymnCount > 0 {
+                        HStack {
+                            Button(action: toggleServiceReorderMode) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: isServiceReorderMode ? "arrow.up.arrow.down.circle.fill" : "arrow.up.arrow.down.circle")
+                                        .foregroundColor(isServiceReorderMode ? .orange : .accentColor)
+                                    Text(isServiceReorderMode ? "Exit Reorder" : "Reorder Hymns")
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(isServiceReorderMode ? .orange : .accentColor)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            
+                            Spacer()
+                        }
+                        .padding(.horizontal, 12)
                     }
                 }
-                .pickerStyle(SegmentedPickerStyle())
                 .padding(.horizontal, 12)
                 .padding(.bottom, 8)
                 
@@ -974,47 +1176,86 @@ struct HymnListViewNew: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding()
             } else {
-                List(filteredHymns) { hymn in
-                    HymnRowView(
-                        hymn: hymn,
-                        isSelected: selected?.id == hymn.id,
-                        isMarkedForDelete: selectedHymnsForDelete.contains(hymn.id),
-                        isMultiSelectMode: isMultiSelectMode,
-                        onTap: {
-                            if isMultiSelectMode {
-                                if selectedHymnsForDelete.contains(hymn.id) {
-                                    selectedHymnsForDelete.remove(hymn.id)
+                List {
+                    ForEach(filteredHymns) { hymn in
+                        HymnRowView(
+                            hymn: hymn,
+                            isSelected: selected?.id == hymn.id,
+                            isMarkedForDelete: selectedHymnsForDelete.contains(hymn.id),
+                            isMultiSelectMode: isMultiSelectMode,
+                            isReorderMode: isServiceReorderMode,
+                            servicePosition: getHymnPositionInService(hymn),
+                            showServicePosition: sortOption == .service,
+                            onTap: {
+                                // Disable interactions during reorder mode
+                                guard !isServiceReorderMode else { return }
+                                
+                                if isMultiSelectMode {
+                                    if selectedHymnsForDelete.contains(hymn.id) {
+                                        selectedHymnsForDelete.remove(hymn.id)
+                                    } else {
+                                        selectedHymnsForDelete.insert(hymn.id)
+                                    }
                                 } else {
+                                    selected = hymn
+                                }
+                            },
+                            onEdit: {
+                                // Disable edit during reorder mode
+                                guard !isServiceReorderMode else { return }
+                                selected = hymn
+                                editHymn = hymn
+                                showingEdit = true
+                            },
+                            onDelete: {
+                                // Disable delete during reorder mode
+                                guard !isServiceReorderMode else { return }
+                                hymnToDelete = hymn
+                                showingDeleteConfirmation = true
+                            },
+                            onPresent: { 
+                                // Disable present during reorder mode
+                                guard !isServiceReorderMode else { return }
+                                onPresent(hymn) 
+                            },
+                            onLongPress: {
+                                // Disable long press selection during reorder mode
+                                guard !isServiceReorderMode else { return }
+                                
+                                // Enter selection mode on long press
+                                if !isMultiSelectMode {
+                                    // Provide haptic feedback
+                                    let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+                                    impactFeedback.impactOccurred()
+                                    
+                                    isMultiSelectMode = true
                                     selectedHymnsForDelete.insert(hymn.id)
                                 }
-                            } else {
-                                selected = hymn
                             }
-                        },
-                        onEdit: {
-                            selected = hymn
-                            editHymn = hymn
-                            showingEdit = true
-                        },
-                        onDelete: {
-                            hymnToDelete = hymn
-                            showingDeleteConfirmation = true
-                        },
-                        onPresent: { onPresent(hymn) },
-                        onLongPress: {
-                            // Enter selection mode on long press
-                            if !isMultiSelectMode {
-                                // Provide haptic feedback
-                                let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
-                                impactFeedback.impactOccurred()
-                                
-                                isMultiSelectMode = true
-                                selectedHymnsForDelete.insert(hymn.id)
-                            }
-                        }
-                    )
+                        )
+                    }
+                    .onMove(perform: (isServiceReorderMode && sortOption == .service) ? moveServiceHymns : nil)
                 }
+                .environment(\.editMode, (isServiceReorderMode && sortOption == .service) ? .constant(.active) : .constant(.inactive))
                 .searchable(text: $searchText, prompt: "Search hymns...")
+                // Note: Don't disable the entire list in reorder mode - this prevents drag handles from working
+                
+                // Show reorder instructions when in reorder mode
+                if isServiceReorderMode && sortOption == .service {
+                    HStack {
+                        Image(systemName: "arrow.up.arrow.down")
+                            .foregroundColor(.orange)
+                        Text("Drag hymns to reorder them in the service")
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(Color.orange.opacity(0.1))
+                    .cornerRadius(8)
+                    .padding(.horizontal, 16)
+                }
             }
         }
         .task {
@@ -1076,11 +1317,62 @@ struct HymnListViewNew: View {
     private func toggleServiceReorderMode() {
         // Switch to service sort when entering reorder mode
         sortOption = .service
-        print("Service reorder mode toggled")
+        isServiceReorderMode.toggle()
+        print("Service reorder mode toggled: \(isServiceReorderMode)")
     }
     
     private func toggleServiceManagement() {
         print("Service management mode toggled")
+    }
+    
+    // MARK: - Service Reordering
+    
+    private func moveServiceHymns(from source: IndexSet, to destination: Int) {
+        guard let activeService = serviceService.activeService,
+              let sourceIndex = source.first,
+              sortOption == .service else { return }
+        
+        // Get the current ordered list of hymns for this service
+        let serviceHymns = serviceService.serviceHymns
+            .filter { $0.serviceId == activeService.id }
+            .sorted { $0.order < $1.order }
+        
+        // Validate indices
+        guard sourceIndex < serviceHymns.count,
+              destination <= serviceHymns.count else {
+            print("Invalid reorder indices: source \(sourceIndex), destination \(destination)")
+            return
+        }
+        
+        // Adjust destination if moving down
+        let adjustedDestination = destination > sourceIndex ? destination - 1 : destination
+        
+        // Create reordered array of hymn IDs
+        var reorderedHymnIds = serviceHymns.map { $0.hymnId }
+        let movedHymnId = reorderedHymnIds.remove(at: sourceIndex)
+        reorderedHymnIds.insert(movedHymnId, at: adjustedDestination)
+        
+        // Apply reordering
+        Task {
+            let success = await serviceService.reorderServiceHymns(serviceId: activeService.id, hymnIds: reorderedHymnIds)
+            if success {
+                print("Successfully reordered service hymns")
+                
+                // Provide haptic feedback for successful reorder
+                await MainActor.run {
+                    let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                    impactFeedback.impactOccurred()
+                }
+            } else {
+                print("Failed to reorder service hymns")
+                
+                // Provide error haptic feedback
+                await MainActor.run {
+                    let notificationFeedback = UINotificationFeedbackGenerator()
+                    notificationFeedback.notificationOccurred(.error)
+                }
+            }
+        }
     }
 }
 
@@ -1090,6 +1382,9 @@ struct HymnRowView: View {
     let isSelected: Bool
     let isMarkedForDelete: Bool
     let isMultiSelectMode: Bool
+    let isReorderMode: Bool
+    let servicePosition: Int?
+    let showServicePosition: Bool
     let onTap: () -> Void
     let onEdit: () -> Void
     let onDelete: () -> Void
@@ -1126,7 +1421,19 @@ struct HymnRowView: View {
             
             Spacer()
             
-            if !isMultiSelectMode {
+            // Service position indicator
+            if showServicePosition, let position = servicePosition {
+                Text("#\(position)")
+                    .font(.caption2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Color.green)
+                    .cornerRadius(4)
+            }
+            
+            if !isMultiSelectMode && !isReorderMode {
                 Menu {
                     Button("Present", action: onPresent)
                     Button("Edit", action: onEdit)
@@ -1136,6 +1443,13 @@ struct HymnRowView: View {
                         .foregroundColor(.secondary)
                 }
             }
+            
+            // Show reorder indicator when in reorder mode
+            if isReorderMode {
+                Image(systemName: "line.3.horizontal")
+                    .foregroundColor(.orange)
+                    .font(.title3)
+            }
         }
         .contentShape(Rectangle())
         .onTapGesture {
@@ -1144,7 +1458,10 @@ struct HymnRowView: View {
         .onLongPressGesture {
             onLongPress()
         }
-        .listRowBackground(isSelected ? Color.accentColor.opacity(0.1) : nil)
+        .listRowBackground(
+            isSelected ? Color.accentColor.opacity(0.1) : 
+            isReorderMode ? Color.orange.opacity(0.05) : nil
+        )
     }
 }
 
@@ -1350,7 +1667,7 @@ struct HymnToolbarViewNew: View {
                 .help(externalDisplayHelpText)
                 
                 // Worship Session Control
-                CompactWorshipSessionControl()
+                CompactWorshipSessionControl(serviceService: serviceService)
                 
                 // Font Size Controls with label
                 Menu {

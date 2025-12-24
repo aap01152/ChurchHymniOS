@@ -86,7 +86,9 @@ struct ServiceManagementView: View {
                 }
             )
         }
-        .sheet(isPresented: $showingServiceDetails) {
+        .sheet(isPresented: $showingServiceDetails, onDismiss: {
+            selectedService = nil
+        }) {
             if let service = selectedService {
                 ServiceDetailsView(
                     service: service,
@@ -101,6 +103,12 @@ struct ServiceManagementView: View {
             }
             if hymnService.hymns.isEmpty && !hymnService.isLoading {
                 await hymnService.loadHymns()
+            }
+        }
+        .onAppear {
+            // Refresh services when view appears to ensure data is current
+            Task {
+                await serviceService.loadServices()
             }
         }
         .onChange(of: serviceService.activeService) { _, newActiveService in
@@ -318,6 +326,11 @@ struct ServicesList: View {
                             Task {
                                 await serviceService.setActiveService(service)
                             }
+                        },
+                        onDelete: {
+                            Task {
+                                await serviceService.deleteService(service)
+                            }
                         }
                     )
                 }
@@ -334,6 +347,9 @@ struct ServiceRowView: View {
     let isActive: Bool
     let onTap: () -> Void
     let onSetActive: () -> Void
+    let onDelete: () -> Void
+    
+    @State private var showingDeleteAlert = false
     
     var body: some View {
         HStack {
@@ -369,7 +385,7 @@ struct ServiceRowView: View {
             
             Spacer()
             
-            VStack {
+            VStack(spacing: 4) {
                 if !isActive {
                     Button("Activate") {
                         onSetActive()
@@ -383,11 +399,26 @@ struct ServiceRowView: View {
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
+                
+                Button("Delete") {
+                    showingDeleteAlert = true
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .foregroundColor(.red)
             }
         }
         .contentShape(Rectangle())
         .onTapGesture {
             onTap()
+        }
+        .alert("Delete Service", isPresented: $showingDeleteAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                onDelete()
+            }
+        } message: {
+            Text("Are you sure you want to delete '\(service.displayTitle)'? This action cannot be undone.")
         }
     }
 }
@@ -444,56 +475,75 @@ struct ServiceDetailsView: View {
     
     @Environment(\.dismiss) private var dismiss
     @State private var showingAddHymn = false
+    @State private var localServiceHymns: [ServiceHymn] = []
+    @State private var isLoading = false
     
-    var serviceHymns: [ServiceHymn] {
-        serviceService.serviceHymns.filter { $0.serviceId == service.id }
-            .sorted { $0.order < $1.order }
+    var currentService: WorshipService? {
+        serviceService.services.first { $0.id == service.id }
+    }
+    
+    func loadLocalServiceHymns() async {
+        isLoading = true
+        do {
+            // Use the serviceHymnRepository directly to get hymns for this specific service
+            let hymns = try await serviceService.serviceHymnRepository.getServiceHymns(for: service.id)
+            await MainActor.run {
+                localServiceHymns = hymns.sorted { $0.order < $1.order }
+                isLoading = false
+            }
+        } catch {
+            await MainActor.run {
+                localServiceHymns = []
+                isLoading = false
+            }
+        }
     }
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
-                // Service Info Header
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text(service.displayTitle)
-                                .font(.title2)
-                                .fontWeight(.bold)
+        Group {
+            if let currentService = currentService {
+                VStack(spacing: 0) {
+                    // Service Info Header
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text(currentService.displayTitle)
+                                    .font(.title2)
+                                    .fontWeight(.bold)
+                                
+                                Text(currentService.date.formatted(date: .complete, time: .omitted))
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
                             
-                            Text(service.date.formatted(date: .complete, time: .omitted))
-                                .font(.subheadline)
+                            Spacer()
+                            
+                            if currentService.isActive {
+                                Text("ACTIVE")
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Color.accentColor)
+                                    .cornerRadius(6)
+                            }
+                        }
+                        
+                        if let notes = currentService.notes, !notes.isEmpty {
+                            Text(notes)
+                                .font(.body)
                                 .foregroundColor(.secondary)
-                        }
-                        
-                        Spacer()
-                        
-                        if service.isActive {
-                            Text("ACTIVE")
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Color.accentColor)
-                                .cornerRadius(6)
+                                .padding(.top, 4)
                         }
                     }
-                    
-                    if let notes = service.notes, !notes.isEmpty {
-                        Text(notes)
-                            .font(.body)
-                            .foregroundColor(.secondary)
-                            .padding(.top, 4)
-                    }
-                }
-                .padding()
-                .background(Color(.secondarySystemBackground))
+                    .padding()
+                    .background(Color(.secondarySystemBackground))
                 
                 // Hymns Section
                 VStack(alignment: .leading, spacing: 0) {
                     HStack {
-                        Text("Hymns (\(serviceHymns.count))")
+                        Text("Hymns (\(localServiceHymns.count))")
                             .font(.headline)
                             .fontWeight(.semibold)
                         
@@ -507,7 +557,7 @@ struct ServiceDetailsView: View {
                     }
                     .padding()
                     
-                    if serviceHymns.isEmpty {
+                    if localServiceHymns.isEmpty {
                         VStack(spacing: 16) {
                             Image(systemName: "music.note.list")
                                 .font(.system(size: 32))
@@ -530,7 +580,7 @@ struct ServiceDetailsView: View {
                         .padding()
                     } else {
                         List {
-                            ForEach(serviceHymns, id: \.id) { serviceHymn in
+                            ForEach(localServiceHymns, id: \.id) { serviceHymn in
                                 ServiceHymnRowView(
                                     serviceHymn: serviceHymn,
                                     hymn: hymnService.hymns.first { $0.id == serviceHymn.hymnId },
@@ -540,18 +590,22 @@ struct ServiceDetailsView: View {
                                                 hymnId: serviceHymn.hymnId,
                                                 serviceId: service.id
                                             )
+                                            // Refresh local hymns after removing
+                                            await loadLocalServiceHymns()
                                         }
                                     }
                                 )
                             }
                             .onMove { source, destination in
                                 Task {
-                                    let movedHymns = Array(serviceHymns)
+                                    let movedHymns = Array(localServiceHymns)
                                     var reorderedHymns = movedHymns
                                     reorderedHymns.move(fromOffsets: source, toOffset: destination)
                                     
                                     let hymnIds = reorderedHymns.map { $0.hymnId }
                                     _ = await serviceService.reorderServiceHymns(serviceId: service.id, hymnIds: hymnIds)
+                                    // Refresh local hymns after reordering
+                                    await loadLocalServiceHymns()
                                 }
                             }
                         }
@@ -562,6 +616,42 @@ struct ServiceDetailsView: View {
             .navigationTitle("Service Details")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Close") {
+                        dismiss()
+                    }
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        } else {
+            VStack(spacing: 16) {
+                Image(systemName: "exclamationmark.triangle")
+                    .font(.system(size: 32))
+                    .foregroundColor(.secondary)
+                
+                Text("Service Not Found")
+                    .font(.headline)
+                
+                Text("The service details could not be loaded.")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                
+                Button("Close") {
+                    dismiss()
+                }
+                .buttonStyle(.borderedProminent)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding()
+            .navigationTitle("Service Details")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
                         dismiss()
@@ -569,9 +659,16 @@ struct ServiceDetailsView: View {
                 }
             }
         }
+        }
         .task {
             // Load service hymns when the details view appears
-            await serviceService.loadServiceHymns(for: service.id)
+            await loadLocalServiceHymns()
+        }
+        .onAppear {
+            // Ensure hymns are loaded when view appears
+            Task {
+                await loadLocalServiceHymns()
+            }
         }
         .sheet(isPresented: $showingAddHymn) {
             AddHymnToServiceSheet(
@@ -582,6 +679,8 @@ struct ServiceDetailsView: View {
                             hymnId: hymn.id,
                             serviceId: service.id
                         )
+                        // Refresh local hymns after adding
+                        await loadLocalServiceHymns()
                     }
                 }
             )

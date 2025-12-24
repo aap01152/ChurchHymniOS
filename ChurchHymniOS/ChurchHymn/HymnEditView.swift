@@ -11,11 +11,13 @@ struct HymnEditView: View {
     @Environment(\.dismiss) private var dismiss
     @Bindable var hymn: Hymn
     var onSave: ((Hymn) -> Void)?
+    var onCancel: (() -> Void)?
     @State private var songNumberText: String = ""
 
-    init(hymn: Hymn, onSave: ((Hymn) -> Void)? = nil) {
+    init(hymn: Hymn, onSave: ((Hymn) -> Void)? = nil, onCancel: (() -> Void)? = nil) {
         self._hymn = Bindable(wrappedValue: hymn)
         self.onSave = onSave
+        self.onCancel = onCancel
         // Initialize songNumberText with the current value if it exists
         self._songNumberText = State(initialValue: hymn.songNumber.map(String.init) ?? "")
     }
@@ -91,7 +93,16 @@ struct HymnEditView: View {
                                 
                                 TextField(NSLocalizedString("placeholder.tags", comment: "Tags placeholder"), text: Binding(
                                     get: { hymn.tags?.joined(separator: ", ") ?? "" },
-                                    set: { hymn.tags = $0.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) } }
+                                    set: { 
+                                        let trimmedInput = $0.trimmingCharacters(in: .whitespacesAndNewlines)
+                                        if trimmedInput.isEmpty {
+                                            hymn.tags = nil
+                                        } else {
+                                            hymn.tags = trimmedInput.split(separator: ",")
+                                                .map { String($0.trimmingCharacters(in: .whitespaces)) }
+                                                .filter { !$0.isEmpty }
+                                        }
+                                    }
                                 ))
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .font(.body)
@@ -147,6 +158,7 @@ struct HymnEditView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(NSLocalizedString("btn.cancel", comment: "Cancel button")) {
+                        onCancel?()
                         dismiss()
                     }
                     .font(.body)
@@ -155,7 +167,7 @@ struct HymnEditView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(NSLocalizedString("btn.save", comment: "Save button")) {
                         onSave?(hymn)
-                        dismiss()
+                        // Don't auto-dismiss, let ContentView handle it after successful save
                     }
                     .font(.body)
                     .fontWeight(.semibold)

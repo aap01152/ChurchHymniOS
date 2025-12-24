@@ -11,6 +11,7 @@ import SwiftUI
 struct WorshipSessionControls: View {
     @EnvironmentObject private var externalDisplayManager: ExternalDisplayManager
     @EnvironmentObject private var worshipSessionManager: WorshipSessionManager
+    @ObservedObject var serviceService: ServiceService
     @State private var showingErrorAlert = false
     @State private var errorMessage = ""
     
@@ -181,7 +182,8 @@ struct WorshipSessionControls: View {
         case .disconnected:
             return Color.gray.opacity(0.2)
         case .connected:
-            return Color.green
+            // Only green if we can actually start worship session (has hymns)
+            return hasActiveServiceWithHymns ? Color.green : Color.gray.opacity(0.2)
         case .presenting:
             return Color.orange
         case .worshipMode, .worshipPresenting:
@@ -194,7 +196,8 @@ struct WorshipSessionControls: View {
         case .disconnected:
             return .gray
         case .connected:
-            return .white
+            // Gray text if we can't start worship session (no hymns)
+            return hasActiveServiceWithHymns ? .white : .gray
         case .presenting:
             return .white
         case .worshipMode, .worshipPresenting:
@@ -207,7 +210,11 @@ struct WorshipSessionControls: View {
         case .disconnected:
             return "Connect an external display first"
         case .connected:
-            return "Start worship session with background display"
+            if hasActiveServiceWithHymns {
+                return "Start worship session with background display"
+            } else {
+                return "Add hymns to your active service before starting worship session"
+            }
         case .presenting:
             return "Stop current presentation to enable worship session"
         case .worshipMode:
@@ -218,12 +225,26 @@ struct WorshipSessionControls: View {
     }
     
     private var canToggleWorshipSession: Bool {
+        // First check external display state
         switch externalDisplayManager.state {
         case .disconnected:
             return false
-        case .connected, .presenting, .worshipMode, .worshipPresenting:
+        case .connected:
+            // For starting worship session, also check if service has hymns
+            return hasActiveServiceWithHymns
+        case .presenting, .worshipMode, .worshipPresenting:
+            // Can always stop or change modes
             return true
         }
+    }
+    
+    private var hasActiveServiceWithHymns: Bool {
+        guard let activeService = serviceService.activeService else {
+            return false
+        }
+        
+        let hymnCount = serviceService.serviceHymns.filter { $0.serviceId == activeService.id }.count
+        return hymnCount > 0
     }
     
     private var worshipSessionBackgroundColor: Color {
@@ -286,6 +307,7 @@ struct WorshipSessionControls: View {
 struct CompactWorshipSessionControl: View {
     @EnvironmentObject private var externalDisplayManager: ExternalDisplayManager
     @EnvironmentObject private var worshipSessionManager: WorshipSessionManager
+    @ObservedObject var serviceService: ServiceService
     @State private var showingErrorAlert = false
     @State private var errorMessage = ""
     
@@ -358,11 +380,24 @@ struct CompactWorshipSessionControl: View {
         }
     }
     
+    private var hasActiveServiceWithHymns: Bool {
+        guard let activeService = serviceService.activeService else {
+            return false
+        }
+        
+        let hymnCount = serviceService.serviceHymns.filter { $0.serviceId == activeService.id }.count
+        return hymnCount > 0
+    }
+    
     private var canToggleWorshipSession: Bool {
         switch externalDisplayManager.state {
         case .disconnected, .presenting:
             return false
-        case .connected, .worshipMode, .worshipPresenting:
+        case .connected:
+            // For starting worship session, also check if service has hymns
+            return hasActiveServiceWithHymns
+        case .worshipMode, .worshipPresenting:
+            // Can always stop or change modes
             return true
         }
     }
@@ -389,11 +424,6 @@ struct CompactWorshipSessionControl: View {
 }
 
 #Preview {
-    VStack(spacing: 20) {
-        WorshipSessionControls()
-        CompactWorshipSessionControl()
-    }
-    .padding()
-    .environmentObject(ExternalDisplayManager())
-    .environmentObject(WorshipSessionManager(externalDisplayManager: ExternalDisplayManager()))
+    Text("WorshipSessionControls Preview")
+        .foregroundColor(.secondary)
 }
