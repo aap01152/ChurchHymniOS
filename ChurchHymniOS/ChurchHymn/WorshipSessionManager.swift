@@ -65,6 +65,9 @@ final class WorshipSessionManager: ObservableObject {
     /// Current hymn being presented in worship session (if any)
     @Published var currentWorshipHymn: Hymn?
     
+    /// List of hymns presented during current worship session
+    @Published private(set) var presentedHymns: [String] = []
+    
     // MARK: - Dependencies
     
     private let externalDisplayManager: ExternalDisplayManager
@@ -150,6 +153,9 @@ final class WorshipSessionManager: ObservableObject {
             isWorshipSessionActive = true
             currentWorshipHymn = nil
             
+            // Reset worship hymns history for new session
+            presentedHymns.removeAll()
+            
             print("✅ Worship session started successfully")
         } catch {
             print("❌ Failed to start worship session: \(error.localizedDescription)")
@@ -199,7 +205,12 @@ final class WorshipSessionManager: ObservableObject {
             // Update current hymn
             currentWorshipHymn = hymn
             
-            print("Hymn '\(hymn.title)' presented in worship session")
+            // Track hymn in worship history (avoid duplicates)
+            if !presentedHymns.contains(hymn.title) {
+                presentedHymns.append(hymn.title)
+            }
+            
+            print("Hymn '\(hymn.title)' presented in worship session (total presented: \(presentedHymns.count))")
         } catch {
             print("Failed to present hymn in worship session: \(error.localizedDescription)")
         }
@@ -280,5 +291,20 @@ final class WorshipSessionManager: ObservableObject {
     func goToVerse(_ index: Int) {
         guard isWorshipSessionActive && externalDisplayManager.state == .worshipPresenting else { return }
         externalDisplayManager.goToVerse(index)
+    }
+    
+    // MARK: - Worship History
+    
+    /// Get the current worship session hymns history as JSON string
+    func getWorshipHymnsHistoryJSON() -> String? {
+        guard !presentedHymns.isEmpty else { return nil }
+        
+        do {
+            let jsonData = try JSONEncoder().encode(presentedHymns)
+            return String(data: jsonData, encoding: .utf8)
+        } catch {
+            print("Failed to encode worship hymns history: \(error)")
+            return nil
+        }
     }
 }

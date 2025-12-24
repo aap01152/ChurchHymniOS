@@ -340,7 +340,7 @@ class ServiceService: ObservableObject {
         }
     }
     
-    func completeService(_ serviceId: UUID) async -> Bool {
+    func completeService(_ serviceId: UUID, worshipHymnsHistory: String? = nil) async -> Bool {
         guard !isPerformingServiceOperation else { return false }
         
         isPerformingServiceOperation = true
@@ -352,6 +352,7 @@ class ServiceService: ObservableObject {
                 var updatedService = service
                 updatedService.isCompleted = true
                 updatedService.completedAt = Date()
+                updatedService.worshipHymnsHistory = worshipHymnsHistory
                 
                 let completedService = try await serviceRepository.updateService(updatedService)
                 

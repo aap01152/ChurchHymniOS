@@ -518,15 +518,34 @@ struct ServiceDetailsView: View {
                             
                             Spacer()
                             
-                            if currentService.isActive {
-                                Text("ACTIVE")
-                                    .font(.caption)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(Color.accentColor)
-                                    .cornerRadius(6)
+                            VStack(alignment: .trailing, spacing: 4) {
+                                if currentService.isActive {
+                                    Text("ACTIVE")
+                                        .font(.caption)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(Color.accentColor)
+                                        .cornerRadius(6)
+                                }
+                                
+                                if currentService.isCompleted {
+                                    Text("COMPLETED")
+                                        .font(.caption)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(Color.green)
+                                        .cornerRadius(6)
+                                        
+                                    if let completedAt = currentService.completedAt {
+                                        Text("Completed \(completedAt.formatted(date: .abbreviated, time: .shortened))")
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
                             }
                         }
                         
@@ -535,6 +554,11 @@ struct ServiceDetailsView: View {
                                 .font(.body)
                                 .foregroundColor(.secondary)
                                 .padding(.top, 4)
+                        }
+                        
+                        // Worship History Section (for completed services)
+                        if currentService.isCompleted && !currentService.worshipHymnsUsed.isEmpty {
+                            worshipHistorySection(for: currentService)
                         }
                     }
                     .padding()
@@ -685,6 +709,42 @@ struct ServiceDetailsView: View {
                 }
             )
         }
+    }
+    
+    // MARK: - Helper Views
+    
+    @ViewBuilder
+    private func worshipHistorySection(for service: WorshipService) -> some View {
+        Divider()
+            .padding(.top, 8)
+        
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "music.note")
+                    .foregroundColor(.green)
+                Text("Hymns Presented During Worship")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+            }
+            
+            VStack(alignment: .leading, spacing: 4) {
+                ForEach(Array(service.worshipHymnsUsed.enumerated()), id: \.offset) { index, hymnTitle in
+                    HStack {
+                        Text("\(index + 1).")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .frame(width: 20, alignment: .leading)
+                        
+                        Text(hymnTitle)
+                            .font(.body)
+                        
+                        Spacer()
+                    }
+                }
+            }
+            .padding(.leading, 24)
+        }
+        .padding(.top, 8)
     }
 }
 

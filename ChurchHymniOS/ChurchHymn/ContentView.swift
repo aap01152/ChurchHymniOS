@@ -400,18 +400,13 @@ struct ContentView: View {
                 onAddNew: addNewHymn,
                 onEdit: editCurrentHymn
             )
-            .padding(.top, 16)
             
-            // Worship Session Controls (iPad only - prominent placement)
+            // Unified Control Banner (combines worship and external display controls)
             if externalDisplayManager.state != .disconnected {
-                WorshipSessionControls(serviceService: serviceService)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 8)
-            }
-            
-            // External Display Status Bar
-            if externalDisplayManager.state != .disconnected {
-                externalDisplayStatusView()
+                UnifiedControlBanner(
+                    serviceService: serviceService,
+                    selectedHymn: selected
+                )
             }
             
             Divider()
@@ -444,11 +439,13 @@ struct ContentView: View {
                 onAddNew: addNewHymn,
                 onEdit: editCurrentHymn
             )
-            .padding(.top, 16)
             
-            // External Display Status Bar
+            // Unified Control Banner (combines worship and external display controls)
             if externalDisplayManager.state != .disconnected {
-                externalDisplayStatusView()
+                UnifiedControlBanner(
+                    serviceService: serviceService,
+                    selectedHymn: selected
+                )
             }
             
             Divider()
@@ -456,15 +453,6 @@ struct ContentView: View {
         }
     }
     
-    @ViewBuilder
-    private func externalDisplayStatusView() -> some View {
-        VStack(spacing: 0) {
-            ExternalDisplayStatusBar(selectedHymn: selected)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-        }
-        .background(Color(.systemBackground))
-    }
     
     @ViewBuilder
     private func detailContentView() -> some View {
@@ -815,6 +803,7 @@ struct LoadingServicesView: View {
 // MARK: - New UI Components (Simplified implementations)
 
 struct HymnListViewNew: View {
+    @EnvironmentObject private var worshipSessionManager: WorshipSessionManager
     @ObservedObject var hymnService: HymnService
     @ObservedObject var serviceService: ServiceService
     
@@ -1283,15 +1272,7 @@ struct HymnListViewNew: View {
         .alert(NSLocalizedString("service.complete_title", comment: "Complete service title"), isPresented: $showingCompleteServiceConfirmation) {
             Button(NSLocalizedString("btn.cancel", comment: "Cancel"), role: .cancel) { }
             Button(NSLocalizedString("service.complete", comment: "Complete"), role: .destructive) {
-                Task {
-                    guard let activeService = serviceService.activeService else { return }
-                    let success = await serviceService.completeService(activeService.id)
-                    if success {
-                        showingServiceCompletedSuccess = true
-                    } else {
-                        print("Failed to complete service")
-                    }
-                }
+                completeCurrentService()
             }
         } message: {
             Text(NSLocalizedString("service.complete_message", comment: "Complete service confirmation message"))
@@ -1313,6 +1294,29 @@ struct HymnListViewNew: View {
         showingCompleteServiceConfirmation = true
     }
     
+    private func completeCurrentService() {
+        Task {
+            guard let activeService = serviceService.activeService else {
+                print("No active service to complete")
+                return
+            }
+            
+            // Get worship hymns history from worship session manager
+            let worshipHymnsHistory = worshipSessionManager.getWorshipHymnsHistoryJSON()
+            
+            // Complete the service with worship history
+            let success = await serviceService.completeService(activeService.id, worshipHymnsHistory: worshipHymnsHistory)
+            
+            await MainActor.run {
+                if success {
+                    showingServiceCompletedSuccess = true
+                    print("Service completed successfully with worship history")
+                } else {
+                    print("Failed to complete service")
+                }
+            }
+        }
+    }
     
     private func toggleServiceReorderMode() {
         // Switch to service sort when entering reorder mode
@@ -1493,214 +1497,193 @@ struct HymnToolbarViewNew: View {
     let onEdit: () -> Void
     
     var body: some View {
-        HStack(spacing: 20) {
-            // Primary action buttons - larger icons with labels
-            HStack(spacing: 20) {
-                // Present Button (most important)
-                Button(action: {
-                    if let hymn = selected {
-                        onPresent(hymn)
-                    }
-                }) {
-                    VStack(spacing: 6) {
-                        Image(systemName: "play.circle.fill")
-                            .font(.title)
-                            .foregroundColor(.green)
-                        Text("Present")
-                            .font(.caption)
-                            .foregroundColor(.primary)
-                    }
-                }
-                .disabled(selected == nil)
-                .help("Present selected hymn")
-                
-                // Add Button
-                Button(action: onAddNew) {
-                    VStack(spacing: 6) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.title)
-                            .foregroundColor(.blue)
-                        Text("Add")
-                            .font(.caption)
-                            .foregroundColor(.primary)
-                    }
-                }
-                .help("Add new hymn")
-                
-                // Edit Button
-                Button(action: onEdit) {
-                    VStack(spacing: 6) {
-                        Image(systemName: "pencil.circle.fill")
-                            .font(.title)
-                            .foregroundColor(selected == nil ? .gray : .orange)
-                        Text("Edit")
-                            .font(.caption)
-                            .foregroundColor(selected == nil ? .gray : .primary)
-                    }
-                }
-                .disabled(selected == nil)
-                .help("Edit selected hymn")
-                
-                // Delete Button
-                Button(action: {
-                    if isMultiSelectMode {
-                        if !selectedHymnsForDelete.isEmpty {
-                            showingBatchDeleteConfirmation = true
+        GeometryReader { geometry in
+            HStack(spacing: 0) {
+                // Evenly distributed buttons across the entire width
+                    // Present Button
+                    UniformToolbarButton(
+                        icon: "play.circle.fill",
+                        text: "Present",
+                        color: .green,
+                        action: {
+                            if let hymn = selected {
+                                onPresent(hymn)
+                            }
+                        },
+                        isEnabled: selected != nil
+                    )
+                    .help("Present selected hymn")
+                    
+                    // Add Button
+                    UniformToolbarButton(
+                        icon: "plus.circle.fill",
+                        text: "Add",
+                        color: .blue,
+                        action: onAddNew
+                    )
+                    .help("Add new hymn")
+                    
+                    // Edit Button
+                    UniformToolbarButton(
+                        icon: "pencil.circle.fill",
+                        text: "Edit",
+                        color: selected == nil ? .gray : .orange,
+                        action: onEdit,
+                        isEnabled: selected != nil
+                    )
+                    .help("Edit selected hymn")
+                    
+                    // Delete Button
+                    UniformToolbarButton(
+                        icon: "trash.circle.fill",
+                        text: "Delete",
+                        color: .red,
+                        action: {
+                            if isMultiSelectMode {
+                                if !selectedHymnsForDelete.isEmpty {
+                                    showingBatchDeleteConfirmation = true
+                                }
+                            } else if let hymn = selected {
+                                hymnToDelete = hymn
+                                showingDeleteConfirmation = true
+                            }
+                        },
+                        isEnabled: isMultiSelectMode ? !selectedHymnsForDelete.isEmpty : selected != nil
+                    )
+                    .help(isMultiSelectMode ? "Delete selected hymns" : "Delete selected hymn")
+                    
+                    // Import Button
+                    UniformToolbarButton(
+                        icon: "square.and.arrow.down.fill",
+                        text: "Import",
+                        color: .purple,
+                        action: {
+                            showingImporter = true
                         }
-                    } else if let hymn = selected {
-                        hymnToDelete = hymn
-                        showingDeleteConfirmation = true
-                    }
-                }) {
-                    VStack(spacing: 6) {
-                        Image(systemName: "trash.circle.fill")
-                            .font(.title)
-                            .foregroundColor(.red)
-                        Text("Delete")
-                            .font(.caption)
-                            .foregroundColor(.primary)
-                    }
-                }
-                .disabled(isMultiSelectMode ? selectedHymnsForDelete.isEmpty : selected == nil)
-                .help(isMultiSelectMode ? "Delete selected hymns" : "Delete selected hymn")
-            }
-            
-            Spacer()
-            
-            // Secondary actions with labels
-            HStack(spacing: 16) {
-                // Import Button
-                Button(action: {
-                    showingImporter = true
-                }) {
-                    VStack(spacing: 6) {
-                        Image(systemName: "square.and.arrow.down.fill")
-                            .font(.title)
-                            .foregroundColor(.purple)
-                        Text("Import")
-                            .font(.caption)
-                            .foregroundColor(.primary)
-                    }
-                }
-                .help("Import hymns from files")
-                
-                // Export Menu with label
-                Menu {
-                    Button("Export Selected") { 
-                        if let hymn = selected {
-                            selectedHymnsForExport = [hymn.id]
+                    )
+                    .help("Import hymns from files")
+                    
+                    // Export Menu
+                    Menu {
+                        Button("Export Selected") { 
+                            if let hymn = selected {
+                                selectedHymnsForExport = [hymn.id]
+                                showingExportSelection = true
+                            }
+                        }
+                        .disabled(selected == nil)
+                        
+                        Button("Export Multiple") { 
                             showingExportSelection = true
                         }
-                    }
-                    .disabled(selected == nil)
-                    
-                    Button("Export Multiple") { 
-                        showingExportSelection = true
-                    }
-                    .disabled(hymnService.hymns.isEmpty)
-                    
-                    Button("Export All") { 
-                        selectedHymnsForExport = Set(hymnService.hymns.map { $0.id })
-                        showingExportSelection = true
-                    }
-                    .disabled(hymnService.hymns.isEmpty)
-                    
-                    Divider()
-                    
-                    Button("Export Help") {
-                        helpSystem.showHelp(for: .exportingHymns)
-                    }
-                } label: {
-                    VStack(spacing: 6) {
-                        Image(systemName: "square.and.arrow.up.fill")
-                            .font(.title)
-                            .foregroundColor(.blue)
-                        Text("Export")
-                            .font(.caption)
-                            .foregroundColor(.primary)
-                    }
-                }
-                .help("Export hymns to files")
-                
-                // External Display Button with label
-                Button(action: {
-                    switch externalDisplayManager.state {
-                    case .disconnected:
-                        break
-                    case .connected:
-                        if let hymn = selected {
-                            do {
-                                try externalDisplayManager.startPresentation(hymn: hymn)
-                            } catch {
-                                print("External display error: \(error)")
-                            }
+                        .disabled(hymnService.hymns.isEmpty)
+                        
+                        Button("Export All") { 
+                            selectedHymnsForExport = Set(hymnService.hymns.map { $0.id })
+                            showingExportSelection = true
                         }
-                    case .presenting:
-                        externalDisplayManager.stopPresentation()
-                    case .worshipMode:
-                        if let hymn = selected {
-                            Task {
-                                do {
-                                    try await externalDisplayManager.presentHymnInWorshipMode(hymn)
-                                } catch {
-                                    print("Worship hymn presentation error: \(error)")
+                        .disabled(hymnService.hymns.isEmpty)
+                        
+                        Divider()
+                        
+                        Button("Export Help") {
+                            helpSystem.showHelp(for: .exportingHymns)
+                        }
+                    } label: {
+                        UniformToolbarButtonContent(
+                            icon: "square.and.arrow.up.fill",
+                            text: "Export",
+                            color: .blue
+                        )
+                    }
+                    .help("Export hymns to files")
+                    
+                    // External Display Button
+                    UniformToolbarButton(
+                        icon: externalDisplayIconName,
+                        text: externalDisplayText,
+                        color: externalDisplayColor,
+                        action: {
+                            switch externalDisplayManager.state {
+                            case .disconnected:
+                                break
+                            case .connected:
+                                if let hymn = selected {
+                                    do {
+                                        try externalDisplayManager.startPresentation(hymn: hymn)
+                                    } catch {
+                                        print("External display error: \(error)")
+                                    }
+                                }
+                            case .presenting:
+                                externalDisplayManager.stopPresentation()
+                            case .worshipMode:
+                                if let hymn = selected {
+                                    Task {
+                                        do {
+                                            try await externalDisplayManager.presentHymnInWorshipMode(hymn)
+                                        } catch {
+                                            print("Worship hymn presentation error: \(error)")
+                                        }
+                                    }
+                                }
+                            case .worshipPresenting:
+                                Task {
+                                    await externalDisplayManager.stopHymnInWorshipMode()
                                 }
                             }
-                        }
-                    case .worshipPresenting:
-                        Task {
-                            await externalDisplayManager.stopHymnInWorshipMode()
-                        }
-                    }
-                }) {
-                    VStack(spacing: 6) {
-                        Image(systemName: externalDisplayIconName)
-                            .font(.title)
-                            .foregroundColor(externalDisplayColor)
-                        Text(externalDisplayText)
-                            .font(.caption)
-                            .foregroundColor(.primary)
-                    }
-                }
-                .disabled(externalDisplayManager.state == .disconnected || 
-                         (externalDisplayManager.state == .connected && selected == nil))
-                .help(externalDisplayHelpText)
-                
-                // Worship Session Control
-                CompactWorshipSessionControl(serviceService: serviceService)
-                
-                // Font Size Controls with label
-                Menu {
-                    VStack(spacing: 12) {
-                        Text("Font Size: \(Int(lyricsFontSize))")
-                            .font(.headline)
-                        
-                        Slider(value: $lyricsFontSize, in: 12...32, step: 1)
-                    }
-                    .padding()
-                } label: {
-                    VStack(spacing: 6) {
-                        Image(systemName: "textformat.size")
-                            .font(.title)
-                            .foregroundColor(.secondary)
-                        Text("Font Size")
-                            .font(.caption)
-                            .foregroundColor(.primary)
-                    }
-                }
-                .help("Adjust font size")
-                
-                // Help Button (iPad only)
-                if UIDevice.current.userInterfaceIdiom == .pad {
-                    HelpButton(
-                        helpSystem: helpSystem,
-                        context: getHelpContext()
+                        },
+                        isEnabled: !(externalDisplayManager.state == .disconnected || 
+                                   (externalDisplayManager.state == .connected && selected == nil))
                     )
-                }
+                    .help(externalDisplayHelpText)
+                    
+                    // Worship Session Control
+                    UniformWorshipSessionControl(serviceService: serviceService)
+                    
+                    // Font Size Controls
+                    Menu {
+                        VStack(spacing: 12) {
+                            Text("Font Size: \(Int(lyricsFontSize))")
+                                .font(.headline)
+                            
+                            Slider(value: $lyricsFontSize, in: 12...32, step: 1)
+                        }
+                        .padding()
+                    } label: {
+                        UniformToolbarButtonContent(
+                            icon: "textformat.size",
+                            text: "Font\nSize",
+                            color: .secondary
+                        )
+                    }
+                    .help("Adjust font size")
+                    
+                    // Help Button (iPad only)
+                    if UIDevice.current.userInterfaceIdiom == .pad {
+                        Button(action: {
+                            if let context = getHelpContext() {
+                                let topic = helpSystem.getContextualHelp(for: context)
+                                helpSystem.showHelp(for: topic)
+                            } else {
+                                helpSystem.showHelp()
+                            }
+                        }) {
+                            UniformToolbarButtonContent(
+                                icon: "questionmark.circle.fill",
+                                text: "Help",
+                                color: .secondary
+                            )
+                        }
+                        .help("Get contextual help")
+                        .frame(maxWidth: .infinity)
+                    }
             }
+            .frame(width: geometry.size.width)
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 12)
+        .frame(height: 60)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 2)
     }
     
     // Helper computed properties for external display
@@ -1760,6 +1743,160 @@ struct HymnToolbarViewNew: View {
             return .serviceManagement
         }
         return nil
+    }
+}
+
+// MARK: - Uniform Toolbar Button Components
+
+struct UniformToolbarButton: View {
+    let icon: String
+    let text: String
+    let color: Color
+    let action: () -> Void
+    let isEnabled: Bool
+    
+    init(icon: String, text: String, color: Color, action: @escaping () -> Void, isEnabled: Bool = true) {
+        self.icon = icon
+        self.text = text
+        self.color = color
+        self.action = action
+        self.isEnabled = isEnabled
+    }
+    
+    var body: some View {
+        Button(action: action) {
+            UniformToolbarButtonContent(
+                icon: icon,
+                text: text,
+                color: isEnabled ? color : .gray
+            )
+        }
+        .disabled(!isEnabled)
+        .frame(maxWidth: .infinity)
+    }
+}
+
+struct UniformToolbarButtonContent: View {
+    let icon: String
+    let text: String
+    let color: Color
+    
+    var body: some View {
+        VStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.title3)
+                .foregroundColor(color)
+            
+            Text(text)
+                .font(.caption2)
+                .fontWeight(.medium)
+                .foregroundColor(.primary)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.8)
+        }
+        .frame(maxWidth: .infinity, minHeight: 44)
+        .padding(.horizontal, 4)
+        .padding(.vertical, 4)
+    }
+}
+
+struct UniformWorshipSessionControl: View {
+    @EnvironmentObject private var externalDisplayManager: ExternalDisplayManager
+    @EnvironmentObject private var worshipSessionManager: WorshipSessionManager
+    @ObservedObject var serviceService: ServiceService
+    @State private var showingErrorAlert = false
+    @State private var errorMessage = ""
+    
+    var body: some View {
+        Button(action: toggleWorshipSession) {
+            UniformToolbarButtonContent(
+                icon: worshipIcon,
+                text: worshipText,
+                color: worshipIconColor
+            )
+        }
+        .disabled(!canToggleWorshipSession)
+        .help(worshipHelpText)
+        .frame(maxWidth: .infinity)
+        .alert("Worship Session Error", isPresented: $showingErrorAlert) {
+            Button("OK") { }
+        } message: {
+            Text(errorMessage)
+        }
+    }
+    
+    private var worshipIcon: String {
+        switch externalDisplayManager.state {
+        case .disconnected, .connected:
+            return "play.circle.fill"
+        case .presenting, .worshipMode, .worshipPresenting:
+            return "stop.circle.fill"
+        }
+    }
+    
+    private var worshipIconColor: Color {
+        switch externalDisplayManager.state {
+        case .disconnected:
+            return .gray
+        case .connected:
+            return .green
+        case .presenting, .worshipMode, .worshipPresenting:
+            return .red
+        }
+    }
+    
+    private var worshipText: String {
+        switch externalDisplayManager.state {
+        case .disconnected:
+            return "Worship"
+        case .connected:
+            return canToggleWorshipSession ? "Start\nWorship" : "Worship"
+        case .presenting, .worshipMode, .worshipPresenting:
+            return "Stop\nWorship"
+        }
+    }
+    
+    private var canToggleWorshipSession: Bool {
+        switch externalDisplayManager.state {
+        case .disconnected:
+            return false
+        case .connected:
+            return worshipSessionManager.canStartWorshipSession
+        case .presenting, .worshipMode, .worshipPresenting:
+            return true
+        }
+    }
+    
+    private var worshipHelpText: String {
+        switch externalDisplayManager.state {
+        case .disconnected:
+            return "No external display available"
+        case .connected:
+            return canToggleWorshipSession ? "Start worship session" : "External display ready"
+        case .presenting, .worshipMode, .worshipPresenting:
+            return "Stop worship session"
+        }
+    }
+    
+    private func toggleWorshipSession() {
+        Task {
+            do {
+                switch externalDisplayManager.state {
+                case .disconnected, .connected:
+                    if worshipSessionManager.canStartWorshipSession {
+                        try await worshipSessionManager.startWorshipSession()
+                    }
+                case .presenting, .worshipMode, .worshipPresenting:
+                    await worshipSessionManager.stopWorshipSession()
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                    showingErrorAlert = true
+                }
+            }
+        }
     }
 }
 

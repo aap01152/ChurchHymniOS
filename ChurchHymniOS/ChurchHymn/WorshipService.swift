@@ -18,6 +18,7 @@ class WorshipService: Identifiable, Codable, @unchecked Sendable {
     var isCompleted: Bool
     var completedAt: Date?
     var notes: String?
+    var worshipHymnsHistory: String? // JSON string of hymns used during worship
     var createdAt: Date
     var updatedAt: Date
     var modelVersion: Int
@@ -30,6 +31,7 @@ class WorshipService: Identifiable, Codable, @unchecked Sendable {
         isCompleted: Bool = false,
         completedAt: Date? = nil,
         notes: String? = nil,
+        worshipHymnsHistory: String? = nil,
         modelVersion: Int = 1
     ) {
         self.id = id
@@ -39,6 +41,7 @@ class WorshipService: Identifiable, Codable, @unchecked Sendable {
         self.isCompleted = isCompleted
         self.completedAt = completedAt
         self.notes = notes?.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.worshipHymnsHistory = worshipHymnsHistory
         self.createdAt = Date()
         self.updatedAt = Date()
         self.modelVersion = modelVersion
@@ -68,6 +71,21 @@ class WorshipService: Identifiable, Codable, @unchecked Sendable {
         formatter.timeStyle = .none
         return formatter.string(from: date)
     }
+    
+    /// Computed property to get worship hymns used during this service
+    var worshipHymnsUsed: [String] {
+        guard let historyJson = worshipHymnsHistory,
+              let data = historyJson.data(using: .utf8) else {
+            return []
+        }
+        
+        do {
+            return try JSONDecoder().decode([String].self, from: data)
+        } catch {
+            print("Failed to decode worship hymns history: \(error)")
+            return []
+        }
+    }
 
     // MARK: - Update Methods
     
@@ -88,7 +106,7 @@ class WorshipService: Identifiable, Codable, @unchecked Sendable {
 
     // MARK: - Codable Implementation
     enum CodingKeys: String, CodingKey {
-        case id, title, date, isActive, isCompleted, completedAt, notes, createdAt, updatedAt, modelVersion
+        case id, title, date, isActive, isCompleted, completedAt, notes, worshipHymnsHistory, createdAt, updatedAt, modelVersion
     }
 
     required convenience init(from decoder: Decoder) throws {
@@ -100,6 +118,7 @@ class WorshipService: Identifiable, Codable, @unchecked Sendable {
         let isCompleted = try container.decodeIfPresent(Bool.self, forKey: .isCompleted) ?? false
         let completedAt = try container.decodeIfPresent(Date.self, forKey: .completedAt)
         let notes = try container.decodeIfPresent(String.self, forKey: .notes)
+        let worshipHymnsHistory = try container.decodeIfPresent(String.self, forKey: .worshipHymnsHistory)
         let modelVersion = try container.decodeIfPresent(Int.self, forKey: .modelVersion) ?? 1
         
         self.init(
@@ -110,6 +129,7 @@ class WorshipService: Identifiable, Codable, @unchecked Sendable {
             isCompleted: isCompleted,
             completedAt: completedAt,
             notes: notes,
+            worshipHymnsHistory: worshipHymnsHistory,
             modelVersion: modelVersion
         )
         
@@ -131,6 +151,7 @@ class WorshipService: Identifiable, Codable, @unchecked Sendable {
         try container.encode(isCompleted, forKey: .isCompleted)
         try container.encodeIfPresent(completedAt, forKey: .completedAt)
         try container.encodeIfPresent(notes, forKey: .notes)
+        try container.encodeIfPresent(worshipHymnsHistory, forKey: .worshipHymnsHistory)
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(updatedAt, forKey: .updatedAt)
         try container.encode(modelVersion, forKey: .modelVersion)
