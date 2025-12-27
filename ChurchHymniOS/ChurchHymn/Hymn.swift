@@ -13,7 +13,8 @@ import Foundation
 class Hymn: Identifiable, Codable, @unchecked Sendable {
     @Attribute(.unique) var id: UUID
     // Store a normalized (e.g. lowercase + trimmed) title for lookups
-    @Attribute(.unique) var normalizedTitle: String
+    // Note: Removed .unique constraint to prevent SwiftData from replacing hymns
+    var normalizedTitle: String
     var title: String
     var lyrics: String?
     var musicalKey: String?
@@ -35,7 +36,7 @@ class Hymn: Identifiable, Codable, @unchecked Sendable {
         tags: [String]? = nil,
         notes: String? = nil,
         songNumber: Int? = nil,
-        modelVersion: Int = 2
+        modelVersion: Int = 3
     ) {
         let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
         self.id = id

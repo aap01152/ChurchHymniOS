@@ -69,18 +69,17 @@ class HymnService: ObservableObject {
             
             let createdHymn = try await repository.createHymn(hymn)
             
-            // Check if hymn is already in the array to prevent duplicates
-            if let existingIndex = self.hymns.firstIndex(where: { $0.id == createdHymn.id }) {
-                print("Warning: Hymn \(createdHymn.title) already exists in hymns array at index \(existingIndex)")
-                print("Existing hymn: \(self.hymns[existingIndex].title) (ID: \(self.hymns[existingIndex].id))")
-                print("Created hymn: \(createdHymn.title) (ID: \(createdHymn.id))")
-                // Replace the existing hymn instead of ignoring
-                self.hymns[existingIndex] = createdHymn
-                self.hymns.sort { $0.title < $1.title }
-            } else {
-                self.hymns.append(createdHymn)
-                self.hymns.sort { $0.title < $1.title }
-            }
+            print("DEBUG: Hymn created in repository. ID: \(createdHymn.id.uuidString), Title: '\(createdHymn.title)'")
+            print("DEBUG: Current hymns array has \(self.hymns.count) items before refresh")
+            
+            // CRITICAL FIX: Reload fresh data from repository to ensure consistency
+            let freshHymns = try await repository.getAllHymns()
+            print("DEBUG: Repository now contains \(freshHymns.count) hymns")
+            
+            // Update our local array with fresh data
+            self.hymns = freshHymns
+            print("✅ Hymns array refreshed from repository")
+            print("DEBUG: Final hymns array has \(self.hymns.count) items")
             
             isLoading = false
             return true
