@@ -35,7 +35,7 @@ struct ServiceQuickAddView: View {
                     // Hymn is already in service - show position and remove option
                     HStack(spacing: 6) {
                         Image(systemName: "checkmark.circle.fill")
-                            .font(.caption)
+                            .font(.caption
                             .foregroundColor(.green)
                         
                         Text("In Service")
