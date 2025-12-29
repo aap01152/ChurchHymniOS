@@ -60,135 +60,61 @@ struct ExternalDisplayStatusBar: View {
     @ViewBuilder
     private var connectionStatusIcon: some View {
         Group {
-            switch externalDisplayManager.state {
-            case .disconnected:
-                Image(systemName: "tv.slash")
-                    .font(.title2)
-                    .foregroundColor(.gray)
-            case .connected:
-                Image(systemName: "tv")
-                    .font(.title2)
-                    .foregroundColor(.blue)
-            case .presenting:
-                Image(systemName: "tv.fill")
-                    .font(.title2)
-                    .foregroundColor(.green)
-                    .symbolEffect(.pulse)
-            case .worshipMode:
-                Image(systemName: "tv.fill")
-                    .font(.title2)
-                    .foregroundColor(.purple)
-                    .symbolEffect(.pulse)
-            case .worshipPresenting:
-                Image(systemName: "tv.fill")
-                    .font(.title2)
-                    .foregroundColor(.green)
-                    .symbolEffect(.pulse)
-            }
+            Image(systemName: externalDisplayManager.state.systemIcon)
+                .font(.title2)
+                .foregroundColor(externalDisplayManager.state.stateColor)
+                .symbolEffect(.pulse, isActive: externalDisplayManager.state.isPresenting)
         }
         .frame(width: 32, height: 32)
+        .help("External Display Status: \(externalDisplayManager.state.displayName)")
     }
     
     private var statusTitle: String {
-        switch externalDisplayManager.state {
-        case .disconnected:
-            return "No External Display"
-        case .connected:
-            return "External Display Ready"
-        case .presenting:
-            if let hymn = externalDisplayManager.currentHymn {
-                return "Presenting: \(hymn.title)"
-            } else {
-                return "Presenting to External Display"
-            }
-        case .worshipMode:
-            return "Worship Session Active"
-        case .worshipPresenting:
-            if let hymn = externalDisplayManager.currentHymn {
-                return "Worship: \(hymn.title)"
-            } else {
-                return "Worship Session - Presenting"
-            }
+        let baseTitle = externalDisplayManager.state.displayName
+        
+        if let hymn = externalDisplayManager.currentHymn,
+           externalDisplayManager.state.isPresenting {
+            return "\(baseTitle): \(hymn.title)"
+        } else {
+            return baseTitle
         }
     }
     
     private var statusSubtitle: String {
-        switch externalDisplayManager.state {
-        case .disconnected:
-            return "Connect a projector or external monitor"
-        case .connected:
-            if let displayInfo = externalDisplayManager.externalDisplayInfo {
-                return displayInfo.description
-            } else {
-                return "Ready to present"
-            }
-        case .presenting:
-            return externalDisplayManager.currentVerseInfo
-        case .worshipMode:
-            return "Showing background - Ready for hymn presentation"
-        case .worshipPresenting:
+        // Use suggested actions for disconnected state, otherwise existing logic
+        if externalDisplayManager.state == .disconnected {
+            return externalDisplayManager.state.suggestedActions.first ?? "No external display"
+        }
+        
+        if let displayInfo = externalDisplayManager.externalDisplayInfo,
+           externalDisplayManager.state == .connected {
+            return displayInfo.description
+        }
+        
+        if externalDisplayManager.state.supportsVerseNavigation {
             return externalDisplayManager.currentVerseInfo
         }
+        
+        // Use suggested action for other states
+        return externalDisplayManager.state.suggestedActions.first ?? "External display active"
     }
     
     private var statusTextColor: Color {
-        switch externalDisplayManager.state {
-        case .disconnected:
-            return .gray
-        case .connected:
-            return .blue
-        case .presenting:
-            return .green
-        case .worshipMode:
-            return .purple
-        case .worshipPresenting:
-            return .green
-        }
+        return externalDisplayManager.state.stateColor
     }
     
     private var statusBackgroundColor: Color {
-        switch externalDisplayManager.state {
-        case .disconnected:
-            return Color(.systemGray6)
-        case .connected:
-            return Color.blue.opacity(0.1)
-        case .presenting:
-            return Color.green.opacity(0.1)
-        case .worshipMode:
-            return Color.purple.opacity(0.1)
-        case .worshipPresenting:
-            return Color.green.opacity(0.1)
-        }
+        return externalDisplayManager.state.stateColor.opacity(0.1)
     }
     
     private var statusBorderColor: Color {
-        switch externalDisplayManager.state {
-        case .disconnected:
-            return Color.gray.opacity(0.3)
-        case .connected:
-            return Color.blue.opacity(0.3)
-        case .presenting:
-            return Color.green.opacity(0.3)
-        case .worshipMode:
-            return Color.purple.opacity(0.3)
-        case .worshipPresenting:
-            return Color.green.opacity(0.3)
-        }
+        return externalDisplayManager.state.stateColor.opacity(0.3)
     }
     
     private var statusShadowColor: Color {
-        switch externalDisplayManager.state {
-        case .disconnected:
-            return Color.clear
-        case .connected:
-            return Color.blue.opacity(0.1)
-        case .presenting:
-            return Color.green.opacity(0.2)
-        case .worshipMode:
-            return Color.purple.opacity(0.2)
-        case .worshipPresenting:
-            return Color.green.opacity(0.2)
-        }
+        return externalDisplayManager.state == .disconnected ? 
+            Color.clear : 
+            externalDisplayManager.state.stateColor.opacity(0.2)
     }
     
     @ViewBuilder

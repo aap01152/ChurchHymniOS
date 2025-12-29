@@ -514,6 +514,9 @@ struct UnifiedControlBanner: View {
                 )
             }
             
+            // Present Current Hymn Button
+            PresentCurrentHymnButton(currentHymn: selectedHymn)
+            
             UniformControlButton(
                 icon: "stop.circle.fill",
                 text: "Stop\nWorship",
@@ -543,6 +546,9 @@ struct UnifiedControlBanner: View {
                 style: .secondary,
                 isEnabled: externalDisplayManager.canGoToNextVerse
             )
+            
+            // Present Current Hymn Button (for switching to different hymn)
+            PresentCurrentHymnButton(currentHymn: selectedHymn)
             
             UniformControlButton(
                 icon: "stop.circle.fill",

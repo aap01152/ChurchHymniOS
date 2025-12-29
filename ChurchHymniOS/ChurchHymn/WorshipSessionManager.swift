@@ -13,6 +13,7 @@ import Combine
 
 enum WorshipSessionError: LocalizedError {
     case sessionAlreadyActive
+    case sessionNotActive
     case externalDisplayNotReady(state: ExternalDisplayState)
     case noActiveService
     case serviceHasNoHymns
@@ -22,6 +23,8 @@ enum WorshipSessionError: LocalizedError {
         switch self {
         case .sessionAlreadyActive:
             return "Worship session is already active"
+        case .sessionNotActive:
+            return "No worship session is currently active"
         case .externalDisplayNotReady(let state):
             return "External display not ready for worship session. Current state: \(state.rawValue)"
         case .noActiveService:
@@ -37,6 +40,8 @@ enum WorshipSessionError: LocalizedError {
         switch self {
         case .sessionAlreadyActive:
             return "Stop the current worship session before starting a new one"
+        case .sessionNotActive:
+            return "Start a worship session first"
         case .externalDisplayNotReady:
             return "Ensure external display is connected and in ready state"
         case .noActiveService:
@@ -329,6 +334,55 @@ final class WorshipSessionManager: ObservableObject {
     func goToVerse(_ index: Int) {
         guard isWorshipSessionActive && externalDisplayManager.state == .worshipPresenting else { return }
         externalDisplayManager.goToVerse(index)
+    }
+    
+    // MARK: - Seamless Hymn Switching
+    
+    /// Present the currently viewed hymn on external display without stopping current presentation
+    /// This method enables seamless switching during worship sessions
+    func presentCurrentlyViewedHymn(_ hymn: Hymn, startingAtVerse: Int = 0) async throws {
+        // Validate worship session state
+        guard isWorshipSessionActive else {
+            throw WorshipSessionError.sessionNotActive
+        }
+        
+        // Validate external display capabilities
+        guard externalDisplayManager.state.supportsHymnSwitching || 
+              externalDisplayManager.state == .worshipMode else {
+            throw WorshipSessionError.externalDisplayNotReady(state: externalDisplayManager.state)
+        }
+        
+        print("🎵 Seamlessly switching to hymn: \(hymn.title)")
+        
+        do {
+            // Use existing seamless switching capability
+            try await externalDisplayManager.presentOrSwitchToHymn(hymn, startingAtVerse: startingAtVerse)
+            
+            // Update worship session state
+            currentWorshipHymn = hymn
+            
+            // Track hymn in worship history (avoid duplicates)
+            if !presentedHymns.contains(hymn.title) {
+                presentedHymns.append(hymn.title)
+            }
+            
+            // Save persistent state
+            saveCurrentState()
+            
+            print("✅ Successfully switched to hymn: \(hymn.title) in worship session")
+            
+        } catch {
+            print("❌ Failed to switch to hymn: \(hymn.title) - \(error.localizedDescription)")
+            throw WorshipSessionError.failedToStart(underlying: error)
+        }
+    }
+    
+    /// Check if a hymn can be seamlessly presented
+    func canPresentHymn(_ hymn: Hymn) -> Bool {
+        return isWorshipSessionActive && 
+               (externalDisplayManager.state.supportsHymnSwitching || 
+                externalDisplayManager.state == .worshipMode) &&
+               currentWorshipHymn?.id != hymn.id
     }
     
     // MARK: - State Recovery
