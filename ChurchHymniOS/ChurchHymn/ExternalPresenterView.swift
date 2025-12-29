@@ -38,13 +38,10 @@ struct ExternalPresenterView: View {
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
-                titleSection
-                    .frame(height: geometry.size.height * 0.1)
-                
                 Spacer()
                 
                 lyricsSection
-                    .frame(maxHeight: geometry.size.height * 0.9)
+                    .frame(maxHeight: .infinity)
                 
                 Spacer()
             }
@@ -54,22 +51,13 @@ struct ExternalPresenterView: View {
         .ignoresSafeArea()
     }
     
-    private var titleSection: some View {
-        Text(hymn.title)
-            .font(.system(size: 36, weight: .semibold, design: .rounded))
-            .foregroundColor(.white.opacity(0.8))
-            .multilineTextAlignment(.center)
-            .shadow(color: .black.opacity(0.5), radius: 1, x: 0, y: 1)
-            .padding(.horizontal, 20)
-            .padding(.top, 16)
-    }
     
     private var lyricsSection: some View {
         VStack {
             if !presentationParts.isEmpty && verseIndex < presentationParts.count {
                 let currentPart = presentationParts[verseIndex]
                 Text(currentPart.lines.joined(separator: "\n"))
-                    .font(.system(size: 80, weight: .heavy, design: .rounded))
+                    .font(.custom("Montserrat-Medium", size: 80))
                     .foregroundColor(.white)
                     .multilineTextAlignment(.center)
                     .lineSpacing(16) // Increased line spacing for better readability
@@ -79,7 +67,7 @@ struct ExternalPresenterView: View {
             } else if let lyrics = hymn.lyrics, !lyrics.isEmpty {
                 // Fallback for non-parsed lyrics
                 Text(lyrics)
-                    .font(.system(size: 72, weight: .heavy, design: .rounded))
+                    .font(.custom("Montserrat-Medium", size: 72))
                     .foregroundColor(.white)
                     .multilineTextAlignment(.center)
                     .lineSpacing(16)
@@ -90,12 +78,12 @@ struct ExternalPresenterView: View {
                 // No lyrics message in high contrast
                 VStack(spacing: 16) {
                     Text(NSLocalizedString("external.no_lyrics_available", comment: "No lyrics available message"))
-                        .font(.system(size: 56, weight: .bold, design: .rounded))
+                        .font(.custom("Montserrat-Medium", size: 56))
                         .foregroundColor(.red)
                         .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 1)
                     
                     Text(NSLocalizedString("external.check_hymn_content", comment: "Check hymn content message"))
-                        .font(.system(size: 32, weight: .medium, design: .rounded))
+                        .font(.custom("Montserrat-Medium", size: 32))
                         .foregroundColor(.yellow)
                         .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 1)
                 }

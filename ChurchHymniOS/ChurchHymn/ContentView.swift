@@ -846,14 +846,53 @@ struct ContentView: View {
         if let index = hymnService?.hymns.firstIndex(where: { $0.id == hymn.id }) {
             presentedHymnIndex = index
             
-            // If already presenting, just change the selected hymn
+            // Always check if we should handle external display switching
+            if externalDisplayManager.state.supportsHymnSwitching {
+                // External display is currently presenting - switch hymn seamlessly
+                Task {
+                    do {
+                        try await externalDisplayManager.presentOrSwitchToHymn(hymn)
+                        // Only update UI selection if external display switch succeeds
+                        await MainActor.run {
+                            selected = hymn
+                            print("Successfully switched external display to hymn: \(hymn.title)")
+                        }
+                    } catch {
+                        print("Failed to switch external display hymn: \(error)")
+                        // Don't update selected state - external display didn't change
+                    }
+                }
+                return
+            }
+            
+            // If already presenting locally, just change the selected hymn
             if isPresenting {
                 selected = hymn
-                print("Switching to hymn: \(hymn.title) during presentation")
+                
+                // Try to present on external display if available
+                Task {
+                    do {
+                        try await externalDisplayManager.presentOrSwitchToHymn(hymn)
+                    } catch {
+                        print("Failed to present external display hymn: \(error)")
+                    }
+                }
+                
+                print("Switched to hymn: \(hymn.title) during local presentation")
             } else {
                 // Start new presentation
                 selected = hymn // Ensure the hymn is selected before presenting
                 isPresenting = true
+                
+                // Try to present on external display if available
+                Task {
+                    do {
+                        try await externalDisplayManager.presentOrSwitchToHymn(hymn)
+                    } catch {
+                        print("Failed to present external display hymn: \(error)")
+                    }
+                }
+                
                 print("Starting presentation of hymn: \(hymn.title)")
             }
         }
@@ -2976,7 +3015,7 @@ struct HymnToolbarViewNew: View {
                                 if let hymn = selected {
                                     Task {
                                         do {
-                                            try await externalDisplayManager.presentHymnInWorshipMode(hymn)
+                                            try await externalDisplayManager.presentOrSwitchToHymn(hymn)
                                         } catch {
                                             print("Worship hymn presentation error: \(error)")
                                         }

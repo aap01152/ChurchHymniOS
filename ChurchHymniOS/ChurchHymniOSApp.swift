@@ -35,6 +35,19 @@ struct ChurchHymniOSApp: App {
                     .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
                         // Refresh external display state when app becomes active
                         externalDisplayManager.refreshExternalDisplayState()
+                        
+                        // Restore worship session state to keep managers in sync
+                        Task {
+                            await worshipSessionManager.restoreStateAfterAppBecomesActive()
+                        }
+                    }
+                    .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
+                        // Save state when app goes to background/screen locks
+                        worshipSessionManager.saveCurrentState()
+                    }
+                    .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { _ in
+                        // Save state when app enters background
+                        worshipSessionManager.saveCurrentState()
                     }
             } else {
                 LoadingView()

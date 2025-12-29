@@ -156,6 +156,9 @@ final class WorshipSessionManager: ObservableObject {
             // Reset worship hymns history for new session
             presentedHymns.removeAll()
             
+            // Save state
+            saveCurrentState()
+            
             print("✅ Worship session started successfully")
         } catch {
             print("❌ Failed to start worship session: \(error.localizedDescription)")
@@ -180,6 +183,9 @@ final class WorshipSessionManager: ObservableObject {
         isWorshipSessionActive = false
         currentWorshipHymn = nil
         
+        // Clear saved state when stopping worship session
+        externalDisplayManager.clearSavedState()
+        
         print("Worship session stopped")
     }
     
@@ -187,12 +193,38 @@ final class WorshipSessionManager: ObservableObject {
     
     /// Present a hymn within the active worship session
     /// After presentation ends, returns to worship background
+    /// Now supports seamless switching if already presenting
     func presentHymnInWorshipSession(_ hymn: Hymn, startingAtVerse: Int = 0) async {
         guard isWorshipSessionActive else {
             print("Cannot present hymn - no active worship session")
             return
         }
         
+        // Check if we should switch hymns during active worship presentation
+        if externalDisplayManager.state == .worshipPresenting {
+            do {
+                // Seamlessly switch to new hymn during worship session
+                try await externalDisplayManager.presentOrSwitchToHymn(hymn, startingAtVerse: startingAtVerse)
+                
+                // Update current hymn
+                currentWorshipHymn = hymn
+                
+                // Track hymn in worship history (avoid duplicates)
+                if !presentedHymns.contains(hymn.title) {
+                    presentedHymns.append(hymn.title)
+                }
+                
+                // Save updated state
+                saveCurrentState()
+                
+                print("Switched to hymn '\(hymn.title)' in worship session (total presented: \(presentedHymns.count))")
+            } catch {
+                print("Failed to switch hymn in worship session: \(error.localizedDescription)")
+            }
+            return
+        }
+        
+        // Original logic for starting new presentation
         guard externalDisplayManager.state == .worshipMode else {
             print("Cannot present hymn - worship session not in correct state")
             return
@@ -209,6 +241,9 @@ final class WorshipSessionManager: ObservableObject {
             if !presentedHymns.contains(hymn.title) {
                 presentedHymns.append(hymn.title)
             }
+            
+            // Save updated state
+            saveCurrentState()
             
             print("Hymn '\(hymn.title)' presented in worship session (total presented: \(presentedHymns.count))")
         } catch {
@@ -228,6 +263,9 @@ final class WorshipSessionManager: ObservableObject {
         
         // Clear current hymn
         currentWorshipHymn = nil
+        
+        // Save updated state (back to worship background)
+        saveCurrentState()
         
         print("Hymn presentation stopped - returned to worship background")
     }
@@ -291,6 +329,107 @@ final class WorshipSessionManager: ObservableObject {
     func goToVerse(_ index: Int) {
         guard isWorshipSessionActive && externalDisplayManager.state == .worshipPresenting else { return }
         externalDisplayManager.goToVerse(index)
+    }
+    
+    // MARK: - State Recovery
+    
+    /// Restore worship session state after app becomes active
+    /// This ensures the worship session manager stays in sync with external display manager
+    func restoreStateAfterAppBecomesActive() async {
+        print("Restoring worship session state...")
+        
+        // First, try to restore from saved persistent state
+        if let savedState = ExternalDisplayStateManager.loadState() {
+            await restoreFromSavedState(savedState)
+            return
+        }
+        
+        // Fallback to current in-memory state sync
+        await restoreFromCurrentState()
+    }
+    
+    /// Restore from saved persistent state
+    private func restoreFromSavedState(_ savedState: ExternalDisplayStateManager.PersistentState) async {
+        guard let savedExternalState = savedState.externalDisplayStateEnum else {
+            print("❌ Invalid saved external display state")
+            return
+        }
+        
+        print("📱 Restoring worship session from saved state: \(savedExternalState.rawValue)")
+        
+        // Restore worship session properties
+        isWorshipSessionActive = savedState.isWorshipSessionActive
+        presentedHymns = savedState.presentedHymns
+        
+        if savedExternalState == .worshipMode {
+            // Clear current hymn - we're back to background
+            currentWorshipHymn = nil
+            print("📱 Restored to worship background mode")
+            
+        } else if savedExternalState == .worshipPresenting, 
+                  let hymnId = savedState.currentHymnId,
+                  let hymnTitle = savedState.currentHymnTitle {
+            
+            // For now, we'll restore worship background and log the hymn that should be restored
+            // The actual hymn restoration will need to be handled by the UI layer when it has access to hymns
+            print("📱 Need to restore hymn presentation: \(hymnTitle) (ID: \(hymnId))")
+            print("📱 Falling back to worship background - UI will need to handle hymn restoration")
+            
+            // Set state to worship mode for now
+            externalDisplayManager.state = .worshipMode
+            currentWorshipHymn = nil
+        }
+        
+        print("📱 Worship session state restored: active=\(isWorshipSessionActive), hymn=\(currentWorshipHymn?.title ?? "none")")
+    }
+    
+    /// Fallback restoration from current in-memory state
+    private func restoreFromCurrentState() async {
+        let externalState = externalDisplayManager.state
+        let wasInWorshipMode = externalState.isWorshipSession
+        
+        print("📱 Restoring worship session from current state: external=\(externalState), current=\(isWorshipSessionActive)")
+        
+        // If external display indicates worship mode but we think we're not active, sync the state
+        if wasInWorshipMode && !isWorshipSessionActive {
+            print("Syncing worship session state - was active before app went to background")
+            isWorshipSessionActive = true
+        }
+        
+        // If external display is in worship mode but no hymn presenting, clear current hymn
+        if externalState == .worshipMode && currentWorshipHymn != nil {
+            print("Clearing current worship hymn - back to background")
+            currentWorshipHymn = nil
+        }
+        
+        // If external display is presenting a hymn in worship session, sync the current hymn
+        if externalState == .worshipPresenting, let externalHymn = externalDisplayManager.currentHymn {
+            if currentWorshipHymn?.id != externalHymn.id {
+                print("Syncing current worship hymn: \(externalHymn.title)")
+                currentWorshipHymn = externalHymn
+                
+                // Add to history if not already there
+                if !presentedHymns.contains(externalHymn.title) {
+                    presentedHymns.append(externalHymn.title)
+                }
+            }
+        }
+        
+        print("Worship session state restored: active=\(isWorshipSessionActive), external state=\(externalState), current hymn=\(currentWorshipHymn?.title ?? "none")")
+    }
+    
+    /// Save current worship session state
+    func saveCurrentState() {
+        guard isWorshipSessionActive else {
+            // Clear saved state when not in worship session
+            externalDisplayManager.clearSavedState()
+            return
+        }
+        
+        externalDisplayManager.saveCurrentState(
+            worshipSessionActive: isWorshipSessionActive,
+            presentedHymns: presentedHymns
+        )
     }
     
     // MARK: - Worship History

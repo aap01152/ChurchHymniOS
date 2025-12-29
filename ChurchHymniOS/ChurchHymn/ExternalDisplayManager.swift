@@ -32,6 +32,11 @@ class ExternalDisplayManager: ObservableObject {
         return state.canStartWorshipSession
     }
     
+    /// Whether hymn switching is currently supported
+    var canSwitchHymns: Bool {
+        return state.supportsHymnSwitching
+    }
+    
     init() {
         setupSceneNotifications()
         checkForExternalDisplays()
@@ -45,6 +50,148 @@ class ExternalDisplayManager: ObservableObject {
     func refreshExternalDisplayState() {
         print("Refreshing external display state...")
         checkForExternalDisplays()
+        
+        // Restore state if we were presenting something before app went to background
+        Task {
+            await restoreStateAfterAppBecomesActive()
+        }
+    }
+    
+    /// Save current state to persistent storage
+    func saveCurrentState(worshipSessionActive: Bool, presentedHymns: [String]) {
+        ExternalDisplayStateManager.saveState(
+            externalDisplayState: state,
+            worshipSessionActive: worshipSessionActive,
+            currentHymn: currentHymn,
+            currentVerseIndex: currentVerseIndex,
+            presentedHymns: presentedHymns
+        )
+    }
+    
+    /// Clear saved state
+    func clearSavedState() {
+        ExternalDisplayStateManager.clearState()
+    }
+    
+    /// Restore external display state after app becomes active
+    private func restoreStateAfterAppBecomesActive() async {
+        print("Restoring external display state: current=\(state)")
+        
+        // First, try to restore from saved persistent state
+        if let savedState = ExternalDisplayStateManager.loadState() {
+            await restoreFromSavedState(savedState)
+            return
+        }
+        
+        // Fallback to current in-memory state restoration
+        await restoreFromCurrentState()
+    }
+    
+    /// Restore state from saved persistent data
+    private func restoreFromSavedState(_ savedState: ExternalDisplayStateManager.PersistentState) async {
+        guard let savedExternalState = savedState.externalDisplayStateEnum else {
+            print("❌ Invalid saved external display state")
+            return
+        }
+        
+        print("📱 Restoring from saved state: \(savedExternalState.rawValue)")
+        
+        // Restore external display state
+        state = savedExternalState
+        currentVerseIndex = savedState.currentVerseIndex
+        
+        // Handle worship session states
+        if savedExternalState.isWorshipSession {
+            print("📱 Restoring worship session")
+            
+            // Ensure we have an external window
+            if externalWindow == nil, let displayInfo = externalDisplayInfo {
+                do {
+                    try createExternalWindow(for: displayInfo.scene)
+                } catch {
+                    print("Failed to recreate external window for saved worship session: \(error)")
+                    return
+                }
+            }
+            
+            if savedExternalState == .worshipMode {
+                // Restore worship background
+                print("📱 Showing worship background from saved state")
+                await showWorshipBackground()
+            } else if savedExternalState == .worshipPresenting {
+                // Need to find the hymn by ID and restore presentation
+                if let hymnId = savedState.currentHymnId {
+                    // For now, we'll need to get hymn from external source
+                    // This will be handled by the WorshipSessionManager
+                    print("📱 Need to restore hymn presentation: \(savedState.currentHymnTitle ?? hymnId)")
+                }
+            }
+        }
+    }
+    
+    /// Fallback restoration from current in-memory state
+    private func restoreFromCurrentState() async {
+        print("📱 Using fallback in-memory state restoration")
+        
+        // Handle worship session states
+        if state.isWorshipSession {
+            // Ensure we have an external window for any worship session state
+            if externalWindow == nil, let displayInfo = externalDisplayInfo {
+                do {
+                    try createExternalWindow(for: displayInfo.scene)
+                } catch {
+                    print("Failed to recreate external window for worship session: \(error)")
+                    return
+                }
+            }
+            
+            if state == .worshipMode {
+                // Restore worship background
+                print("Restoring worship background after app became active")
+                await showWorshipBackground()
+            } else if state == .worshipPresenting, let hymn = currentHymn {
+                // Restore hymn presentation within worship session
+                print("Restoring worship hymn presentation after app became active: \(hymn.title)")
+                await updateExternalDisplay()
+            }
+        }
+        // Handle regular presentation (non-worship)
+        else if state == .presenting, let hymn = currentHymn {
+            print("Restoring regular hymn presentation after app became active: \(hymn.title)")
+            
+            // Ensure we have an external window
+            if externalWindow == nil, let displayInfo = externalDisplayInfo {
+                do {
+                    try createExternalWindow(for: displayInfo.scene)
+                } catch {
+                    print("Failed to recreate external window: \(error)")
+                    return
+                }
+            }
+            
+            // Update the external display with current hymn
+            await updateExternalDisplay()
+        }
+    }
+    
+    /// Restore hymn presentation from saved state with hymn object
+    func restoreHymnPresentation(_ hymn: Hymn, verseIndex: Int) async {
+        currentHymn = hymn
+        currentVerseIndex = verseIndex
+        isPresenting = true
+        
+        // Ensure we have an external window
+        if externalWindow == nil, let displayInfo = externalDisplayInfo {
+            do {
+                try createExternalWindow(for: displayInfo.scene)
+            } catch {
+                print("Failed to recreate external window for hymn restoration: \(error)")
+                return
+            }
+        }
+        
+        await updateExternalDisplay()
+        print("📱 Restored hymn presentation: \(hymn.title)")
     }
     
     private func setupSceneNotifications() {
@@ -157,6 +304,53 @@ class ExternalDisplayManager: ObservableObject {
         }
     }
     
+    // MARK: - Hymn Switching Methods
+    
+    /// Switch to a different hymn during active presentation without stopping
+    func switchToHymn(_ newHymn: Hymn, startingAtVerse: Int = 0) throws {
+        guard state.supportsHymnSwitching else {
+            throw ExternalDisplayError.notCurrentlyPresenting
+        }
+        
+        // Update internal state
+        currentHymn = newHymn
+        currentVerseIndex = startingAtVerse
+        
+        // Refresh external display with new hymn
+        Task {
+            await updateExternalDisplay()
+        }
+        
+        print("Switched external display to hymn: \(newHymn.title)")
+    }
+    
+    /// Present a hymn or switch to it if already presenting
+    func presentOrSwitchToHymn(_ hymn: Hymn, startingAtVerse: Int = 0) async throws {
+        print("External display presentOrSwitchToHymn: \(hymn.title), state: \(state)")
+        
+        switch state {
+        case .connected:
+            print("Starting new presentation on connected external display")
+            try startPresentation(hymn: hymn, startingAtVerse: startingAtVerse)
+            
+        case .presenting:
+            print("Switching hymn during standard presentation")
+            try switchToHymn(hymn, startingAtVerse: startingAtVerse)
+            
+        case .worshipMode:
+            print("Presenting hymn in worship mode")
+            try await presentHymnInWorshipMode(hymn, startingAtVerse: startingAtVerse)
+            
+        case .worshipPresenting:
+            print("Switching hymn during worship presentation")
+            try switchToHymn(hymn, startingAtVerse: startingAtVerse)
+            
+        case .disconnected:
+            print("Cannot present: no external display connected")
+            throw ExternalDisplayError.noExternalDisplayFound
+        }
+    }
+    
     // MARK: - Worship Session Methods
     
     /// Start worship mode - shows background image on external display
@@ -232,9 +426,24 @@ class ExternalDisplayManager: ObservableObject {
     
     /// Show worship background image on external display
     private func showWorshipBackground() async {
-        guard let window = externalWindow, state == .worshipMode else { 
-            print("Cannot show worship background: window=\(externalWindow != nil), state=\(state)")
+        guard state == .worshipMode else { 
+            print("Cannot show worship background: state=\(state)")
             return 
+        }
+        
+        // Ensure we have an external window
+        if externalWindow == nil, let displayInfo = externalDisplayInfo {
+            do {
+                try createExternalWindow(for: displayInfo.scene)
+            } catch {
+                print("Failed to recreate external window for worship background: \(error)")
+                return
+            }
+        }
+        
+        guard let window = externalWindow else {
+            print("Cannot show worship background: no external window available")
+            return
         }
         
         print("Showing worship background on external display")

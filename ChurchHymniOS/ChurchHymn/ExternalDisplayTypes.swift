@@ -57,6 +57,16 @@ enum ExternalDisplayState: String, CaseIterable {
             return false
         }
     }
+    
+    /// Whether this state supports seamless hymn switching
+    var supportsHymnSwitching: Bool {
+        switch self {
+        case .presenting, .worshipPresenting:
+            return true
+        default:
+            return false
+        }
+    }
 }
 
 enum ExternalDisplayError: Error, LocalizedError {
@@ -64,6 +74,7 @@ enum ExternalDisplayError: Error, LocalizedError {
     case sceneConfigurationFailed
     case windowCreationFailed
     case presentationFailed(String)
+    case notCurrentlyPresenting
     
     var errorDescription: String? {
         switch self {
@@ -75,6 +86,8 @@ enum ExternalDisplayError: Error, LocalizedError {
             return "Failed to create external display window."
         case .presentationFailed(let details):
             return "Failed to present to external display: \(details)"
+        case .notCurrentlyPresenting:
+            return "Cannot switch hymn: not currently presenting to external display."
         }
     }
 }

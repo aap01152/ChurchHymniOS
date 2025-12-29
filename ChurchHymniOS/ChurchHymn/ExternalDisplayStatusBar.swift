@@ -382,7 +382,7 @@ struct ExternalDisplayStatusBar: View {
         
         Task {
             do {
-                try await externalDisplayManager.presentHymnInWorshipMode(hymn)
+                try await externalDisplayManager.presentOrSwitchToHymn(hymn)
             } catch {
                 await MainActor.run {
                     errorMessage = error.localizedDescription
