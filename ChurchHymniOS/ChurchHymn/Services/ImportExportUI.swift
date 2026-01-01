@@ -96,7 +96,7 @@ struct ImportPreviewView: View {
                 VStack(spacing: 8) {
                     HStack {
                         VStack(alignment: .leading) {
-                            Text("Import Preview")
+                            Text(NSLocalizedString("import.preview_title", comment: "Import Preview"))
                                 .font(.title2)
                                 .fontWeight(.semibold)
                             Text(preview.fileName)
@@ -107,11 +107,11 @@ struct ImportPreviewView: View {
                         Spacer()
                         
                         VStack(alignment: .trailing) {
-                            Text("\(preview.hymns.count + preview.duplicates.count) total")
+                            Text(String(format: NSLocalizedString("import.total", comment: "%d total"), preview.hymns.count + preview.duplicates.count))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                             if !preview.duplicates.isEmpty {
-                                Text("\(preview.duplicates.count) duplicates")
+                                Text(String(format: NSLocalizedString("import.duplicates", comment: "%d duplicates"), preview.duplicates.count))
                                     .font(.caption)
                                     .foregroundColor(.orange)
                             }

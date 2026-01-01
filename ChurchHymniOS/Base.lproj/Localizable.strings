@@ -399,6 +399,146 @@
 /* Progress Messages */
 "progress.initializing" = "Initializing ChurchHymn...";
 
+/* Auto-Present Mode */
+"auto_present.mode" = "Auto-Present Mode";
+"auto_present.settings" = "Settings";
+"auto_present.description" = "Hymns will automatically present after staying on them for the selected duration during worship sessions.";
+"auto_present.how_it_works" = "How It Works";
+"auto_present.works_description" = "Auto-present only works during active worship sessions and when an external display is connected.";
+"auto_present.presenting" = "Auto-presenting...";
+
+/* Navigation Titles (Additional) */
+"nav.hymn_queue" = "Hymn Queue";
+"nav.data_recovery" = "Data Recovery";
+"nav.test_results" = "Test Results";
+"nav.auto_present_settings" = "Auto-Present Settings";
+"nav.help_support" = "Help & Support";
+"nav.new_service" = "New Service";
+"nav.add_hymn" = "Add Hymn";
+
+/* Service Management (Additional) */
+"service.active_service" = "Active Service";
+"service.no_active_service" = "No Active Service";
+"service.create_or_activate" = "Create or activate a service to start managing hymns for worship";
+"service.all_services" = "All Services";
+"service.no_services_created" = "No services created yet";
+"service.delete_confirmation" = "Are you sure you want to delete '%@'? This action cannot be undone.";
+"service.completed_at" = "Completed %@";
+"service.hymns_count" = "Hymns (%d)";
+"service.no_hymns_added_yet" = "No hymns added yet";
+"service.add_hymns_to_organize" = "Add hymns to this service to organize worship music";
+"service.service_not_found" = "Service Not Found";
+"service.service_not_loaded" = "The service details could not be loaded.";
+"service.hymns_presented_during_worship" = "Hymns Presented During Worship";
+"service.note_prefix" = "Note: %@";
+"service.create_todays_service" = "Create Today's Service";
+"service.dismiss" = "Dismiss";
+
+/* Button Labels (Additional) */
+"btn.details" = "Details";
+"btn.clear_all" = "Clear All";
+"btn.dismiss" = "Dismiss";
+"btn.create_todays_service" = "Create Today's Service";
+"btn.create_your_first_service" = "Create Your First Service";
+
+/* Import/Export Interface (Additional) */
+"import.preview_title" = "Import Preview";
+"import.total" = "%d total";
+"import.duplicates" = "%d duplicates";
+"import.duplicate_resolution_title" = "Duplicate Resolution";
+"import.conflicts_with" = "Conflicts with: %@";
+"export.hymns_title" = "Export Hymns";
+"export.hymns_count" = "%d of %d";
+
+/* External Display Status (Additional) */
+"external.no_external_display" = "No External Display";
+"external.external_display_ready" = "External Display Ready";
+"external.worship_session_active" = "Worship Session Active";
+"external.present" = "Present";
+"external.present_externally" = "Present Externally";
+"external.stop" = "Stop";
+
+/* Content States (Additional) */
+"content.no_hymn_selected" = "No hymn selected";
+"content.no_hymn_to_edit" = "No hymn to edit";
+"content.song" = "Song";
+"content.loading_services" = "Loading Services...";
+"content.loading_hymns" = "Loading hymns...";
+"content.no_hymns" = "No Hymns";
+"content.use_toolbar_add_first" = "Use the toolbar to add your first hymn";
+"content.drag_hymns_reorder" = "Drag hymns to reorder them in the service";
+
+/* Alert Titles (Additional) */
+"alert.delete_hymn" = "Delete Hymn";
+"alert.delete_multiple_hymns" = "Delete Multiple Hymns";
+"alert.export_successful" = "Export Successful";
+"alert.save_error" = "Save Error";
+"alert.validation_warning" = "Validation Warning";
+"alert.data_integrity_check" = "Data Integrity Check";
+"alert.recovery_complete" = "Recovery Complete";
+"alert.delete_service" = "Delete Service";
+"alert.invalid_state" = "Error: Invalid State";
+
+/* Alert Messages (Additional) */
+"msg.delete_hymn_confirm" = "Are you sure you want to delete '%@'?";
+"msg.delete_multiple_hymns_confirm" = "Are you sure you want to delete %d hymns?";
+"msg.hymn_creation_state_corrupted" = "Hymn creation state was corrupted. Please try again.";
+
+/* Menu Items */
+"menu.export" = "Export";
+"menu.manage" = "Manage";
+
+/* Help System */
+"help.search_placeholder" = "Search help topics...";
+"help.no_help_topics" = "No help topics found";
+"help.try_different_search" = "Try different search terms or browse categories";
+"help.search_results" = "Search Results";
+"help.topics_found" = "%d topics found";
+"help.related_topics" = "Related Topics";
+"help.help" = "Help";
+"help.open_help_support" = "Open help and support";
+
+/* Progress and Status */
+"progress.percentage" = "%d%%";
+
+/* Toolbar and Interface Elements */
+"toolbar.data_recovery_tools" = "Data Recovery Tools";
+
+/* Worship Session Controls */
+"worship.start_worship" = "Start Worship";
+"worship.stop_worship" = "Stop Worship";
+"worship.stop_presentation" = "Stop Presentation";
+"worship.no_external_display" = "No External Display";
+"worship.ready_for_worship" = "Ready for Worship";
+"worship.individual_presentation" = "Individual Presentation";
+"worship.worship_session_active" = "Worship Session Active";
+"worship.worship_presentation" = "Worship Presentation";
+"worship.connect_projector" = "Connect a projector to start worship";
+"worship.start_worship_session" = "Start worship session to begin";
+"worship.stop_to_enable" = "Stop to enable worship session";
+"worship.ready_for_hymn" = "Ready for hymn presentation";
+"worship.presenting_hymn" = "Presenting: %@";
+"worship.hymn_being_presented" = "Hymn being presented";
+
+/* Additional Button Labels */
+"btn.get_help" = "Get Help";
+"btn.start_worship" = "Start Worship";
+"btn.stop_worship" = "Stop Worship";
+"btn.stop_presentation" = "Stop Presentation";
+"btn.present_next" = "Present Next";
+"btn.clear_done" = "Clear Done";
+
+/* Toolbar Labels */
+"toolbar.present" = "Present";
+"toolbar.add" = "Add";
+"toolbar.import" = "Import";
+"toolbar.edit" = "Edit";
+"toolbar.delete" = "Delete";
+"toolbar.export" = "Export";
+"toolbar.manage" = "Manage";
+"toolbar.help" = "Help";
+"toolbar.font_size" = "Font Size";
+
 /* Worship Background */
 "worship_bg.church_hymn" = "ChurchHymn";
 "worship_bg.session_active" = "Worship Session Active";

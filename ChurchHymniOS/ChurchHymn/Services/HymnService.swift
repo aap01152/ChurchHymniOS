@@ -43,11 +43,35 @@ class HymnService: ObservableObject {
     }
     
     func createHymn(_ hymn: Hymn) async -> Bool {
+        return await createHymnFromData(
+            title: hymn.title,
+            lyrics: hymn.lyrics,
+            musicalKey: hymn.musicalKey,
+            copyright: hymn.copyright,
+            author: hymn.author,
+            tags: hymn.tags,
+            notes: hymn.notes,
+            songNumber: hymn.songNumber
+        )
+    }
+    
+    func createHymnFromData(title: String, lyrics: String?, musicalKey: String?, copyright: String?, author: String?, tags: [String]?, notes: String?, songNumber: Int?) async -> Bool {
         guard !isLoading else { return false }
         
-        // Validate hymn data
+        // Validate hymn data with a temporary object for validation only
+        let tempHymn = Hymn(
+            title: title,
+            lyrics: lyrics,
+            musicalKey: musicalKey,
+            copyright: copyright,
+            author: author,
+            tags: tags,
+            notes: notes,
+            songNumber: songNumber
+        )
+        
         do {
-            try validateHymn(hymn)
+            try validateHymn(tempHymn)
         } catch let error as HymnError {
             self.error = error
             return false
@@ -61,13 +85,22 @@ class HymnService: ObservableObject {
         
         do {
             // Check for duplicate titles
-            if try await repository.hymnExists(title: hymn.title, excludingId: nil) {
-                self.error = .duplicateHymn(hymn.title)
+            if try await repository.hymnExists(title: title, excludingId: nil) {
+                self.error = .duplicateHymn(title)
                 isLoading = false
                 return false
             }
             
-            let createdHymn = try await repository.createHymn(hymn)
+            let createdHymn = try await repository.createHymnFromData(
+                title: title,
+                lyrics: lyrics,
+                musicalKey: musicalKey,
+                copyright: copyright,
+                author: author,
+                tags: tags,
+                notes: notes,
+                songNumber: songNumber
+            )
             
             print("DEBUG: Hymn created in repository. ID: \(createdHymn.id.uuidString), Title: '\(createdHymn.title)'")
             print("DEBUG: Current hymns array has \(self.hymns.count) items before refresh")

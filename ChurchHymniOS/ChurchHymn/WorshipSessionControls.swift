@@ -118,33 +118,33 @@ struct WorshipSessionControls: View {
     private var worshipSessionStatusTitle: String {
         switch externalDisplayManager.state {
         case .disconnected:
-            return "No External Display"
+            return NSLocalizedString("worship.no_external_display", comment: "No External Display")
         case .connected:
-            return "Ready for Worship"
+            return NSLocalizedString("worship.ready_for_worship", comment: "Ready for Worship")
         case .presenting:
-            return "Individual Presentation"
+            return NSLocalizedString("worship.individual_presentation", comment: "Individual Presentation")
         case .worshipMode:
-            return "Worship Session Active"
+            return NSLocalizedString("worship.worship_session_active", comment: "Worship Session Active")
         case .worshipPresenting:
-            return "Worship Presentation"
+            return NSLocalizedString("worship.worship_presentation", comment: "Worship Presentation")
         }
     }
     
     private var worshipSessionStatusSubtitle: String {
         switch externalDisplayManager.state {
         case .disconnected:
-            return "Connect a projector to start worship"
+            return NSLocalizedString("worship.connect_projector", comment: "Connect a projector to start worship")
         case .connected:
-            return "Start worship session to begin"
+            return NSLocalizedString("worship.start_worship_session", comment: "Start worship session to begin")
         case .presenting:
-            return "Stop to enable worship session"
+            return NSLocalizedString("worship.stop_to_enable", comment: "Stop to enable worship session")
         case .worshipMode:
-            return "Ready for hymn presentation"
+            return NSLocalizedString("worship.ready_for_hymn", comment: "Ready for hymn presentation")
         case .worshipPresenting:
             if let hymn = externalDisplayManager.currentHymn {
-                return "Presenting: \(hymn.title)"
+                return String(format: NSLocalizedString("worship.presenting_hymn", comment: "Presenting: %@"), hymn.title)
             } else {
-                return "Hymn being presented"
+                return NSLocalizedString("worship.hymn_being_presented", comment: "Hymn being presented")
             }
         }
     }
@@ -165,15 +165,15 @@ struct WorshipSessionControls: View {
     private var worshipSessionButtonText: String {
         switch externalDisplayManager.state {
         case .disconnected:
-            return "No Display"
+            return NSLocalizedString("external.no_display", comment: "No external display available")
         case .connected:
-            return "Start Worship"
+            return NSLocalizedString("btn.start_worship", comment: "Start Worship")
         case .presenting:
-            return "Stop Presentation"
+            return NSLocalizedString("btn.stop_presentation", comment: "Stop Presentation")
         case .worshipMode:
-            return "Stop Worship"
+            return NSLocalizedString("btn.stop_worship", comment: "Stop Worship")
         case .worshipPresenting:
-            return "Stop Worship"
+            return NSLocalizedString("btn.stop_worship", comment: "Stop Worship")
         }
     }
     
@@ -357,7 +357,7 @@ struct CompactWorshipSessionControl: View {
     private var worshipText: String {
         switch externalDisplayManager.state {
         case .disconnected:
-            return "No Display"
+            return NSLocalizedString("external.no_display", comment: "No external display available")
         case .connected:
             return "Start Worship"
         case .presenting:

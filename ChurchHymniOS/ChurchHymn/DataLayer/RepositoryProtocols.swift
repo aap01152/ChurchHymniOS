@@ -41,6 +41,9 @@ protocol HymnRepositoryProtocol: BaseRepositoryProtocol {
     /// Save a new hymn
     func createHymn(_ hymn: Hymn) async throws -> Hymn
     
+    /// Create a new hymn from data within proper context
+    func createHymnFromData(title: String, lyrics: String?, musicalKey: String?, copyright: String?, author: String?, tags: [String]?, notes: String?, songNumber: Int?) async throws -> Hymn
+    
     /// Update an existing hymn
     func updateHymn(_ hymn: Hymn) async throws -> Hymn
     

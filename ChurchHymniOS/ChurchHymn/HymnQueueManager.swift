@@ -398,12 +398,12 @@ struct HymnQueueView: View {
                 
                 // Queue actions
                 HStack(spacing: 12) {
-                    Button("Present Next", action: {
+                    Button(NSLocalizedString("btn.present_next", comment: "Present Next"), action: {
                         Task { await queueManager.presentNext() }
                     })
                     .disabled(!queueManager.hasNextHymn())
                     
-                    Button("Clear Done") {
+                    Button(NSLocalizedString("btn.clear_done", comment: "Clear Done")) {
                         queueManager.clearCompleted()
                     }
                     .disabled(stats.completed + stats.skipped == 0)

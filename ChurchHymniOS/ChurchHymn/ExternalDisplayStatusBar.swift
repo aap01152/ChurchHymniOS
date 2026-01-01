@@ -130,7 +130,7 @@ struct ExternalDisplayStatusBar: View {
             Button(action: startExternalPresentation) {
                 HStack(spacing: 6) {
                     Image(systemName: "play.circle.fill")
-                    Text("Present")
+                    Text(NSLocalizedString("btn.present", comment: "Present"))
                 }
                 .font(.subheadline)
                 .fontWeight(.medium)

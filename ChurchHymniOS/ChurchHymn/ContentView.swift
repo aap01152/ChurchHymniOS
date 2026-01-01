@@ -211,7 +211,7 @@ struct ContentView: View {
             }
         }
         */
-        .alert("Delete Hymn", isPresented: $showingDeleteConfirmation, presenting: hymnToDelete) { hymn in
+        .alert(NSLocalizedString("alert.delete_hymn", comment: "Delete Hymn"), isPresented: $showingDeleteConfirmation, presenting: hymnToDelete) { hymn in
             Button("Cancel", role: .cancel) { }
             Button("Delete", role: .destructive) {
                 Task {
@@ -219,9 +219,9 @@ struct ContentView: View {
                 }
             }
         } message: { hymn in
-            Text("Are you sure you want to delete '\(hymn.title)'?")
+            Text(String(format: NSLocalizedString("msg.delete_hymn_confirm", comment: "Are you sure you want to delete '%@'?"), hymn.title))
         }
-        .alert("Delete Multiple Hymns", isPresented: $showingBatchDeleteConfirmation) {
+        .alert(NSLocalizedString("alert.delete_multiple_hymns", comment: "Delete Multiple Hymns"), isPresented: $showingBatchDeleteConfirmation) {
             Button("Cancel", role: .cancel) { }
             Button("Delete", role: .destructive) {
                 Task {
@@ -229,7 +229,7 @@ struct ContentView: View {
                 }
             }
         } message: {
-            Text("Are you sure you want to delete \(selectedHymnsForDelete.count) hymns?")
+            Text(String(format: NSLocalizedString("msg.delete_multiple_hymns_confirm", comment: "Are you sure you want to delete %d hymns?"), selectedHymnsForDelete.count))
         }
         .alert(NSLocalizedString("alert.import_error", comment: "Import error alert title"), isPresented: $showingImportErrorAlert, presenting: importError) { error in
             Button(NSLocalizedString("btn.ok", comment: "OK button")) { }
@@ -241,20 +241,20 @@ struct ContentView: View {
         } message: {
             Text(importSuccessMessage ?? NSLocalizedString("msg.hymn_imported_successfully", comment: "Default import success message"))
         }
-        .alert("Export Successful", isPresented: $showingExportSuccessAlert) {
+        .alert(NSLocalizedString("alert.export_successful", comment: "Export Successful"), isPresented: $showingExportSuccessAlert) {
             Button(NSLocalizedString("btn.ok", comment: "OK button")) { }
         } message: {
             Text(exportSuccessMessage ?? "Hymns exported successfully")
         }
         // PHASE 2: Enhanced error handling alerts
-        .alert("Save Error", isPresented: $showingSaveError) {
-            Button("OK") { }
+        .alert(NSLocalizedString("alert.save_error", comment: "Save Error"), isPresented: $showingSaveError) {
+            Button(NSLocalizedString("btn.ok", comment: "OK")) { }
         } message: {
             Text(saveErrorMessage)
         }
-        .alert("Validation Warning", isPresented: $showingValidationWarning) {
-            Button("Cancel", role: .cancel) { }
-            Button("Save Anyway") {
+        .alert(NSLocalizedString("alert.validation_warning", comment: "Validation Warning"), isPresented: $showingValidationWarning) {
+            Button(NSLocalizedString("btn.cancel", comment: "Cancel"), role: .cancel) { }
+            Button(NSLocalizedString("btn.save", comment: "Save Anyway")) {
                 // Force save despite warnings
                 Task {
                     await forceSaveWithWarnings()
@@ -264,7 +264,7 @@ struct ContentView: View {
             Text(validationWarningMessage)
         }
         // PHASE 3: Data integrity and recovery alerts
-        .alert("Data Integrity Check", isPresented: $showingDataIntegrityCheck) {
+        .alert(NSLocalizedString("alert.data_integrity_check", comment: "Data Integrity Check"), isPresented: $showingDataIntegrityCheck) {
             if let result = integrityCheckResult {
                 if result.hasCriticalIssues {
                     Button("View Issues") {
@@ -539,6 +539,12 @@ struct ContentView: View {
                     print("  - newHymnBeingCreated: \(newHymnBeingCreated?.title ?? "None")")
                     print("  - existingHymnBeingEdited: \(existingHymnBeingEdited?.title ?? "None")")
                     
+                    // CRITICAL FIX: Don't clear edit state if edit sheet is showing to prevent race condition
+                    guard !showingEditHymnSheet else {
+                        print("⚠️ Edit sheet is showing, ignoring add request to prevent race condition")
+                        return
+                    }
+                    
                     // Force clean state before adding
                     newHymnBeingCreated = nil
                     existingHymnBeingEdited = nil
@@ -552,10 +558,10 @@ struct ContentView: View {
                 },
                 onEdit: editCurrentHymn
             )
-            .navigationTitle("Library")
+            .navigationTitle(NSLocalizedString("nav.library", comment: "Library navigation bar title"))
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Services") {
+                    Button(NSLocalizedString("nav.services", comment: "Services button")) {
                         print("Services button tapped")
                         showingServiceManagement = true
                     }
@@ -610,6 +616,12 @@ struct ContentView: View {
                     print("  - newHymnBeingCreated: \(newHymnBeingCreated?.title ?? "None")")
                     print("  - existingHymnBeingEdited: \(existingHymnBeingEdited?.title ?? "None")")
                     
+                    // CRITICAL FIX: Don't clear edit state if edit sheet is showing to prevent race condition
+                    guard !showingEditHymnSheet else {
+                        print("⚠️ Edit sheet is showing, ignoring add request to prevent race condition")
+                        return
+                    }
+                    
                     // Force clean state before adding
                     newHymnBeingCreated = nil
                     existingHymnBeingEdited = nil
@@ -625,7 +637,7 @@ struct ContentView: View {
             )
             .tabItem {
                 Image(systemName: "music.note.list")
-                Text("Library")
+                Text(NSLocalizedString("nav.library", comment: "Library title"))
             }
             .tag(0)
             
@@ -633,7 +645,7 @@ struct ContentView: View {
             iPhoneDetailView(hymnService: hymnService, serviceService: serviceService)
                 .tabItem {
                     Image(systemName: "music.note")
-                    Text("Song")
+                    Text(NSLocalizedString("content.song", comment: "Song"))
                 }
                 .tag(1)
             
@@ -644,7 +656,7 @@ struct ContentView: View {
             )
             .tabItem {
                 Image(systemName: "calendar")
-                Text("Services")
+                Text(NSLocalizedString("nav.services", comment: "Services button"))
             }
             .tag(2)
         }
@@ -678,6 +690,12 @@ struct ContentView: View {
                     print("  - showingEditHymnSheet: \(showingEditHymnSheet)")
                     print("  - newHymnBeingCreated: \(newHymnBeingCreated?.title ?? "None")")
                     print("  - existingHymnBeingEdited: \(existingHymnBeingEdited?.title ?? "None")")
+                    
+                    // CRITICAL FIX: Don't clear edit state if edit sheet is showing to prevent race condition
+                    guard !showingEditHymnSheet else {
+                        print("⚠️ Edit sheet is showing, ignoring add request to prevent race condition")
+                        return
+                    }
                     
                     // Force clean state before adding
                     newHymnBeingCreated = nil
@@ -734,6 +752,12 @@ struct ContentView: View {
                     print("  - showingEditHymnSheet: \(showingEditHymnSheet)")
                     print("  - newHymnBeingCreated: \(newHymnBeingCreated?.title ?? "None")")
                     print("  - existingHymnBeingEdited: \(existingHymnBeingEdited?.title ?? "None")")
+                    
+                    // CRITICAL FIX: Don't clear edit state if edit sheet is showing to prevent race condition
+                    guard !showingEditHymnSheet else {
+                        print("⚠️ Edit sheet is showing, ignoring add request to prevent race condition")
+                        return
+                    }
                     
                     // Force clean state before adding
                     newHymnBeingCreated = nil
@@ -2540,20 +2564,20 @@ struct HymnListViewNew: View {
                         .font(.system(size: 48))
                         .foregroundColor(.secondary)
                     
-                    Text("No Hymns")
+                    Text(NSLocalizedString("content.no_hymns", comment: "No Hymns"))
                         .font(.title2)
                         .fontWeight(.medium)
                     
-                    Text("Use the toolbar to add your first hymn")
+                    Text(NSLocalizedString("content.use_toolbar_add_first", comment: "Use the toolbar to add your first hymn"))
                         .font(.body)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
                     
                     HStack(spacing: 12) {
-                        Button("Add Hymn", action: onAddNew)
+                        Button(NSLocalizedString("btn.add_hymn", comment: "Add Hymn"), action: onAddNew)
                             .buttonStyle(.borderedProminent)
                         
-                        Button("Get Help") {
+                        Button(NSLocalizedString("btn.get_help", comment: "Get Help")) {
                             helpSystem.showHelp(for: .addingFirstHymn)
                         }
                         .buttonStyle(.bordered)
@@ -2835,9 +2859,9 @@ struct HymnRowView: View {
             
             if !isMultiSelectMode && !isReorderMode {
                 Menu {
-                    Button("Present", action: onPresent)
-                    Button("Edit", action: onEdit)
-                    Button("Delete", role: .destructive, action: onDelete)
+                    Button(NSLocalizedString("btn.present", comment: "Present"), action: onPresent)
+                    Button(NSLocalizedString("btn.edit", comment: "Edit"), action: onEdit)
+                    Button(NSLocalizedString("btn.delete", comment: "Delete"), role: .destructive, action: onDelete)
                 } label: {
                     Image(systemName: "ellipsis")
                         .foregroundColor(.secondary)
@@ -2897,7 +2921,7 @@ struct HymnToolbarViewNew: View {
                     // Present Button
                     UniformToolbarButton(
                         icon: "play.circle.fill",
-                        text: "Present",
+                        text: NSLocalizedString("btn.present", comment: "Present"),
                         color: .green,
                         action: {
                             if let hymn = selected {
@@ -3038,7 +3062,7 @@ struct HymnToolbarViewNew: View {
                     // Font Size Controls
                     Menu {
                         VStack(spacing: 12) {
-                            Text("Font Size: \(Int(lyricsFontSize))")
+                            Text(String(format: NSLocalizedString("display.font_size_value", comment: "Font Size: %d"), Int(lyricsFontSize)))
                                 .font(.headline)
                             
                             Slider(value: $lyricsFontSize, in: 12...32, step: 1)
@@ -3105,7 +3129,7 @@ struct HymnToolbarViewNew: View {
     
     private var externalDisplayText: String {
         switch externalDisplayManager.state {
-        case .disconnected: return "No Display"
+        case .disconnected: return NSLocalizedString("external.no_display", comment: "No external display available")
         case .connected: return "External"
         case .presenting: return "Stop External"
         case .worshipMode: return "Worship"

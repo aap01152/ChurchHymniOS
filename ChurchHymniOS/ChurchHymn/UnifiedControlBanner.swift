@@ -152,7 +152,7 @@ struct UnifiedControlBanner: View {
                     // Present button
                     UniformControlButton(
                         icon: "play.circle.fill",
-                        text: "Present",
+                        text: NSLocalizedString("btn.present", comment: "Present"),
                         action: startExternalPresentation,
                         style: .secondary,
                         isEnabled: selectedHymn != nil
@@ -202,7 +202,7 @@ struct UnifiedControlBanner: View {
                 Button(action: startExternalPresentation) {
                     HStack(spacing: 6) {
                         Image(systemName: "play.circle.fill")
-                        Text("Present")
+                        Text(NSLocalizedString("btn.present", comment: "Present"))
                     }
                     .font(.subheadline)
                     .fontWeight(.medium)
@@ -266,7 +266,7 @@ struct UnifiedControlBanner: View {
                 Button(action: presentSelectedHymnInWorship) {
                     CompactControlButton(
                         icon: "play.circle.fill",
-                        text: selectedHymn?.title ?? "Present"
+                        text: selectedHymn?.title ?? NSLocalizedString("btn.present", comment: "Present")
                     )
                 }
                 .buttonStyle(.bordered)
@@ -508,7 +508,7 @@ struct UnifiedControlBanner: View {
             if selectedHymn != nil {
                 UniformControlButton(
                     icon: "play.circle.fill",
-                    text: selectedHymn?.title ?? "Present",
+                    text: selectedHymn?.title ?? NSLocalizedString("btn.present", comment: "Present"),
                     action: presentSelectedHymnInWorship,
                     style: .secondary
                 )

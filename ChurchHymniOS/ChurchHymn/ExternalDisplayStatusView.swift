@@ -101,7 +101,7 @@ struct ExternalDisplayStatusView: View {
         Button(action: startExternalPresentation) {
             HStack(spacing: 4) {
                 Image(systemName: "tv")
-                Text("Present")
+                Text(NSLocalizedString("btn.present", comment: "Present"))
             }
             .font(.caption)
             .fontWeight(.medium)

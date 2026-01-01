@@ -65,10 +65,10 @@ struct ServiceManagementView: View {
                     }
                 )
             }
-            .navigationTitle("Services")
+            .navigationTitle(NSLocalizedString("nav.services", comment: "Services button on navigation bar"))
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("New Service") {
+                    Button(NSLocalizedString("btn.new_service", comment: "New Service")) {
                         showingCreateService = true
                     }
                 }
@@ -154,7 +154,7 @@ struct ActiveServiceCard: View {
             // Header
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Active Service")
+                    Text(NSLocalizedString("service.active_service", comment: "Active Service"))
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
@@ -446,7 +446,7 @@ struct CreateServiceSheet: View {
                         .lineLimit(3...6)
                 }
             }
-            .navigationTitle("New Service")
+            .navigationTitle(NSLocalizedString("nav.new_service", comment: "New Service"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

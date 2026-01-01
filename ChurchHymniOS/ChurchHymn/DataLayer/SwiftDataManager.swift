@@ -53,7 +53,11 @@ final class SwiftDataManager {
         let startTime = CFAbsoluteTimeGetCurrent()
         
         do {
-            let results = try backgroundContext.fetch(descriptor)
+            // CRITICAL FIX: Use mainContext to match the save context 
+            let totalCount = try mainContext.fetchCount(FetchDescriptor<T>())
+            logger.info("🔍 Before fetch: \(String(describing: T.self)) count in mainContext: \(totalCount)")
+            
+            let results = try mainContext.fetch(descriptor)
             
             let duration = CFAbsoluteTimeGetCurrent() - startTime
             logger.info("Fetch \(String(describing: T.self)): \(results.count) items in \(duration, format: .fixed(precision: 3))s")
@@ -75,7 +79,7 @@ final class SwiftDataManager {
     func count<T>(for type: T.Type, predicate: Predicate<T>? = nil) async throws -> Int where T: PersistentModel {
         do {
             let descriptor = FetchDescriptor<T>(predicate: predicate)
-            let results = try backgroundContext.fetch(descriptor)
+            let results = try mainContext.fetch(descriptor)
             
             logger.info("Count \(String(describing: T.self)): \(results.count) items")
             return results.count
@@ -90,8 +94,8 @@ final class SwiftDataManager {
         let startTime = CFAbsoluteTimeGetCurrent()
         
         do {
-            backgroundContext.insert(model)
-            try backgroundContext.save()
+            mainContext.insert(model)
+            try mainContext.save()
             
             let duration = CFAbsoluteTimeGetCurrent() - startTime
             logger.info("Insert \(String(describing: T.self)) completed in \(duration, format: .fixed(precision: 3))s")
@@ -107,9 +111,9 @@ final class SwiftDataManager {
         
         do {
             for model in models {
-                backgroundContext.insert(model)
+                mainContext.insert(model)
             }
-            try backgroundContext.save()
+            try mainContext.save()
             
             let duration = CFAbsoluteTimeGetCurrent() - startTime
             logger.info("Batch insert \(models.count) \(String(describing: T.self)) completed in \(duration, format: .fixed(precision: 3))s")
@@ -119,13 +123,53 @@ final class SwiftDataManager {
         }
     }
     
+    /// Create and insert a model within the proper context
+    func createAndInsert<T>(_ factory: @escaping (ModelContext) throws -> T) async throws -> T where T: PersistentModel {
+        let startTime = CFAbsoluteTimeGetCurrent()
+        
+        do {
+            // CRITICAL FIX: Use mainContext for both save and fetch operations to ensure consistency
+            // Background context might be causing isolation issues
+            let model = try factory(mainContext)
+            mainContext.insert(model)
+            try mainContext.save()
+            
+            logger.info("💾 Saved \(String(describing: T.self)) to mainContext")
+            
+            // CRITICAL DEBUG: Verify the save worked by immediately checking count
+            let testCount = try mainContext.fetchCount(FetchDescriptor<T>())
+            logger.info("✅ After save: \(String(describing: T.self)) count in mainContext: \(testCount)")
+            
+            // Additional verification: try to fetch the specific item we just saved
+            if let savedModel = model as? Hymn {
+                let descriptor = FetchDescriptor<Hymn>(
+                    predicate: #Predicate<Hymn> { hymn in
+                        hymn.id == savedModel.id
+                    }
+                )
+                if let foundItem = try? mainContext.fetch(descriptor).first {
+                    logger.info("✅ Verification: Successfully found saved hymn: '\(foundItem.title)'")
+                } else {
+                    logger.error("❌ Verification FAILED: Could not find saved hymn with ID: \(savedModel.id)")
+                }
+            }
+            
+            let duration = CFAbsoluteTimeGetCurrent() - startTime
+            logger.info("Create and insert \(String(describing: T.self)) completed in \(duration, format: .fixed(precision: 3))s")
+            return model
+        } catch {
+            logger.error("Create and insert failed for \(String(describing: T.self)): \(error.localizedDescription)")
+            throw DataLayerError.insertFailed(error)
+        }
+    }
+    
     /// Delete an entity
     func delete<T>(_ model: T) async throws where T: PersistentModel {
         let startTime = CFAbsoluteTimeGetCurrent()
         
         do {
-            backgroundContext.delete(model)
-            try backgroundContext.save()
+            mainContext.delete(model)
+            try mainContext.save()
             
             let duration = CFAbsoluteTimeGetCurrent() - startTime
             logger.info("Delete \(String(describing: T.self)) completed in \(duration, format: .fixed(precision: 3))s")
@@ -141,13 +185,13 @@ final class SwiftDataManager {
         
         do {
             let descriptor = FetchDescriptor<T>(predicate: predicate)
-            let modelsToDelete = try backgroundContext.fetch(descriptor)
+            let modelsToDelete = try mainContext.fetch(descriptor)
             
             let deleteCount = modelsToDelete.count
             for model in modelsToDelete {
-                backgroundContext.delete(model)
+                mainContext.delete(model)
             }
-            try backgroundContext.save()
+            try mainContext.save()
             
             let duration = CFAbsoluteTimeGetCurrent() - startTime
             logger.info("Batch delete \(deleteCount) \(String(describing: T.self)) completed in \(duration, format: .fixed(precision: 3))s")
@@ -164,8 +208,8 @@ final class SwiftDataManager {
         let startTime = CFAbsoluteTimeGetCurrent()
         
         do {
-            if backgroundContext.hasChanges {
-                try backgroundContext.save()
+            if mainContext.hasChanges {
+                try mainContext.save()
                 
                 let duration = CFAbsoluteTimeGetCurrent() - startTime
                 logger.info("Save completed in \(duration, format: .fixed(precision: 3))s")
@@ -207,7 +251,7 @@ final class SwiftDataManager {
     
     /// Check if context has unsaved changes
     var hasChanges: Bool {
-        backgroundContext.hasChanges
+        mainContext.hasChanges
     }
     
     // MARK: - Health Check

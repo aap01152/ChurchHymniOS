@@ -180,48 +180,54 @@ final class HymnRepository: HymnRepositoryProtocol {
     }
     
     func createHymn(_ hymn: Hymn) async throws -> Hymn {
-        logger.info("Creating new hymn: \(hymn.title)")
-        
-        // Validate hymn data
-        try validateHymn(hymn)
+        return try await createHymnFromData(
+            title: hymn.title,
+            lyrics: hymn.lyrics,
+            musicalKey: hymn.musicalKey,
+            copyright: hymn.copyright,
+            author: hymn.author,
+            tags: hymn.tags,
+            notes: hymn.notes,
+            songNumber: hymn.songNumber
+        )
+    }
+    
+    func createHymnFromData(title: String, lyrics: String?, musicalKey: String?, copyright: String?, author: String?, tags: [String]?, notes: String?, songNumber: Int?) async throws -> Hymn {
+        logger.info("Creating new hymn: \(title)")
         
         // Check for duplicates by title
-        if try await hymnExists(title: hymn.title, excludingId: nil) {
-            logger.warning("Attempted to create duplicate hymn: \(hymn.title)")
-            throw RepositoryError.duplicateEntity("Hymn with title '\(hymn.title)' already exists")
-        }
-        
-        // Check for UUID collisions (extremely rare but possible)
-        let uuidExists = try await dataManager.exists(
-            for: Hymn.self, 
-            predicate: #Predicate<Hymn> { $0.id == hymn.id }
-        )
-        if uuidExists {
-            logger.warning("UUID collision detected for hymn: \(hymn.title), ID: \(hymn.id)")
-            // Generate a new UUID and try again
-            let newHymn = Hymn(
-                title: hymn.title,
-                lyrics: hymn.lyrics,
-                musicalKey: hymn.musicalKey,
-                copyright: hymn.copyright,
-                author: hymn.author,
-                tags: hymn.tags,
-                notes: hymn.notes,
-                songNumber: hymn.songNumber
-            )
-            return try await createHymn(newHymn) // Recursive call with new UUID
+        if try await hymnExists(title: title, excludingId: nil) {
+            logger.warning("Attempted to create duplicate hymn: \(title)")
+            throw RepositoryError.duplicateEntity("Hymn with title '\(title)' already exists")
         }
         
         do {
-            try await dataManager.insert(hymn)
+            // CRITICAL FIX: Create the hymn within the data manager's context
+            let hymn = try await dataManager.createAndInsert { context in
+                let newHymn = Hymn(
+                    title: title,
+                    lyrics: lyrics,
+                    musicalKey: musicalKey,
+                    copyright: copyright,
+                    author: author,
+                    tags: tags,
+                    notes: notes,
+                    songNumber: songNumber
+                )
+                
+                // Validate hymn data
+                try self.validateHymn(newHymn)
+                
+                return newHymn
+            }
             
             // Cache the new hymn
             await cache.setHymn(hymn)
             
-            logger.info("Successfully created hymn: \(hymn.title)")
+            logger.info("Successfully created hymn: \(title)")
             return hymn
         } catch {
-            logger.error("Failed to create hymn: \(error.localizedDescription)")
+            logger.error("Failed to create hymn '\(title)': \(error.localizedDescription)")
             throw DataLayerError.insertFailed(error)
         }
     }

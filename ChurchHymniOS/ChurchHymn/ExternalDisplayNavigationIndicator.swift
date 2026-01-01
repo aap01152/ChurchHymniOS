@@ -81,7 +81,7 @@ struct ExternalDisplayNavigationIndicator: View {
     private var statusText: String {
         switch externalDisplayManager.state {
         case .disconnected:
-            return "No Display"
+            return NSLocalizedString("external.no_display", comment: "No external display available")
         case .connected:
             return "Ready"
         case .presenting:

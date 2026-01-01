@@ -242,8 +242,9 @@ final class MigrationManager {
     func performDataCleanup() async throws {
         logger.info("Performing data cleanup...")
         
-        // Remove empty/invalid hymns
-        try await cleanupInvalidHymns()
+        // CRITICAL FIX: Disabled cleanupInvalidHymns - was deleting valid hymns on startup
+        // try await cleanupInvalidHymns()
+        logger.info("Skipping invalid hymn cleanup (disabled due to data loss issue)")
         
         // Remove duplicate service hymns
         try await removeDuplicateServiceHymns()

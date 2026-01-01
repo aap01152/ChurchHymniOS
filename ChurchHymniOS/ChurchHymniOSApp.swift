@@ -69,7 +69,9 @@ class ServiceFactoryManager: ObservableObject {
     
     func initialize() async {
         do {
-            let container = ServiceMigrationManager.createModelContainer()
+            // CRITICAL FIX: Use proper production container instead of migration fallback
+            let container = ModelContainerFactory.createProductionContainer()
+            print("✅ Using production ModelContainer for persistent storage")
             
             // Create SwiftDataManager with the container
             let dataManager = await SwiftDataManager(modelContainer: container)

@@ -32,7 +32,7 @@ struct HymnToolbar {
                         Image(systemName: "play.circle.fill")
                             .font(.title)
                             .foregroundColor(.green)
-                        Text("Present")
+                        Text(NSLocalizedString("btn.present", comment: "Present"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -52,7 +52,7 @@ struct HymnToolbar {
                         Image(systemName: "plus.circle.fill")
                             .font(.title)
                             .foregroundColor(.blue)
-                        Text("Add")
+                        Text(NSLocalizedString("btn.add", comment: "Add"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -68,7 +68,7 @@ struct HymnToolbar {
                         Image(systemName: "square.and.arrow.down.fill")
                             .font(.title)
                             .foregroundColor(.purple)
-                        Text("Import")
+                        Text(NSLocalizedString("btn.import", comment: "Import"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -83,7 +83,7 @@ struct HymnToolbar {
                         Image(systemName: "pencil.circle.fill")
                             .font(.title)
                             .foregroundColor(.orange)
-                        Text("Edit")
+                        Text(NSLocalizedString("btn.edit", comment: "Edit"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -106,7 +106,7 @@ struct HymnToolbar {
                         Image(systemName: "trash.circle.fill")
                             .font(.title)
                             .foregroundColor(.red)
-                        Text("Delete")
+                        Text(NSLocalizedString("btn.delete", comment: "Delete"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -144,7 +144,7 @@ struct HymnToolbar {
                 // Help icon button has been removed from the left column toolbar.
 
                 // Export Menu
-                Menu("Export") {
+                Menu(NSLocalizedString("btn.export", comment: "Export")) {
                     Button("Export Selected") { 
                         if let hymn = selected {
                             selectedHymnsForExport = [hymn.id]
@@ -173,7 +173,7 @@ struct HymnToolbar {
                 }
                 
                 // Management Menu
-                Menu("Manage") {
+                Menu(NSLocalizedString("btn.manage", comment: "Manage")) {
                     Button(isMultiSelectMode ? "Exit Multi-Select" : "Multi-Select") {
                         isMultiSelectMode.toggle()
                         if !isMultiSelectMode {
@@ -234,7 +234,7 @@ struct HymnToolbarView: View {
                     Image(systemName: "play.circle.fill")
                         .font(.title)
                         .foregroundColor(.blue)
-                    Text("Present")
+                    Text(NSLocalizedString("btn.present", comment: "Present"))
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -300,7 +300,7 @@ struct HymnToolbarView: View {
                     VStack(spacing: 4) {
                         Image(systemName: "questionmark.circle")
                             .font(.title)
-                        Text("Help")
+                        Text(NSLocalizedString("btn.help", comment: "Help"))
                             .font(.caption)
                         .foregroundColor(.secondary)
                     }
@@ -373,7 +373,7 @@ struct ExternalDisplayButton: View {
     private var buttonText: String {
         switch externalDisplayManager.state {
         case .disconnected:
-            return "No Display"
+            return NSLocalizedString("external.no_display", comment: "No external display available")
         case .connected:
             return "External"
         case .presenting:
@@ -473,14 +473,14 @@ struct FontSizeSliderButton: View {
                 Image(systemName: "textformat.size")
                     .font(.title)
                     .foregroundColor(.blue)
-                Text("Font Size")
+                Text(NSLocalizedString("display.font_size", comment: "Font Size"))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
         }
         .popover(isPresented: $showSlider) {
             VStack {
-                Text("Font Size: \(Int(lyricsFontSize))")
+                Text(String(format: NSLocalizedString("display.font_size_value", comment: "Font Size: %d"), Int(lyricsFontSize)))
                     .font(.headline)
                 Slider(
                     value: $lyricsFontSize,

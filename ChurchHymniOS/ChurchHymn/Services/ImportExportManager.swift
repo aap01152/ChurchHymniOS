@@ -175,7 +175,8 @@ class ImportExportManager: ObservableObject {
             importProgress = Double(index) / Double(totalItems) * 0.9
             progressMessage = "Importing: \(previewHymn.title)"
             
-            let hymn = Hymn(
+            // CRITICAL FIX: Use createHymnFromData to create hymn within proper SwiftData context
+            let success = await hymnService.createHymnFromData(
                 title: previewHymn.title,
                 lyrics: previewHymn.lyrics,
                 musicalKey: previewHymn.musicalKey,
@@ -185,8 +186,6 @@ class ImportExportManager: ObservableObject {
                 notes: previewHymn.notes,
                 songNumber: previewHymn.songNumber
             )
-            
-            let success = await hymnService.createHymn(hymn)
             if success {
                 successCount += 1
             }

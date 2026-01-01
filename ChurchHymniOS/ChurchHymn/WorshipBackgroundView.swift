@@ -117,7 +117,7 @@ struct WorshipBackgroundView: View {
                 
                 VStack(alignment: .trailing, spacing: 6) {
                     // App name with elegant typography
-                    Text("ChurchHymn")
+                    Text(NSLocalizedString("worship_bg.church_hymn", comment: "ChurchHymn"))
                         .font(.system(size: adaptiveFontSize(base: 28, screenSize: screenSize), weight: .light, design: .serif))
                         .foregroundColor(.white)
                         .opacity(0.7)
@@ -130,7 +130,7 @@ struct WorshipBackgroundView: View {
                             .foregroundColor(.white)
                             .opacity(0.5)
                         
-                        Text("Worship Session Active")
+                        Text(NSLocalizedString("worship_bg.session_active", comment: "Worship Session Active"))
                             .font(.system(size: adaptiveFontSize(base: 16, screenSize: screenSize), weight: .ultraLight, design: .default))
                             .foregroundColor(.white)
                             .opacity(0.5)

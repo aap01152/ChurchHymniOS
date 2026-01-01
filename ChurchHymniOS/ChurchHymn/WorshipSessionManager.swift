@@ -474,9 +474,9 @@ final class WorshipSessionManager: ObservableObject {
     
     /// Save current worship session state
     func saveCurrentState() {
+        // CRITICAL FIX: Don't auto-clear state during startup - only save when session is active
         guard isWorshipSessionActive else {
-            // Clear saved state when not in worship session
-            externalDisplayManager.clearSavedState()
+            // Don't clear state automatically - only when explicitly stopping session
             return
         }
         

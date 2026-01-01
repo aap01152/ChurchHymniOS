@@ -204,7 +204,7 @@ struct AutoPresentSettingsView: View {
                             }
                         }
                 } header: {
-                    Text("Auto-Present Mode")
+                    Text(NSLocalizedString("auto_present.mode", comment: "Auto-Present Mode"))
                 }
                 
                 if autoPresentManager.isEnabled {
@@ -217,9 +217,9 @@ struct AutoPresentSettingsView: View {
                         }
                         .pickerStyle(.menu)
                     } header: {
-                        Text("Settings")
+                        Text(NSLocalizedString("auto_present.settings", comment: "Settings"))
                     } footer: {
-                        Text("Hymns will automatically present after staying on them for the selected duration during worship sessions.")
+                        Text(NSLocalizedString("auto_present.description", comment: "Hymns will automatically present after staying on them for the selected duration during worship sessions."))
                     }
                     
                     Section {
@@ -228,17 +228,17 @@ struct AutoPresentSettingsView: View {
                         Label("Hymn presents when timer reaches zero", systemImage: "3.circle.fill")
                         Label("Timer cancels when navigating away", systemImage: "4.circle.fill")
                     } header: {
-                        Text("How It Works")
+                        Text(NSLocalizedString("auto_present.how_it_works", comment: "How It Works"))
                     } footer: {
-                        Text("Auto-present only works during active worship sessions and when an external display is connected.")
+                        Text(NSLocalizedString("auto_present.works_description", comment: "Auto-present only works during active worship sessions and when an external display is connected."))
                     }
                 }
             }
-            .navigationTitle("Auto-Present Settings")
+            .navigationTitle(NSLocalizedString("nav.auto_present_settings", comment: "Auto-Present Settings"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button(NSLocalizedString("btn.done", comment: "Done")) {
                         dismiss()
                     }
                 }
@@ -277,7 +277,7 @@ struct AutoPresentCountdownOverlay: View {
                     }
                     
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Auto-presenting...")
+                        Text(NSLocalizedString("auto_present.presenting", comment: "Auto-presenting..."))
                             .font(.caption)
                             .fontWeight(.medium)
                             .foregroundColor(.green)
