@@ -458,7 +458,7 @@ struct HelpButton: View {
                 Image(systemName: "questionmark.circle.fill")
                     .font(.title)
                     .foregroundColor(.blue)
-                Text("Help")
+                Text(NSLocalizedString("btn.help", comment: "Help"))
                     .font(.caption)
                     .foregroundColor(.primary)
             }

@@ -400,7 +400,7 @@ struct ServiceRowView: View {
                 .buttonStyle(.bordered)
                 .controlSize(.small)
                 
-                Button("Delete") {
+                Button(NSLocalizedString("btn.delete", comment: "Delete")) {
                     showingDeleteAlert = true
                 }
                 .buttonStyle(.bordered)
@@ -414,7 +414,7 @@ struct ServiceRowView: View {
         }
         .alert("Delete Service", isPresented: $showingDeleteAlert) {
             Button("Cancel", role: .cancel) { }
-            Button("Delete", role: .destructive) {
+            Button(NSLocalizedString("btn.delete", comment: "Delete"), role: .destructive) {
                 onDelete()
             }
         } message: {
@@ -845,7 +845,7 @@ struct AddHymnToServiceSheet: View {
                         
                         Spacer()
                         
-                        Button("Add") {
+                        Button(NSLocalizedString("btn.add", comment: "Add")) {
                             onAddHymn(hymn)
                             dismiss()
                         }

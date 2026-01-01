@@ -457,6 +457,7 @@
 "external.present" = "Present";
 "external.present_externally" = "Present Externally";
 "external.stop" = "Stop";
+"btn.worship" = "Worship";
 
 /* Content States (Additional) */
 "content.no_hymn_selected" = "No hymn selected";

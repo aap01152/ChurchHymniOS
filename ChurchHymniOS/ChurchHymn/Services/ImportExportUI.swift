@@ -194,7 +194,7 @@ struct ImportPreviewView: View {
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Import") {
+                    Button(NSLocalizedString("btn.import", comment: "Import")) {
                         Task {
                             await processImport()
                         }
@@ -422,7 +422,7 @@ struct ExportSelectionView: View {
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Export") {
+                    Button(NSLocalizedString("btn.export", comment: "Export")) {
                         selectedHymns = localSelection
                         onExport(selectedHymnObjects, exportFormat)
                     }

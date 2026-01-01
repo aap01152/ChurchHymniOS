@@ -160,8 +160,8 @@
 "display.opacity" = "Opacidade";
 "display.current_position" = "Posição Actual";
 "display.preview" = "Pré-visualização";
-"display.font_size" = "Tamanho da Fonte";
-"display.font_size_value" = "Tamanho da Fonte: %d";
+"display.font_size" = "Tamanho de letra";
+"display.font_size_value" = "Tamanho de letra: %d";
 
 /* External Display and Presentation */
 "external.verse_number" = "Verso %d";
@@ -542,3 +542,4 @@
 /* Worship Background */
 "worship_bg.church_hymn" = "ChurchHymn";
 "worship_bg.session_active" = "Sessão de Culto Activa";
+"btn.worship" = "Louvor";

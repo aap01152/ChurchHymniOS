@@ -213,7 +213,7 @@ struct ContentView: View {
         */
         .alert(NSLocalizedString("alert.delete_hymn", comment: "Delete Hymn"), isPresented: $showingDeleteConfirmation, presenting: hymnToDelete) { hymn in
             Button("Cancel", role: .cancel) { }
-            Button("Delete", role: .destructive) {
+            Button(NSLocalizedString("btn.delete", comment: "Delete"), role: .destructive) {
                 Task {
                     await deleteHymn(hymn)
                 }
@@ -223,7 +223,7 @@ struct ContentView: View {
         }
         .alert(NSLocalizedString("alert.delete_multiple_hymns", comment: "Delete Multiple Hymns"), isPresented: $showingBatchDeleteConfirmation) {
             Button("Cancel", role: .cancel) { }
-            Button("Delete", role: .destructive) {
+            Button(NSLocalizedString("btn.delete", comment: "Delete"), role: .destructive) {
                 Task {
                     await deleteSelectedHymns()
                 }
@@ -2646,7 +2646,7 @@ struct HymnListViewNew: View {
                     .onMove(perform: (isServiceReorderMode && sortOption == .service) ? moveServiceHymns : nil)
                 }
                 .environment(\.editMode, (isServiceReorderMode && sortOption == .service) ? .constant(.active) : .constant(.inactive))
-                .searchable(text: $searchText, prompt: "Search hymns...")
+                .searchable(text: $searchText, prompt: NSLocalizedString("search.placeholder", comment: "Search hymns..."))
                 // Note: Don't disable the entire list in reorder mode - this prevents drag handles from working
                 
                 // Show reorder instructions when in reorder mode
@@ -2935,7 +2935,7 @@ struct HymnToolbarViewNew: View {
                     // Add Button
                     UniformToolbarButton(
                         icon: "plus.circle.fill",
-                        text: "Add",
+                        text: NSLocalizedString("btn.add", comment: "Add"),
                         color: .blue,
                         action: onAddNew
                     )
@@ -2944,7 +2944,7 @@ struct HymnToolbarViewNew: View {
                     // Edit Button
                     UniformToolbarButton(
                         icon: "pencil.circle.fill",
-                        text: "Edit",
+                        text: NSLocalizedString("btn.edit", comment: "Edit"),
                         color: selected == nil ? .gray : .orange,
                         action: onEdit,
                         isEnabled: selected != nil
@@ -2954,7 +2954,7 @@ struct HymnToolbarViewNew: View {
                     // Delete Button
                     UniformToolbarButton(
                         icon: "trash.circle.fill",
-                        text: "Delete",
+                        text: NSLocalizedString("btn.delete", comment: "Delete"),
                         color: .red,
                         action: {
                             if isMultiSelectMode {
@@ -2973,7 +2973,7 @@ struct HymnToolbarViewNew: View {
                     // Import Button
                     UniformToolbarButton(
                         icon: "square.and.arrow.down.fill",
-                        text: "Import",
+                        text: NSLocalizedString("btn.import", comment: "Import"),
                         color: .purple,
                         action: {
                             showingImporter = true
@@ -3010,7 +3010,7 @@ struct HymnToolbarViewNew: View {
                     } label: {
                         UniformToolbarButtonContent(
                             icon: "square.and.arrow.up.fill",
-                            text: "Export",
+                            text: NSLocalizedString("btn.export", comment: "Export"),
                             color: .blue
                         )
                     }
@@ -3089,7 +3089,7 @@ struct HymnToolbarViewNew: View {
                         }) {
                             UniformToolbarButtonContent(
                                 icon: "questionmark.circle.fill",
-                                text: "Help",
+                                text: NSLocalizedString("btn.help", comment: "Help"),
                                 color: .secondary
                             )
                         }
@@ -3267,9 +3267,9 @@ struct UniformWorshipSessionControl: View {
     private var worshipText: String {
         switch externalDisplayManager.state {
         case .disconnected:
-            return "Worship"
+            return NSLocalizedString("btn.worship", comment: "Worship button")
         case .connected:
-            return canToggleWorshipSession ? "Start\nWorship" : "Worship"
+            return canToggleWorshipSession ? "Start\nWorship" : NSLocalizedString("btn.worship", comment: "Worship button")
         case .presenting, .worshipMode, .worshipPresenting:
             return "Stop\nWorship"
         }
