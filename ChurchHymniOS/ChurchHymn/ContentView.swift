@@ -1007,27 +1007,41 @@ struct ContentView: View {
         }
         
         print("🔄 Starting atomic hymn creation transaction for: \(hymn.title)")
-        
+        print("   Original hymn ID: \(hymn.id)")
+
         // Atomic transaction: attempt to create hymn
         do {
             let success = await hymnService.createHymn(hymn)
-            
+
             if success {
-                // Verify the hymn was actually created correctly
-                if let createdHymn = hymnService.hymns.first(where: { $0.id == hymn.id }) {
-                    // Double-check data integrity
-                    if createdHymn.title == hymn.title && createdHymn.lyrics == hymn.lyrics {
-                        print("✅ Atomic hymn creation successful: \(hymn.title)")
-                        return .success(createdHymn)
-                    } else {
-                        print("❌ Data integrity check failed after creation")
-                        return .rollback("Created hymn data doesn't match expected values")
-                    }
+                print("✅ HymnService reported successful creation")
+                print("   Current hymns count: \(hymnService.hymns.count)")
+                print("   Searching for created hymn...")
+
+                // CRITICAL FIX: Verify the hymn was created by searching for title
+                // Note: We can't search by ID because createHymn creates a NEW hymn with a NEW ID
+                if let createdHymn = hymnService.hymns.first(where: {
+                    $0.title == hymn.title &&
+                    $0.lyrics == hymn.lyrics &&
+                    $0.musicalKey == hymn.musicalKey &&
+                    $0.author == hymn.author
+                }) {
+                    print("✅ Atomic hymn creation successful: \(hymn.title) (ID: \(createdHymn.id))")
+                    return .success(createdHymn)
                 } else {
                     print("❌ Hymn creation reported success but hymn not found in collection")
+                    print("   Looking for: title='\(hymn.title)'")
+                    print("   Looking for: lyrics prefix='\(hymn.lyrics?.prefix(50) ?? "nil")'")
+                    print("   Looking for: musicalKey='\(hymn.musicalKey ?? "nil")'")
+                    print("   Looking for: author='\(hymn.author ?? "nil")'")
+                    print("   Available hymns (\(hymnService.hymns.count) total):")
+                    for (index, h) in hymnService.hymns.enumerated() {
+                        print("     [\(index)] '\(h.title)' - lyrics: '\(h.lyrics?.prefix(30) ?? "nil")' - key: '\(h.musicalKey ?? "nil")' - author: '\(h.author ?? "nil")'")
+                    }
                     return .rollback("Hymn not found after successful creation")
                 }
             } else {
+                print("❌ HymnService reported creation failure")
                 return .failure("Failed to create hymn in repository")
             }
         } catch {
