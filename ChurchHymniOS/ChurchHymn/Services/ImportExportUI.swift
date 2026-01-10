@@ -438,7 +438,7 @@ struct ExportSelectionView: View {
 
 // MARK: - Export Document
 
-struct HymnExportDocument: FileDocument {
+struct HymnExportDocument: FileDocument, @unchecked Sendable {
     static var readableContentTypes: [UTType] { [UTType.json, UTType.plainText] }
     
     let hymns: [Hymn]

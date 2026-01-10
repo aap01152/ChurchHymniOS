@@ -163,9 +163,10 @@ class HymnOperations: ObservableObject, @unchecked Sendable {
                     return
                 }
                 
+                let importedCount = importedHymns.count
                 await MainActor.run {
                     importProgress = 0.3
-                    progressMessage = "Processing \(importedHymns.count) hymns..."
+                    progressMessage = "Processing \(importedCount) hymns..."
                 }
                 
                 // Create preview data
@@ -327,11 +328,12 @@ class HymnOperations: ObservableObject, @unchecked Sendable {
     }
     
     func exportBatchJSON(_ hymns: [Hymn], to url: URL, onComplete: @escaping () -> Void, onError: @escaping (ImportError) -> Void) {
+        let hymnCount = hymns.count
         Task {
             await MainActor.run {
                 isExporting = true
                 exportProgress = 0.0
-                progressMessage = "Preparing \(hymns.count) hymns for export..."
+                progressMessage = "Preparing \(hymnCount) hymns for export..."
             }
             
             do {
@@ -344,20 +346,20 @@ class HymnOperations: ObservableObject, @unchecked Sendable {
                     await MainActor.run {
                         isExporting = false
                     }
-                    onError(.invalidFormat("Failed to generate JSON data for \(hymns.count) hymns. Some hymn data may be corrupted."))
+                    onError(.invalidFormat("Failed to generate JSON data for \(hymnCount) hymns. Some hymn data may be corrupted."))
                     return
                 }
                 
                 await MainActor.run {
                     exportProgress = 0.6
-                    progressMessage = "Writing \(hymns.count) hymns to file..."
+                    progressMessage = "Writing \(hymnCount) hymns to file..."
                 }
                 
                 try data.write(to: url)
                 
                 await MainActor.run {
                     exportProgress = 1.0
-                    progressMessage = "Export complete! \(hymns.count) hymns exported."
+                    progressMessage = "Export complete! \(hymnCount) hymns exported."
                     
                     // Small delay to show completion
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {

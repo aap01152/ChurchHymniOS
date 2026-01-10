@@ -46,7 +46,7 @@ class ImportExportManager: ObservableObject {
         var allHymns: [ImportPreviewHymn] = []
         var allDuplicates: [ImportPreviewHymn] = []
         var allErrors: [String] = []
-        var totalFiles = urls.count
+        let totalFiles = urls.count
         
         for (index, url) in urls.enumerated() {
             // Update progress
@@ -463,4 +463,3 @@ struct ImportResult {
         self.preview = preview
     }
 }
-

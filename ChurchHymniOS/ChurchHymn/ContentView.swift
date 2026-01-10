@@ -503,6 +503,7 @@ struct ContentView: View {
             HymnToolbarView(
                 hymnService: hymnService,
                 serviceService: serviceService,
+                worshipSessionManager: worshipSessionManager,
                 selected: $selected,
                 selectedHymnsForDelete: $selectedHymnsForDelete,
                 isMultiSelectMode: $isMultiSelectMode,
@@ -544,6 +545,7 @@ struct ContentView: View {
             HymnToolbarView(
                 hymnService: hymnService,
                 serviceService: serviceService,
+                worshipSessionManager: worshipSessionManager,
                 selected: $selected,
                 selectedHymnsForDelete: $selectedHymnsForDelete,
                 isMultiSelectMode: $isMultiSelectMode,
@@ -915,35 +917,30 @@ struct ContentView: View {
         print("🔄 Starting atomic hymn creation transaction for: \(hymn.title)")
 
         // Atomic transaction: attempt to create hymn
-        do {
-            let success = await hymnService.createHymn(hymn)
+        let success = await hymnService.createHymn(hymn)
 
-            if success {
-                print("✅ HymnService reported successful creation")
-                print("   Current hymns count: \(hymnService.hymns.count)")
+        if success {
+            print("✅ HymnService reported successful creation")
+            print("   Current hymns count: \(hymnService.hymns.count)")
 
-                // SIMPLIFIED FIX: Search for hymn by title only (less strict verification)
-                // HymnService already validates and refreshes the hymns array from the database
-                if let createdHymn = hymnService.hymns.first(where: { $0.title == hymn.title }) {
-                    print("✅ Hymn creation verified: '\(hymn.title)' (ID: \(createdHymn.id))")
-                    return .success(createdHymn)
-                } else {
-                    // This shouldn't happen, but if it does, still return success since HymnService reported success
-                    print("⚠️ Warning: Hymn created but not immediately visible in array")
-                    print("   This is likely a timing issue - the hymn was saved successfully")
-                    print("   Creating temporary hymn object to return")
-
-                    // Since HymnService reported success, trust it and return a success result
-                    // The hymn will appear in the list when the UI refreshes
-                    return .success(hymn)
-                }
+            // SIMPLIFIED FIX: Search for hymn by title only (less strict verification)
+            // HymnService already validates and refreshes the hymns array from the database
+            if let createdHymn = hymnService.hymns.first(where: { $0.title == hymn.title }) {
+                print("✅ Hymn creation verified: '\(hymn.title)' (ID: \(createdHymn.id))")
+                return .success(createdHymn)
             } else {
-                print("❌ HymnService reported creation failure")
-                return .failure("Failed to create hymn in repository")
+                // This shouldn't happen, but if it does, still return success since HymnService reported success
+                print("⚠️ Warning: Hymn created but not immediately visible in array")
+                print("   This is likely a timing issue - the hymn was saved successfully")
+                print("   Creating temporary hymn object to return")
+
+                // Since HymnService reported success, trust it and return a success result
+                // The hymn will appear in the list when the UI refreshes
+                return .success(hymn)
             }
-        } catch {
-            print("❌ Exception during hymn creation: \(error)")
-            return .failure("Unexpected error during hymn creation: \(error.localizedDescription)")
+        } else {
+            print("❌ HymnService reported creation failure")
+            return .failure("Failed to create hymn in repository")
         }
     }
     
@@ -1023,8 +1020,6 @@ struct ContentView: View {
         }
         
         // Store original hymn for potential rollback
-        let originalHymn = hymnService.hymns.first { $0.id == hymn.id }
-        
         // Phase 2 comprehensive validation
         let validationResult = validateHymnForSave(hymn, isNewHymn: false)
         switch validationResult {
@@ -1053,30 +1048,25 @@ struct ContentView: View {
         print("🔄 Starting atomic hymn update transaction for: \(hymn.title)")
         
         // Atomic transaction: attempt to update hymn
-        do {
-            let success = await hymnService.updateHymn(hymn)
-            
-            if success {
-                // Verify the hymn was actually updated correctly
-                if let updatedHymn = hymnService.hymns.first(where: { $0.id == hymn.id }) {
-                    // Double-check data integrity
-                    if updatedHymn.title == hymn.title && updatedHymn.lyrics == hymn.lyrics {
-                        print("✅ Atomic hymn update successful: \(hymn.title)")
-                        return .success(updatedHymn)
-                    } else {
-                        print("❌ Data integrity check failed after update")
-                        return .rollback("Updated hymn data doesn't match expected values")
-                    }
+        let success = await hymnService.updateHymn(hymn)
+        
+        if success {
+            // Verify the hymn was actually updated correctly
+            if let updatedHymn = hymnService.hymns.first(where: { $0.id == hymn.id }) {
+                // Double-check data integrity
+                if updatedHymn.title == hymn.title && updatedHymn.lyrics == hymn.lyrics {
+                    print("✅ Atomic hymn update successful: \(hymn.title)")
+                    return .success(updatedHymn)
                 } else {
-                    print("❌ Hymn update reported success but hymn not found in collection")
-                    return .rollback("Hymn not found after successful update")
+                    print("❌ Data integrity check failed after update")
+                    return .rollback("Updated hymn data doesn't match expected values")
                 }
             } else {
-                return .failure("Failed to update hymn in repository")
+                print("❌ Hymn update reported success but hymn not found in collection")
+                return .rollback("Hymn not found after successful update")
             }
-        } catch {
-            print("❌ Exception during hymn update: \(error)")
-            return .failure("Unexpected error during hymn update: \(error.localizedDescription)")
+        } else {
+            return .failure("Failed to update hymn in repository")
         }
     }
     
@@ -1126,15 +1116,11 @@ struct ContentView: View {
             }
         }
         
-        do {
-            let success = await hymnService.createHymn(hymn)
-            if success, let createdHymn = hymnService.hymns.first(where: { $0.id == hymn.id }) {
-                return .success(createdHymn)
-            } else {
-                return .failure("Failed to create hymn")
-            }
-        } catch {
-            return .failure("Error during forced creation: \(error.localizedDescription)")
+        let success = await hymnService.createHymn(hymn)
+        if success, let createdHymn = hymnService.hymns.first(where: { $0.id == hymn.id }) {
+            return .success(createdHymn)
+        } else {
+            return .failure("Failed to create hymn")
         }
     }
     
@@ -1164,15 +1150,11 @@ struct ContentView: View {
             }
         }
         
-        do {
-            let success = await hymnService.updateHymn(hymn)
-            if success, let updatedHymn = hymnService.hymns.first(where: { $0.id == hymn.id }) {
-                return .success(updatedHymn)
-            } else {
-                return .failure("Failed to update hymn")
-            }
-        } catch {
-            return .failure("Error during forced update: \(error.localizedDescription)")
+        let success = await hymnService.updateHymn(hymn)
+        if success, let updatedHymn = hymnService.hymns.first(where: { $0.id == hymn.id }) {
+            return .success(updatedHymn)
+        } else {
+            return .failure("Failed to update hymn")
         }
     }
     
@@ -1346,7 +1328,7 @@ struct ContentView: View {
         
         print("🔄 Starting orphaned hymn recovery...")
         
-        var recoveredCount = 0
+        let recoveredCount = 0
         var failedCount = 0
         
         do {
@@ -1526,7 +1508,7 @@ struct ContentView: View {
         print("🧪 Testing state separation...")
         
         // Test that new and edit states are properly separated
-        guard let hymnService = hymnService else {
+        guard hymnService != nil else {
             return ValidationTestResult.failure("testStateSeparation", "Hymn service not available")
         }
         
@@ -1775,7 +1757,7 @@ struct ContentView: View {
         
         print("🧪 Testing performance under load...")
         
-        guard let hymnService = hymnService else {
+        guard hymnService != nil else {
             return ValidationTestResult.failure("testPerformanceUnderLoad", "Hymn service not available")
         }
         
@@ -1795,7 +1777,7 @@ struct ContentView: View {
         
         // Test integrity check performance
         let integrityStartTime = CFAbsoluteTimeGetCurrent()
-        let integrityResult = await performDataIntegrityCheck()
+        _ = await performDataIntegrityCheck()
         let integrityTime = CFAbsoluteTimeGetCurrent() - integrityStartTime
         
         if integrityTime < 5.0 { // Should complete in under 5 seconds for typical databases

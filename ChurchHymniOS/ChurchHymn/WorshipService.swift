@@ -10,7 +10,7 @@ import SwiftData
 import Foundation
 
 @Model
-class WorshipService: Identifiable, Codable, @unchecked Sendable {
+class WorshipService: Identifiable, Codable {
     @Attribute(.unique) var id: UUID
     var title: String
     var date: Date

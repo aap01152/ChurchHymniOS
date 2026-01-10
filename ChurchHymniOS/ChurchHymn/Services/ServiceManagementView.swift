@@ -43,7 +43,7 @@ struct ServiceManagementView: View {
                                 let success = await serviceService.createService(todayService)
                                 if success {
                                     // Automatically activate the newly created service
-                                    await serviceService.setActiveService(todayService)
+                                    _ = await serviceService.setActiveService(todayService)
                                 }
                             }
                         }
@@ -610,7 +610,7 @@ struct ServiceDetailsView: View {
                                     hymn: hymnService.hymns.first { $0.id == serviceHymn.hymnId },
                                     onRemove: {
                                         Task {
-                                            await serviceService.removeHymnFromService(
+                                            _ = await serviceService.removeHymnFromService(
                                                 hymnId: serviceHymn.hymnId,
                                                 serviceId: service.id
                                             )
@@ -699,7 +699,7 @@ struct ServiceDetailsView: View {
                 availableHymns: hymnService.hymns,
                 onAddHymn: { hymn in
                     Task {
-                        await serviceService.addHymnToService(
+                        _ = await serviceService.addHymnToService(
                             hymnId: hymn.id,
                             serviceId: service.id
                         )

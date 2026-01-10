@@ -82,7 +82,7 @@ enum WorshipServiceError: LocalizedError, Identifiable, Sendable {
         case .maxHymnsReached(let max):
             return NSLocalizedString("service.error.max_hymns_reached", 
                                     comment: "Maximum hymns limit reached") + ": \(max)"
-        case .hymnAlreadyInService(let hymnId, let serviceId):
+        case .hymnAlreadyInService:
             return NSLocalizedString("service.error.hymn_already_in_service", 
                                     comment: "Hymn is already in service")
         case .serviceNotActive(let serviceId):

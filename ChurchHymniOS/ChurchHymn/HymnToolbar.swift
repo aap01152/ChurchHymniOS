@@ -394,6 +394,7 @@ struct FontSizeSliderButton: View {
 struct HymnToolbarView: View {
     @ObservedObject var hymnService: HymnService
     @ObservedObject var serviceService: ServiceService
+    @ObservedObject var worshipSessionManager: WorshipSessionManager
     
     @Binding var selected: Hymn?
     @Binding var selectedHymnsForDelete: Set<UUID>
@@ -421,16 +422,17 @@ struct HymnToolbarView: View {
             HStack(spacing: 0) {
                 // Evenly distributed buttons across the entire width
                     // Present Button
+                    let isPresentEnabled = selected != nil && !worshipSessionManager.isWorshipSessionActive
                     UniformToolbarButton(
                         icon: "play.circle.fill",
                         text: NSLocalizedString("btn.present", comment: "Present"),
-                        color: .green,
+                        color: isPresentEnabled ? .green : .gray,
                         action: {
                             if let hymn = selected {
                                 onPresent(hymn)
                             }
                         },
-                        isEnabled: selected != nil
+                        isEnabled: isPresentEnabled
                     )
                     .help(NSLocalizedString("help.present_selected_hymn", comment: "Present selected hymn help"))
                     

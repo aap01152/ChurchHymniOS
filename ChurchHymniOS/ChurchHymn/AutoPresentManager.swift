@@ -81,16 +81,16 @@ final class AutoPresentManager: ObservableObject {
         
         // Start countdown timer
         countdownTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
-            guard let self = self else {
-                timer.invalidate()
-                return
-            }
-            
-            self.countdownValue -= 1
-            
-            if self.countdownValue <= 0 {
-                timer.invalidate()
-                Task { @MainActor in
+            Task { @MainActor in
+                guard let self = self else {
+                    timer.invalidate()
+                    return
+                }
+                
+                self.countdownValue -= 1
+                
+                if self.countdownValue <= 0 {
+                    timer.invalidate()
                     await self.executeAutoPresent()
                 }
             }
@@ -129,16 +129,16 @@ final class AutoPresentManager: ObservableObject {
         
         // Restart timer with remaining time
         countdownTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
-            guard let self = self else {
-                timer.invalidate()
-                return
-            }
-            
-            self.countdownValue -= 1
-            
-            if self.countdownValue <= 0 {
-                timer.invalidate()
-                Task { @MainActor in
+            Task { @MainActor in
+                guard let self = self else {
+                    timer.invalidate()
+                    return
+                }
+                
+                self.countdownValue -= 1
+                
+                if self.countdownValue <= 0 {
+                    timer.invalidate()
                     await self.executeAutoPresent()
                 }
             }
@@ -198,8 +198,8 @@ struct AutoPresentSettingsView: View {
             Form {
                 Section {
                     Toggle(NSLocalizedString("auto_present.enable", comment: "Enable auto-present"), isOn: $autoPresentManager.isEnabled)
-                        .onChange(of: autoPresentManager.isEnabled) { _ in
-                            if !autoPresentManager.isEnabled {
+                        .onChange(of: autoPresentManager.isEnabled) { _, isEnabled in
+                            if !isEnabled {
                                 autoPresentManager.cancelTimer()
                             }
                         }

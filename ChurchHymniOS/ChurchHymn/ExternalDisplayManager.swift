@@ -393,21 +393,17 @@ class ExternalDisplayManager: ObservableObject {
     
     /// Present hymn within worship session
     func presentHymnInWorshipMode(_ hymn: Hymn, startingAtVerse: Int = 0) async throws {
-        guard state == .worshipMode, let displayInfo = externalDisplayInfo else {
+        guard state == .worshipMode, externalDisplayInfo != nil else {
             throw ExternalDisplayError.noExternalDisplayFound
         }
         
-        do {
-            currentHymn = hymn
-            currentVerseIndex = startingAtVerse
-            isPresenting = true
-            state = .worshipPresenting
-            
-            await updateExternalDisplay()
-            print("Hymn '\(hymn.title)' presented in worship mode")
-        } catch {
-            throw ExternalDisplayError.presentationFailed("Failed to present hymn in worship mode: \(error.localizedDescription)")
-        }
+        currentHymn = hymn
+        currentVerseIndex = startingAtVerse
+        isPresenting = true
+        state = .worshipPresenting
+        
+        await updateExternalDisplay()
+        print("Hymn '\(hymn.title)' presented in worship mode")
     }
     
     /// Stop hymn presentation within worship session - return to background
@@ -457,7 +453,7 @@ class ExternalDisplayManager: ObservableObject {
         hostingController.view.isOpaque = true
         
         // Simple transition to background
-        if let currentController = window.rootViewController {
+        if window.rootViewController != nil {
             UIView.transition(
                 with: window,
                 duration: 0.1,
@@ -545,7 +541,7 @@ class ExternalDisplayManager: ObservableObject {
         hostingController.view.isOpaque = true
         
         // Simple transition for hymn presentation
-        if let currentController = window.rootViewController {
+        if window.rootViewController != nil {
             UIView.transition(
                 with: window,
                 duration: 0.1,

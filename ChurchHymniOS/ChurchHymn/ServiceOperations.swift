@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 import Foundation
 
+@MainActor
 class ServiceOperations: ObservableObject, @unchecked Sendable {
     @Published var isLoading = false
     @Published var operationProgress: Double = 0.0
@@ -114,11 +115,9 @@ class ServiceOperations: ObservableObject, @unchecked Sendable {
             // Then activate the target service
             service.setActive(true)
             
-            await MainActor.run {
-                operationProgress = 0.7
-                progressMessage = "Saving changes..."
-                currentService = service
-            }
+            operationProgress = 0.7
+            progressMessage = "Saving changes..."
+            currentService = service
             
             try context.save()
             

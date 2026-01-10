@@ -10,7 +10,7 @@ import SwiftData
 import Foundation
 
 @Model
-class Hymn: Identifiable, Codable, @unchecked Sendable {
+class Hymn: Identifiable, Codable {
     @Attribute(.unique) var id: UUID
     // Store a normalized (e.g. lowercase + trimmed) title for lookups
     // Note: Removed .unique constraint to prevent SwiftData from replacing hymns

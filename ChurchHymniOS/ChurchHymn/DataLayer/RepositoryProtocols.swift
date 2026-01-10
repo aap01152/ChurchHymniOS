@@ -11,6 +11,7 @@ import SwiftData
 // MARK: - Base Repository Protocol
 
 /// Base protocol for all repositories
+@DataActor
 protocol BaseRepositoryProtocol: Sendable {
     /// Perform a health check on the repository
     func healthCheck() async throws -> Bool
@@ -22,6 +23,7 @@ protocol BaseRepositoryProtocol: Sendable {
 // MARK: - Hymn Repository Protocol
 
 /// Protocol for hymn data access operations
+@DataActor
 protocol HymnRepositoryProtocol: BaseRepositoryProtocol {
     
     // MARK: - Basic CRUD Operations
@@ -117,6 +119,7 @@ protocol HymnRepositoryProtocol: BaseRepositoryProtocol {
 // MARK: - Service Repository Protocol
 
 /// Protocol for worship service data access operations
+@DataActor
 protocol ServiceRepositoryProtocol: BaseRepositoryProtocol {
     
     // MARK: - Basic CRUD Operations
@@ -211,6 +214,7 @@ protocol ServiceRepositoryProtocol: BaseRepositoryProtocol {
 // MARK: - Service Hymn Repository Protocol
 
 /// Protocol for service-hymn relationship data access operations
+@DataActor
 protocol ServiceHymnRepositoryProtocol: BaseRepositoryProtocol {
     
     // MARK: - Basic CRUD Operations

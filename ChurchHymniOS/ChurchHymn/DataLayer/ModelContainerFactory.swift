@@ -72,15 +72,9 @@ final class ModelContainerFactory {
     /// Creates an in-memory container for testing
     static func createTestContainer() -> ModelContainer {
         logger.info("Creating test ModelContainer...")
-        
-        do {
-            let container = createInMemoryContainer()
-            logger.info("Test ModelContainer created successfully")
-            return container
-        } catch {
-            logger.error("Test container creation failed - this should never happen")
-            fatalError("Failed to create test ModelContainer: \(error)")
-        }
+        let container = createInMemoryContainer()
+        logger.info("Test ModelContainer created successfully")
+        return container
     }
     
     /// Creates a container with CloudKit integration
@@ -262,7 +256,7 @@ final class ModelContainerManager: ObservableObject {
                 logger.error("Attempted to access dataManager before initialization")
                 fatalError("SwiftDataManager not initialized. Call initialize() first.")
             }
-            return await dataManager
+            return dataManager
         }
     }
     

@@ -330,7 +330,6 @@ struct ExternalDisplayStateManagementView: View {
     private func updateTransitionHistory() {
         // In a real implementation, this would be maintained by the ExternalDisplayManager
         // For demo purposes, create some sample transitions
-        let now = Date()
         transitionHistory = [
             StateTransition(from: .disconnected, to: .connected, reason: NSLocalizedString("external.transition.display_connected", comment: "Display connected")),
             StateTransition(from: .connected, to: .worshipMode, reason: NSLocalizedString("external.transition.worship_started", comment: "Worship session started")),
