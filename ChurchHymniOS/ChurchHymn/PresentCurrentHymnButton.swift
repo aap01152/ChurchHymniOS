@@ -71,8 +71,8 @@ struct PresentCurrentHymnButton: View {
             .onAppear {
                 startShimmerAnimation()
             }
-            .alert("Present Hymn Error", isPresented: $showError) {
-                Button("OK") { }
+            .alert(NSLocalizedString("alert.present_hymn_error", comment: "Present hymn error"), isPresented: $showError) {
+                Button(NSLocalizedString("btn.ok", comment: "OK")) { }
             } message: {
                 Text(errorMessage)
             }
@@ -343,7 +343,7 @@ struct PresentCurrentHymnButton: View {
                         externalDisplayManager.state = .worshipMode
                     }
                 
-                Text("Preview of Present Current Hymn Button")
+                Text(NSLocalizedString("preview.present_current_hymn_button", comment: "Present current hymn button preview"))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }

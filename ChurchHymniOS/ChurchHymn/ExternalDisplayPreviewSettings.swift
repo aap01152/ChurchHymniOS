@@ -68,14 +68,14 @@ struct ExternalDisplayPreviewSettingsView: View {
                             .fontWeight(.medium)
                         
                         HStack {
-                            Text("X: \(Int(previewManager.position.x))")
+                            Text(String(format: NSLocalizedString("preview.position_x", comment: "Preview position X"), Int(previewManager.position.x)))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                                 .monospacedDigit()
                             
                             Spacer()
                             
-                            Text("Y: \(Int(previewManager.position.y))")
+                            Text(String(format: NSLocalizedString("preview.position_y", comment: "Preview position Y"), Int(previewManager.position.y)))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                                 .monospacedDigit()

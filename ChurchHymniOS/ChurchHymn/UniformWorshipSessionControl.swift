@@ -25,8 +25,8 @@ struct UniformWorshipSessionControl: View {
         .disabled(!canToggleWorshipSession)
         .help(worshipHelpText)
         .frame(maxWidth: .infinity)
-        .alert("Worship Session Error", isPresented: $showingErrorAlert) {
-            Button("OK") { }
+        .alert(NSLocalizedString("alert.worship_session_error", comment: "Worship session error"), isPresented: $showingErrorAlert) {
+            Button(NSLocalizedString("btn.ok", comment: "OK")) { }
         } message: {
             Text(errorMessage)
         }
@@ -57,9 +57,11 @@ struct UniformWorshipSessionControl: View {
         case .disconnected:
             return NSLocalizedString("btn.worship", comment: "Worship button")
         case .connected:
-            return canToggleWorshipSession ? "Start\nWorship" : NSLocalizedString("btn.worship", comment: "Worship button")
+            return canToggleWorshipSession
+                ? NSLocalizedString("btn.start_worship_multiline", comment: "Start Worship button")
+                : NSLocalizedString("btn.worship", comment: "Worship button")
         case .presenting, .worshipMode, .worshipPresenting:
-            return "Stop\nWorship"
+            return NSLocalizedString("btn.stop_worship_multiline", comment: "Stop Worship button")
         }
     }
     
@@ -77,11 +79,13 @@ struct UniformWorshipSessionControl: View {
     private var worshipHelpText: String {
         switch externalDisplayManager.state {
         case .disconnected:
-            return "No external display available"
+            return NSLocalizedString("status.no_external_display", comment: "No external display available")
         case .connected:
-            return canToggleWorshipSession ? "Start worship session" : "External display ready"
+            return canToggleWorshipSession
+                ? NSLocalizedString("help.start_worship_session", comment: "Start worship session help")
+                : NSLocalizedString("status.external_display_ready", comment: "External display ready")
         case .presenting, .worshipMode, .worshipPresenting:
-            return "Stop worship session"
+            return NSLocalizedString("help.stop_worship_session", comment: "Stop worship session help")
         }
     }
     
@@ -158,4 +162,3 @@ struct UniformToolbarButton: View {
         .frame(maxWidth: .infinity)
     }
 }
-

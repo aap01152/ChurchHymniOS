@@ -31,8 +31,8 @@ struct WorshipSessionControls: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(worshipSessionBorderColor, lineWidth: 1)
         )
-        .alert("Worship Session Error", isPresented: $showingErrorAlert) {
-            Button("OK") { }
+        .alert(NSLocalizedString("alert.worship_session_error", comment: "Worship session error"), isPresented: $showingErrorAlert) {
+            Button(NSLocalizedString("btn.ok", comment: "OK")) { }
         } message: {
             Text(errorMessage)
         }
@@ -208,19 +208,19 @@ struct WorshipSessionControls: View {
     private var worshipSessionButtonHelpText: String {
         switch externalDisplayManager.state {
         case .disconnected:
-            return "Connect an external display first"
+            return NSLocalizedString("help.connect_external_display_first", comment: "Connect an external display first")
         case .connected:
             if hasActiveServiceWithHymns {
-                return "Start worship session with background display"
+                return NSLocalizedString("help.start_worship_background", comment: "Start worship session with background display")
             } else {
-                return "Add hymns to your active service before starting worship session"
+                return NSLocalizedString("help.add_hymns_before_worship", comment: "Add hymns before starting worship session")
             }
         case .presenting:
-            return "Stop current presentation to enable worship session"
+            return NSLocalizedString("help.stop_presentation_to_enable_worship", comment: "Stop presentation to enable worship session")
         case .worshipMode:
-            return "Stop worship session and return to normal mode"
+            return NSLocalizedString("help.stop_worship_return_normal", comment: "Stop worship session and return to normal mode")
         case .worshipPresenting:
-            return "Stop worship session and return to normal mode"
+            return NSLocalizedString("help.stop_worship_return_normal", comment: "Stop worship session and return to normal mode")
         }
     }
     
@@ -325,8 +325,8 @@ struct CompactWorshipSessionControl: View {
         }
         .disabled(!canToggleWorshipSession)
         .help(worshipHelpText)
-        .alert("Worship Session Error", isPresented: $showingErrorAlert) {
-            Button("OK") { }
+        .alert(NSLocalizedString("alert.worship_session_error", comment: "Worship session error"), isPresented: $showingErrorAlert) {
+            Button(NSLocalizedString("btn.ok", comment: "OK")) { }
         } message: {
             Text(errorMessage)
         }
@@ -359,24 +359,24 @@ struct CompactWorshipSessionControl: View {
         case .disconnected:
             return NSLocalizedString("external.no_display", comment: "No external display available")
         case .connected:
-            return "Start Worship"
+            return NSLocalizedString("btn.start_worship", comment: "Start Worship")
         case .presenting:
-            return "Stop First"
+            return NSLocalizedString("btn.stop_first", comment: "Stop First")
         case .worshipMode, .worshipPresenting:
-            return "Stop Worship"
+            return NSLocalizedString("btn.stop_worship", comment: "Stop Worship")
         }
     }
     
     private var worshipHelpText: String {
         switch externalDisplayManager.state {
         case .disconnected:
-            return "Connect an external display first"
+            return NSLocalizedString("help.connect_external_display_first", comment: "Connect an external display first")
         case .connected:
-            return "Start worship session"
+            return NSLocalizedString("help.start_worship_session", comment: "Start worship session")
         case .presenting:
-            return "Stop current presentation first"
+            return NSLocalizedString("help.stop_presentation_first", comment: "Stop current presentation first")
         case .worshipMode, .worshipPresenting:
-            return "Stop worship session"
+            return NSLocalizedString("help.stop_worship_session", comment: "Stop worship session")
         }
     }
     
@@ -424,6 +424,6 @@ struct CompactWorshipSessionControl: View {
 }
 
 #Preview {
-    Text("WorshipSessionControls Preview")
+    Text(NSLocalizedString("preview.worship_session_controls", comment: "Worship session controls preview"))
         .foregroundColor(.secondary)
 }

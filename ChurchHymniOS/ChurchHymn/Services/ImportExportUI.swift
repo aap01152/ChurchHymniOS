@@ -28,11 +28,11 @@ extension ImportType {
     var displayName: String {
         switch self {
         case .auto:
-            return "Auto-detect"
+            return NSLocalizedString("import.type.auto", comment: "Auto-detect import type")
         case .plainText:
-            return "Plain Text"
+            return NSLocalizedString("export.plain_text", comment: "Plain text")
         case .json:
-            return "JSON"
+            return NSLocalizedString("export.json", comment: "JSON")
         }
     }
 }
@@ -140,11 +140,11 @@ struct ImportPreviewView: View {
                 // Duplicate resolution picker
                 if !preview.duplicates.isEmpty {
                     VStack {
-                        Text("Duplicate Resolution")
+                        Text(NSLocalizedString("export.duplicate_resolution", comment: "Duplicate resolution title"))
                             .font(.headline)
                             .padding(.top)
                         
-                        Picker("Resolution", selection: $duplicateResolution) {
+                        Picker(NSLocalizedString("export.duplicate_resolution", comment: "Duplicate resolution picker"), selection: $duplicateResolution) {
                             ForEach(DuplicateResolution.allCases, id: \.self) { resolution in
                                 Text(resolution.displayName)
                                     .tag(resolution)
@@ -160,7 +160,7 @@ struct ImportPreviewView: View {
                 // Content list
                 List {
                     if !preview.hymns.isEmpty {
-                        Section("New Hymns (\(preview.hymns.count))") {
+                        Section(String(format: NSLocalizedString("import.new_hymns_count", comment: "New hymns count"), preview.hymns.count)) {
                             ForEach(preview.hymns) { hymn in
                                 ImportPreviewRowView(
                                     hymn: hymn,
@@ -172,7 +172,7 @@ struct ImportPreviewView: View {
                     }
                     
                     if !preview.duplicates.isEmpty {
-                        Section("Duplicates (\(preview.duplicates.count))") {
+                        Section(String(format: NSLocalizedString("import.duplicates_count", comment: "Duplicate hymns count"), preview.duplicates.count)) {
                             ForEach(preview.duplicates) { hymn in
                                 ImportPreviewRowView(
                                     hymn: hymn,
@@ -188,7 +188,7 @@ struct ImportPreviewView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    Button(NSLocalizedString("btn.cancel", comment: "Cancel")) {
                         onComplete(false)
                     }
                 }
@@ -266,7 +266,7 @@ struct ImportPreviewRowView: View {
                 }
                 
                 if isDuplicate, let existing = hymn.existingHymn {
-                    Text("Conflicts with: \(existing.title)")
+                    Text(String(format: NSLocalizedString("import.conflicts_with", comment: "Conflicts with existing hymn"), existing.title))
                         .font(.caption2)
                         .foregroundColor(.orange)
                 }
@@ -337,19 +337,19 @@ struct ExportSelectionView: View {
                 // Header
                 VStack {
                     HStack {
-                        Text("Export Hymns")
+                        Text(NSLocalizedString("nav.export_hymns", comment: "Export hymns title"))
                             .font(.title2)
                             .fontWeight(.semibold)
                         
                         Spacer()
                         
-                        Text("\(localSelection.count) of \(hymns.count)")
+                        Text(String(format: NSLocalizedString("count.selected_of_total", comment: "Selected of total count"), localSelection.count, hymns.count))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
                     
                     // Format picker
-                    Picker("Format", selection: $exportFormat) {
+                    Picker(NSLocalizedString("export.format", comment: "Export format"), selection: $exportFormat) {
                         ForEach(ExportFormat.allCases, id: \.self) { format in
                             Text(format.displayName).tag(format)
                         }
@@ -358,14 +358,14 @@ struct ExportSelectionView: View {
                     
                     // Quick selection buttons
                     HStack {
-                        Button("Select All") {
+                        Button(NSLocalizedString("btn.select_all", comment: "Select All")) {
                             localSelection = Set(hymns.map { $0.id })
                         }
                         .disabled(hymns.isEmpty)
                         
                         Spacer()
                         
-                        Button("Clear All") {
+                        Button(NSLocalizedString("btn.clear_all", comment: "Clear All")) {
                             localSelection.removeAll()
                         }
                         .disabled(localSelection.isEmpty)
@@ -390,7 +390,7 @@ struct ExportSelectionView: View {
                         }
                         
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(hymn.title.isEmpty ? "Untitled Hymn" : hymn.title)
+                            Text(hymn.title.isEmpty ? NSLocalizedString("status.untitled_hymn", comment: "Untitled hymn") : hymn.title)
                                 .font(.headline)
                                 .lineLimit(1)
                             
@@ -416,7 +416,7 @@ struct ExportSelectionView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    Button(NSLocalizedString("btn.cancel", comment: "Cancel")) {
                         // Dismiss without action
                     }
                 }
@@ -489,7 +489,7 @@ enum ExportError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .serializationFailed:
-            return "Failed to serialize hymns for export"
+            return NSLocalizedString("error.export_serialization_failed", comment: "Export serialization failed")
         }
     }
 }

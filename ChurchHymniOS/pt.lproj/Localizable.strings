@@ -162,6 +162,7 @@
 "display.preview" = "Pré-visualização";
 "display.font_size" = "Tamanho de letra";
 "display.font_size_value" = "Tamanho de letra: %d";
+"display.font_size_multiline" = "Tamanho\nde letra";
 
 /* External Display and Presentation */
 "external.verse_number" = "Verso %d";
@@ -322,8 +323,8 @@
 "btn.export_selected" = "Exportar Seleccionados";
 "btn.export_multiple" = "Exportar Múltiplos";
 "btn.export_all" = "Exportar Todos";
-"btn.start_worship" = "Iniciar Culto";
-"btn.stop_worship" = "Parar Culto";
+"btn.start_worship" = "Iniciar Serviço";
+"btn.stop_worship" = "Parar Serviço";
 "btn.present" = "Apresentar";
 "btn.stop_presentation" = "Parar Apresentação";
 "btn.stop_first" = "Parar Primeiro";
@@ -331,7 +332,7 @@
 /* Status Messages */
 "status.no_external_display" = "Sem Ecrã Externo";
 "status.external_display_ready" = "Ecrã Externo Pronto";
-"status.worship_session_active" = "Sessão de Culto Activa";
+"status.worship_session_active" = "Sessão Activa";
 "status.present_externally" = "Apresentar Externamente";
 "status.ready" = "Pronto";
 "status.active" = "Activo";
@@ -351,8 +352,8 @@
 
 /* User Guidance */
 "guidance.tap_add_first_hymn" = "Toque em 'Adicionar' para criar o seu primeiro hino";
-"guidance.create_service_to_start" = "Criar ou activar um serviço para começar a gerir hinos para o culto";
-"guidance.add_hymns_to_service" = "Adicionar hinos a este serviço para organizar música de culto";
+"guidance.create_service_to_start" = "Criar ou activar um serviço para começar a gerir hinos para o serviço";
+"guidance.add_hymns_to_service" = "Adicionar hinos a este serviço para organizar música de serviço";
 "guidance.add_hymns_first" = "Por favor, adicione primeiro alguns hinos antes de criar serviços";
 "guidance.drag_to_reorder" = "Arraste hinos para reordenar";
 "guidance.no_help_topics" = "Nenhum tópico de ajuda encontrado";
@@ -361,7 +362,7 @@
 "guidance.related_topics" = "Tópicos Relacionados";
 
 /* Alert Titles */
-"alert.worship_session_error" = "Erro da Sessão de Culto";
+"alert.worship_session_error" = "Erro da Sessão";
 "alert.export_successful" = "Exportação Bem-sucedida";
 
 /* Form Labels */
@@ -374,20 +375,20 @@
 
 /* Worship Session Interface */
 "worship.no_external_display" = "Sem Ecrã Externo";
-"worship.ready_for_worship" = "Pronto para o Culto";
+"worship.ready_for_worship" = "Pronto para o Serviço";
 "worship.individual_presentation" = "Apresentação Individual";
-"worship.connect_projector" = "Conecte um projector para iniciar o culto";
-"worship.start_worship_session" = "Iniciar sessão de culto para começar";
-"worship.stop_to_enable" = "Pare para activar sessão de culto";
+"worship.connect_projector" = "Conecte um projector para iniciar o serviço";
+"worship.start_worship_session" = "Iniciar sessão para começar";
+"worship.stop_to_enable" = "Pare para activar sessão";
 "worship.ready_for_hymn" = "Pronto para apresentação de hino";
 "worship.presenting_hymn" = "A apresentar: %@";
 "worship.hymn_being_presented" = "Hino a ser apresentado";
 
 /* Help Text */
 "help.connect_external_first" = "Conecte primeiro um ecrã externo";
-"help.start_worship_background" = "Iniciar sessão de culto com ecrã de fundo";
-"help.stop_presentation_first" = "Pare a apresentação actual para activar sessão de culto";
-"help.stop_worship_return" = "Parar sessão de culto e voltar ao modo normal";
+"help.start_worship_background" = "Iniciar sessão com ecrã de fundo";
+"help.stop_presentation_first" = "Pare a apresentação actual para activar sessão";
+"help.stop_worship_return" = "Parar sessão e voltar ao modo normal";
 
 /* Import/Export Interface */
 "import.preview" = "Pré-visualização da Importação";
@@ -402,9 +403,9 @@
 /* Auto-Present Mode */
 "auto_present.mode" = "Modo Apresentação Automática";
 "auto_present.settings" = "Definições";
-"auto_present.description" = "Os hinos serão automaticamente apresentados após permanecerem seleccionados pela duração escolhida durante as sessões de culto.";
+"auto_present.description" = "Os hinos serão automaticamente apresentados após permanecerem seleccionados pela duração escolhida durante as sessões.";
 "auto_present.how_it_works" = "Como Funciona";
-"auto_present.works_description" = "A apresentação automática só funciona durante sessões de culto activas e quando um ecrã externo está ligado.";
+"auto_present.works_description" = "A apresentação automática só funciona durante sessões activas e quando um ecrã externo está ligado.";
 "auto_present.presenting" = "A apresentar automaticamente...";
 
 /* Navigation Titles (Additional) */
@@ -419,17 +420,17 @@
 /* Service Management (Additional) */
 "service.active_service" = "Serviço Activo";
 "service.no_active_service" = "Nenhum Serviço Activo";
-"service.create_or_activate" = "Criar ou activar um serviço para começar a gerir hinos para o culto";
+"service.create_or_activate" = "Criar ou activar um serviço para começar a gerir hinos para o serviço";
 "service.all_services" = "Todos os Serviços";
 "service.no_services_created" = "Ainda não foram criados serviços";
 "service.delete_confirmation" = "Tem a certeza de que deseja apagar '%@'? Esta acção não pode ser desfeita.";
 "service.completed_at" = "Concluído %@";
 "service.hymns_count" = "Hinos (%d)";
 "service.no_hymns_added_yet" = "Ainda não foram adicionados hinos";
-"service.add_hymns_to_organize" = "Adicionar hinos a este serviço para organizar música de culto";
+"service.add_hymns_to_organize" = "Adicionar hinos a este serviço para organizar música do serviço";
 "service.service_not_found" = "Serviço Não Encontrado";
 "service.service_not_loaded" = "Os detalhes do serviço não puderam ser carregados.";
-"service.hymns_presented_during_worship" = "Hinos Apresentados Durante o Culto";
+"service.hymns_presented_during_worship" = "Hinos Apresentados Durante o Serviço";
 "service.note_prefix" = "Nota: %@";
 "service.create_todays_service" = "Criar Serviço de Hoje";
 "service.dismiss" = "Dispensar";
@@ -453,7 +454,7 @@
 /* External Display Status (Additional) */
 "external.no_external_display" = "Sem Ecrã Externo";
 "external.external_display_ready" = "Ecrã Externo Pronto";
-"external.worship_session_active" = "Sessão de Culto Activa";
+"external.worship_session_active" = "Sessão Activa";
 "external.present" = "Apresentar";
 "external.present_externally" = "Apresentar Externamente";
 "external.stop" = "Parar";
@@ -505,25 +506,25 @@
 "toolbar.data_recovery_tools" = "Ferramentas de Recuperação de Dados";
 
 /* Worship Session Controls */
-"worship.start_worship" = "Iniciar Culto";
-"worship.stop_worship" = "Parar Culto";
+"worship.start_worship" = "Iniciar Serviço";
+"worship.stop_worship" = "Parar Serviço";
 "worship.stop_presentation" = "Parar Apresentação";
 "worship.no_external_display" = "Sem Ecrã Externo";
-"worship.ready_for_worship" = "Pronto para o Culto";
+"worship.ready_for_worship" = "Pronto para o Serviço";
 "worship.individual_presentation" = "Apresentação Individual";
-"worship.worship_session_active" = "Sessão de Culto Activa";
-"worship.worship_presentation" = "Apresentação de Culto";
-"worship.connect_projector" = "Conecte um projector para iniciar o culto";
-"worship.start_worship_session" = "Iniciar sessão de culto para começar";
-"worship.stop_to_enable" = "Pare para activar sessão de culto";
+"worship.worship_session_active" = "Sessão Activa";
+"worship.worship_presentation" = "Apresentação de Serviço";
+"worship.connect_projector" = "Conecte um projector para iniciar o serviço";
+"worship.start_worship_session" = "Iniciar sessão para começar";
+"worship.stop_to_enable" = "Pare para activar sessão";
 "worship.ready_for_hymn" = "Pronto para apresentação de hino";
 "worship.presenting_hymn" = "A apresentar: %@";
 "worship.hymn_being_presented" = "Hino a ser apresentado";
 
 /* Additional Button Labels */
 "btn.get_help" = "Obter Ajuda";
-"btn.start_worship" = "Iniciar Culto";
-"btn.stop_worship" = "Parar Culto";
+"btn.start_worship" = "Iniciar Serviço";
+"btn.stop_worship" = "Parar Serviço";
 "btn.stop_presentation" = "Parar Apresentação";
 "btn.present_next" = "Apresentar Seguinte";
 "btn.clear_done" = "Limpar Concluídos";
@@ -541,5 +542,376 @@
 
 /* Worship Background */
 "worship_bg.church_hymn" = "ChurchHymn";
-"worship_bg.session_active" = "Sessão de Culto Activa";
+"worship_bg.session_active" = "Sessão Activa";
 "btn.worship" = "Louvor";
+
+/* Additional Buttons */
+"btn.done" = "Concluir";
+"btn.close" = "Fechar";
+"btn.create" = "Criar";
+"btn.activate" = "Activar";
+"btn.details" = "Detalhes";
+"btn.remove" = "Remover";
+"btn.run" = "Executar";
+"btn.view_issues" = "Ver Problemas";
+"btn.dismiss" = "Dispensar";
+"btn.save_anyway" = "Guardar Mesmo Assim";
+"btn.start_worship" = "Iniciar Serviço";
+"btn.stop_worship" = "Parar Serviço";
+"btn.start_worship_multiline" = "Iniciar\nServiço";
+"btn.stop_worship_multiline" = "Parar\nServiço";
+"btn.stop_first" = "Parar Primeiro";
+"btn.present_next" = "Apresentar Próximo";
+"btn.clear_done" = "Limpar Concluídos";
+"btn.delete_selected_count" = "Apagar Seleccionados (%d)";
+"btn.new_service" = "Novo Serviço";
+
+/* Alerts */
+"alert.recovery_complete" = "Recuperação Concluída";
+"alert.present_hymn_error" = "Erro ao Apresentar Hino";
+"alert.worship_session_error" = "Erro na Sessão";
+"alert.control_error" = "Erro de Controlo";
+"alert.delete_service" = "Apagar Serviço";
+
+/* Messages */
+"msg.hymns_exported_successfully" = "Hinos exportados com sucesso";
+"msg.data_integrity_critical" = "Foram encontrados problemas críticos: %d críticos, %d avisos. Verificados %d hinos e %d serviços.";
+"msg.data_integrity_warnings" = "Verificação concluída: %d avisos encontrados. Verificados %d hinos e %d serviços.";
+"msg.data_integrity_passed" = "Verificação de integridade concluída. Não foram encontrados problemas em %d hinos e %d serviços.";
+"msg.data_integrity_running" = "A executar verificação de integridade...";
+"msg.recovery_success_items" = "%@ (%d itens)";
+"msg.recovery_partial" = "%@ (%d recuperados, %d falhados)";
+"msg.recovery_failed" = "Recuperação falhada: %@";
+"msg.recovery_completed" = "Recuperação concluída";
+"msg.delete_service_confirm" = "Tem a certeza de que deseja apagar '%@'? Esta acção não pode ser desfeita.";
+
+/* Status */
+"status.loading_services" = "A carregar serviços...";
+"status.loading_hymns" = "A carregar hinos...";
+"status.external_display_active" = "Ecrã externo activo";
+"status.worship_active" = "Serviço activo";
+"status.worship_presenting" = "Serviço a apresentar";
+"status.worship_session" = "Sessão";
+"status.presenting_with_hymn" = "A apresentar: %@";
+"status.presenting" = "A apresentar";
+"status.external_display" = "Ecrã Externo";
+"status.ready_for_worship_session" = "Pronto para sessão";
+"status.select_hymn_to_present" = "A mostrar fundo - seleccione um hino para apresentar";
+"status.worship_session_active" = "Sessão Activa";
+"status.no_hymn_selected" = "Nenhum hino seleccionado";
+"status.no_hymn" = "Sem Hino";
+"status.untitled_hymn" = "Hino sem título";
+"status.not_available" = "N/D";
+
+/* Help */
+"help.external_display_status" = "Estado do Ecrã Externo: %@";
+"help.present_hymn_in_worship" = "Apresentar %@ na sessão";
+"help.select_hymn_for_worship" = "Seleccione um hino para apresentar na sessão";
+"help.support_title" = "Ajuda e Suporte";
+"help.search_placeholder" = "Pesquisar tópicos de ajuda...";
+"help.no_topics_title" = "Nenhum tópico de ajuda encontrado";
+"help.no_topics_message" = "Tente outros termos de pesquisa ou explore categorias";
+"help.search_results_title" = "Resultados da Pesquisa";
+"help.search_results_count" = "%d tópicos encontrados";
+"help.related_topics" = "Tópicos Relacionados";
+"help.open_help" = "Abrir ajuda e suporte";
+"help.start_worship_session" = "Iniciar sessão";
+"help.stop_worship_session" = "Parar sessão";
+"help.connect_external_display_first" = "Ligue primeiro um ecrã externo";
+"help.start_worship_background" = "Iniciar sessão com fundo";
+"help.add_hymns_before_worship" = "Adicione hinos ao serviço activo antes de iniciar a sessão";
+"help.stop_presentation_to_enable_worship" = "Pare a apresentação actual para activar a sessão";
+"help.stop_worship_return_normal" = "Pare a sessão e volte ao modo normal";
+"help.stop_presentation_first" = "Pare primeiro a apresentação actual";
+"help.present_selected_hymn" = "Apresentar hino seleccionado";
+"help.add_new_hymn" = "Adicionar novo hino";
+"help.import_hymns_text_json" = "Importar hinos de ficheiros de texto ou JSON";
+"help.import_hymns_files" = "Importar hinos de ficheiros";
+"help.edit_selected_hymn" = "Editar hino seleccionado";
+"help.delete_selected_hymn" = "Apagar hino seleccionado";
+"help.delete_selected_hymns" = "Apagar hinos seleccionados";
+"help.select_all_hymns" = "Seleccionar todos os hinos";
+"help.deselect_all_hymns" = "Desseleccionar todos os hinos";
+"help.export_large_collection" = "Usar transmissão para colecções grandes (>1000 hinos)";
+"help.export_hymns_files" = "Exportar hinos para ficheiros";
+"help.adjust_font_size" = "Ajustar tamanho da letra";
+"help.get_contextual_help" = "Obter ajuda contextual";
+"help.external.no_display_connected" = "Nenhum ecrã externo ligado";
+"help.external.present_to_external" = "Apresentar no ecrã externo";
+"help.external.stop_external_presentation" = "Parar apresentação externa";
+"help.external.present_in_worship" = "Apresentar hino na sessão";
+"help.external.stop_hymn_return_worship" = "Parar apresentação do hino (voltar ao fundo do serviço)";
+"help.add_hymn_to_service" = "Adicionar %@ a %@";
+
+/* Navigation */
+"nav.data_recovery" = "Recuperação de Dados";
+"nav.service_details" = "Detalhes do Serviço";
+"nav.add_hymn" = "Adicionar Hino";
+
+/* Tests */
+"test.summary" = "Resumo dos Testes";
+"test.passed_count" = "Testes Passados: %d/%d";
+"test.total_execution_time" = "Tempo Total de Execução: %.3fs";
+"test.success_rate" = "Taxa de Sucesso: %.1f%%";
+"test.result_title" = "%d. %@";
+"test.execution_time" = "%.3fs";
+"test.no_results_title" = "Sem resultados de testes disponíveis";
+"test.no_results_message" = "Execute a bateria de testes para ver os resultados de validação";
+"test.results_title" = "Resultados dos Testes";
+
+/* Preview */
+"preview.unified_control_banner" = "Pré-visualização do Painel de Controlo Unificado";
+"preview.present_current_hymn_button" = "Pré-visualização do botão Apresentar Hino Actual";
+"preview.dynamic_presenter" = "Pré-visualização do DynamicPresenterView";
+"preview.service_quick_add" = "Pré-visualização do ServiceQuickAddView";
+"preview.worship_session_controls" = "Pré-visualização dos Controlos de Sessão";
+"preview.position_x" = "X: %d";
+"preview.position_y" = "Y: %d";
+
+/* Import / Export */
+"import.new_hymns_count" = "Novos Hinos (%d)";
+"import.duplicates_count" = "Duplicados (%d)";
+"import.conflicts_with" = "Conflitos com: %@";
+"import.type.auto" = "Detecção automática";
+"count.selected_of_total" = "%d de %d";
+"error.export_serialization_failed" = "Falha ao serializar hinos para exportação";
+"export.help" = "Ajuda de Exportação";
+
+/* Service */
+"service.todays_service" = "Serviço de Hoje";
+"service.hymn_count" = "%d hinos";
+"service.active_badge" = "ACTIVO";
+"service.completed_badge" = "CONCLUÍDO";
+"service.completed_at" = "Concluído %@";
+"service.hymns_count" = "Hinos (%d)";
+"service.no_hymns_added" = "Ainda não foram adicionados hinos";
+"service.no_hymns_added_message" = "Adicione hinos a este serviço para organizar a música do serviço";
+"service.add_first_hymn" = "Adicionar Primeiro Hino";
+"service.no_active_service" = "Sem Serviço Activo";
+"service.no_active_service_message" = "Crie ou active um serviço para começar a gerir hinos para o serviço";
+"service.create_todays_service" = "Criar Serviço de Hoje";
+"service.create_service" = "Criar Serviço";
+"service.all_services" = "Todos os Serviços";
+"service.no_services_yet" = "Ainda não existem serviços";
+"service.create_first_service" = "Criar o Primeiro Serviço";
+"service.details_section" = "Detalhes do Serviço";
+"service.title_field" = "Título do Serviço";
+"service.notes_optional" = "Notas (Opcional)";
+"service.not_found_title" = "Serviço Não Encontrado";
+"service.not_found_message" = "Não foi possível carregar os detalhes do serviço.";
+"service.hymns_presented" = "Hinos Apresentados Durante o Serviço";
+"service.unknown_hymn" = "Hino Desconhecido";
+"service.note_prefix" = "Nota: %@";
+"service.no_hymns_available" = "Não há hinos disponíveis";
+"service.no_hymns_available_message" = "Adicione alguns hinos antes de criar serviços";
+"service.search_hymns_prompt" = "Pesquisar hinos...";
+"service.in_service" = "No Serviço";
+"service.adding" = "A adicionar...";
+"service.add_to_service" = "Adicionar ao Serviço";
+"service.green_plus_help" = "Os botões + verdes adicionam hinos ao serviço";
+"service.reorder_help" = "Arraste os hinos para os reordenar no serviço";
+"service.reorder_exit" = "Sair da Reordenação";
+"service.reorder_start" = "Reordenar Hinos";
+
+/* Queue */
+"queue.status.waiting" = "Em espera";
+"queue.status.presenting" = "A apresentar";
+"queue.status.completed" = "Concluído";
+"queue.status.skipped" = "Ignorado";
+"queue.seconds_label" = "%d segundos";
+"queue.title" = "Fila de Hinos";
+"queue.mode" = "Modo de Fila";
+"queue.total" = "Total";
+"queue.waiting" = "Em espera";
+"queue.done" = "Concluído";
+"queue.empty_title" = "A fila está vazia";
+"queue.empty_message" = "Adicione hinos à fila a partir da lista principal";
+"queue.start_at_verse" = "Começar no verso %d";
+
+/* Auto-Present */
+"time.seconds_label" = "%d segundos";
+"auto_present.enable" = "Activar Auto-Apresentação";
+"auto_present.present_delay" = "Atraso de Apresentação";
+"auto_present.step.navigate_hymn" = "Navegue para um hino durante o serviço";
+"auto_present.step.countdown_starts" = "A contagem decrescente começa automaticamente";
+"auto_present.step.presents_on_zero" = "O hino é apresentado quando o temporizador chega a zero";
+"auto_present.step.timer_cancels" = "O temporizador é cancelado ao sair";
+
+/* External Display */
+"external.key_in_parens" = "(%@)";
+"external.verse_short" = "V%d";
+"external.of_total" = "de %d";
+"external.button.external" = "Externo";
+"external.button.stop_external" = "Parar Externo";
+"external.button.worship" = "Serviço";
+"external.button.stop_hymn" = "Parar Hino";
+
+/* External State Management */
+"external.state_management_title" = "Gestão de Estado";
+"external.state_validation_title" = "Validação de Estado";
+"external.state_validation_errors" = "Erros: %@";
+"external.state_validation_warnings" = "Avisos: %@";
+"external.state_validation_suggestions" = "Sugestões: %@";
+"external.current_state" = "Estado Actual";
+"external.state_priority" = "Prioridade";
+"external.state_capabilities" = "Capacidades de Estado";
+"external.capability.connected" = "Ligado";
+"external.capability.presenting" = "A apresentar";
+"external.capability.worship_session" = "Sessão";
+"external.capability.hymn_switching" = "Troca de Hinos";
+"external.capability.verse_navigation" = "Navegação de Versos";
+"external.capability.can_start_presentation" = "Pode iniciar apresentação";
+"external.capability.can_stop_presentation" = "Pode parar apresentação";
+"external.capability.can_present_hymn" = "Pode apresentar hino";
+"external.state_transition_testing" = "Teste de Transição de Estado";
+"external.target_state" = "Estado-Alvo";
+"external.transition_status" = "Transição %@";
+"external.transition_allowed" = "Permitida";
+"external.transition_blocked" = "Bloqueada";
+"external.suggested_actions" = "Acções Sugeridas";
+"external.validate_current_state" = "Validar Estado Actual";
+"external.errors_found" = "Erros Encontrados";
+"external.warnings_found" = "Avisos Encontrados";
+"external.recent_transitions" = "Transições Recentes";
+"external.no_recent_transitions" = "Sem transições recentes";
+"external.validation.no_display_warning" = "Nenhum ecrã externo ligado";
+"external.validation.connect_display_suggestion" = "Ligue um ecrã externo para funcionalidades de apresentação";
+"external.validation.no_hymn_error" = "A apresentar sem hino carregado";
+"external.validation.load_hymn_suggestion" = "Carregue um hino para continuar a apresentação";
+"external.validation.worship_mode_error" = "Ecrã externo em modo de serviço mas sem sessão activa";
+"external.validation.worship_mode_suggestion" = "Inicie uma sessão ou saia do modo de serviço";
+"external.transition.display_connected" = "Ecrã ligado";
+"external.transition.worship_started" = "Sessão iniciada";
+"external.transition.hymn_presented" = "Hino apresentado";
+
+/* Recovery */
+"recovery.tools_title" = "Ferramentas de Recuperação de Dados";
+"recovery.issues_found" = "Encontrados %d problemas de integridade de dados";
+"recovery.issues_found_title" = "Problemas Encontrados";
+"recovery.orphaned_references" = "Referências de Serviço Órfãs: %d";
+"recovery.duplicate_hymns" = "Hinos Duplicados: %d";
+"recovery.critical_issues" = "Problemas Críticos: %d";
+"recovery.warnings" = "Avisos: %d";
+"recovery.actions_title" = "Acções de Recuperação";
+"recovery.action.recover_missing_hymns" = "Recuperar Hinos em Falta";
+"recovery.action.recover_missing_hymns_desc" = "Tentar restaurar hinos referenciados nos serviços mas ausentes da colecção principal";
+"recovery.action.cleanup_orphaned" = "Limpar Referências Órfãs";
+"recovery.action.cleanup_orphaned_desc" = "Remover referências de serviços a hinos que já não existem";
+"recovery.action.run_integrity_check" = "Executar Verificação de Integridade";
+"recovery.action.run_integrity_check_desc" = "Executar uma verificação abrangente de problemas de integridade de dados";
+"recovery.action.run_test_suite" = "Executar Bateria de Testes";
+"recovery.action.run_test_suite_desc" = "Executar testes de validação abrangentes para todas as fases";
+"recovery.running_operation" = "A executar operação de recuperação...";
+
+/* Lists */
+"list.bullet_item" = "• %@";
+
+/* Progress */
+"progress.bytes_processed" = "%@ / %@";
+"progress.hymns_processed" = "%d / %d hinos";
+
+/* Additional Error Strings */
+"business.error.business_rule_violation" = "Violação de regra de negócio";
+"business.error.invalid_input" = "Dados inválidos";
+"business.error.operation_not_allowed" = "Operação não permitida";
+"business.error.permission_denied" = "Permissão negada";
+"business.error.quota_exceeded" = "Quota excedida";
+"business.error.resource_not_found" = "Recurso não encontrado";
+"business.error.state_conflict" = "Conflito de estado";
+
+"data.error.batch_delete_failed" = "Falha ao apagar em lote";
+"data.error.batch_insert_failed" = "Falha ao inserir em lote";
+"data.error.batch_update_failed" = "Falha ao actualizar em lote";
+"data.error.cloud_sync_failed" = "Falha na sincronização na nuvem";
+"data.error.cloud_sync_failed.reason" = "Falha na sincronização na nuvem: %@";
+"data.error.concurrency_error" = "Erro de concorrência";
+"data.error.concurrency_error.reason" = "Erro de concorrência: %@";
+"data.error.constraint_violation" = "Violação de restrição";
+"data.error.constraint_violation.reason" = "Violação de restrição: %@";
+"data.error.container_init_failed" = "Falha ao iniciar o contentor de dados";
+"data.error.container_init_failed.reason" = "Falha ao iniciar o contentor de dados: %@";
+"data.error.context_creation_failed" = "Falha ao criar contexto";
+"data.error.context_creation_failed.reason" = "Falha ao criar contexto: %@";
+"data.error.context_mismatch" = "Incompatibilidade de contexto";
+"data.error.context_mismatch.reason" = "Incompatibilidade de contexto: %@";
+"data.error.database_corrupted" = "Base de dados corrompida";
+"data.error.database_corrupted.reason" = "Base de dados corrompida: %@";
+"data.error.deadlock_detected" = "Bloqueio detectado";
+"data.error.deadlock_detected.reason" = "Bloqueio detectado: %@";
+"data.error.delete_failed" = "Falha ao apagar";
+"data.error.delete_failed.reason" = "Falha ao apagar: %@";
+"data.error.disk_space_insufficient" = "Espaço em disco insuficiente";
+"data.error.disk_space_insufficient.reason" = "Espaço em disco insuficiente: %@";
+"data.error.fetch_failed" = "Falha ao obter dados";
+"data.error.fetch_failed.reason" = "Falha ao obter dados: %@";
+"data.error.insert_failed" = "Falha ao inserir";
+"data.error.insert_failed.reason" = "Falha ao inserir: %@";
+"data.error.memory_pressure" = "Pressão de memória";
+"data.error.memory_pressure.reason" = "Pressão de memória: %@";
+"data.error.migration_failed" = "Falha na migração";
+"data.error.migration_failed.reason" = "Falha na migração: %@";
+"data.error.network_unavailable" = "Rede indisponível";
+"data.error.network_unavailable.reason" = "Rede indisponível: %@";
+"data.error.permission_denied" = "Permissão negada";
+"data.error.permission_denied.reason" = "Permissão negada: %@";
+"data.error.relationship_error" = "Erro de relacionamento";
+"data.error.relationship_error.reason" = "Erro de relacionamento: %@";
+"data.error.save_failed" = "Falha ao guardar";
+"data.error.save_failed.reason" = "Falha ao guardar: %@";
+"data.error.sync_conflict" = "Conflito de sincronização";
+"data.error.sync_conflict.reason" = "Conflito de sincronização: %@";
+"data.error.transaction_failed" = "Falha na transacção";
+"data.error.transaction_failed.reason" = "Falha na transacção: %@";
+"data.error.update_failed" = "Falha na actualização";
+"data.error.update_failed.reason" = "Falha na actualização: %@";
+"data.error.validation_failed" = "Falha na validação";
+"data.error.validation_failed.reason" = "Falha na validação: %@";
+
+"data.error.recovery.cloud_sync" = "Verifique a ligação à internet e tente sincronizar novamente.";
+"data.error.recovery.concurrency" = "Tente novamente a operação.";
+"data.error.recovery.constraint" = "Verifique dados duplicados ou inválidos.";
+"data.error.recovery.context" = "Reinicie a aplicação e tente novamente.";
+"data.error.recovery.corruption" = "Restaure de cópia de segurança ou reimporte os dados.";
+"data.error.recovery.disk_space" = "Libertar espaço em disco e tente novamente.";
+"data.error.recovery.memory" = "Feche outras aplicações e tente novamente.";
+"data.error.recovery.migration" = "Reinicie a aplicação para concluir a migração.";
+"data.error.recovery.network" = "Verifique a ligação à internet e tente novamente.";
+"data.error.recovery.permission" = "Verifique as permissões e tente novamente.";
+"data.error.recovery.reduce_batch" = "Tente um lote mais pequeno.";
+"data.error.recovery.relationship" = "Verifique os itens relacionados e tente novamente.";
+"data.error.recovery.restart_app" = "Reinicie a aplicação e tente novamente.";
+"data.error.recovery.retry" = "Tente novamente a operação.";
+"data.error.recovery.sync_conflict" = "Resolva os conflitos de sincronização e tente novamente.";
+"data.error.recovery.transaction" = "Tente novamente a operação.";
+"data.error.recovery.validation" = "Corrija os erros de validação e tente novamente.";
+
+"hymn.error.duplicate" = "O hino já existe";
+"hymn.error.in_use" = "O hino está em uso";
+"hymn.error.invalid_data" = "Dados do hino inválidos";
+"hymn.error.not_found" = "Hino não encontrado";
+"hymn.error.recovery.duplicate" = "Escolha um título diferente.";
+"hymn.error.recovery.in_use" = "Remova o hino dos serviços antes de apagar.";
+"hymn.error.recovery.invalid_data" = "Corrija os dados do hino e tente novamente.";
+"hymn.error.recovery.not_found" = "Actualize a lista e tente novamente.";
+"hymn.error.validation_failed" = "Falha na validação do hino";
+
+"repository.error.cache_error" = "Erro de cache";
+"repository.error.duplicate_entity" = "Entidade duplicada";
+"repository.error.entity_not_found" = "Entidade não encontrada";
+"repository.error.invalid_query" = "Consulta inválida";
+"repository.error.serialization_error" = "Erro de serialização";
+"repository.error.unavailable" = "Repositório indisponível";
+
+"service.error.invalid_configuration" = "Configuração do serviço inválida";
+"service.error.max_hymns_reached" = "Limite máximo de hinos atingido";
+"service.error.recovery.hymn_duplicate" = "Remova hinos duplicados e tente novamente.";
+"service.error.recovery.invalid_config" = "Verifique a configuração do serviço e tente novamente.";
+"service.error.recovery.max_hymns" = "Remova alguns hinos e tente novamente.";
+"service.error.recovery.not_active" = "Active o serviço e tente novamente.";
+"service.error.recovery.schedule_conflict" = "Escolha outra hora e tente novamente.";
+"service.error.schedule_conflict" = "Conflito de agendamento";
+"service.error.service_not_active" = "Serviço não activo";
+
+"status.worship_with_hymn" = "Serviço: %@";
+"verse.currently_displayed" = "Actualmente apresentado";
+"verse.tap_to_navigate_current" = "Toque para navegar para este verso";

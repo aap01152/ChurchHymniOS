@@ -30,7 +30,7 @@ struct HymnRowView: View {
             }
             
             VStack(alignment: .leading, spacing: 4) {
-                Text(hymn.title.isEmpty ? "Untitled Hymn" : hymn.title)
+                Text(hymn.title.isEmpty ? NSLocalizedString("status.untitled_hymn", comment: "Untitled hymn") : hymn.title)
                     .font(.headline)
                     .lineLimit(1)
                 
@@ -42,7 +42,7 @@ struct HymnRowView: View {
                 }
                 
                 if let key = hymn.musicalKey, !key.isEmpty {
-                    Text("Key: \(key)")
+                    Text(String(format: NSLocalizedString("external.key_prefix", comment: "Key prefix"), key))
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }
@@ -93,4 +93,3 @@ struct HymnRowView: View {
         )
     }
 }
-

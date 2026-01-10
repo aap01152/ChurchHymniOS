@@ -128,7 +128,7 @@ struct ContentView: View {
         }
         */
         .alert(NSLocalizedString("alert.delete_hymn", comment: "Delete Hymn"), isPresented: $showingDeleteConfirmation, presenting: hymnToDelete) { hymn in
-            Button("Cancel", role: .cancel) { }
+            Button(NSLocalizedString("btn.cancel", comment: "Cancel"), role: .cancel) { }
             Button(NSLocalizedString("btn.delete", comment: "Delete"), role: .destructive) {
                 Task {
                     await deleteHymn(hymn)
@@ -138,7 +138,7 @@ struct ContentView: View {
             Text(String(format: NSLocalizedString("msg.delete_hymn_confirm", comment: "Are you sure you want to delete '%@'?"), hymn.title))
         }
         .alert(NSLocalizedString("alert.delete_multiple_hymns", comment: "Delete Multiple Hymns"), isPresented: $showingBatchDeleteConfirmation) {
-            Button("Cancel", role: .cancel) { }
+            Button(NSLocalizedString("btn.cancel", comment: "Cancel"), role: .cancel) { }
             Button(NSLocalizedString("btn.delete", comment: "Delete"), role: .destructive) {
                 Task {
                     await deleteSelectedHymns()
@@ -160,7 +160,7 @@ struct ContentView: View {
         .alert(NSLocalizedString("alert.export_successful", comment: "Export Successful"), isPresented: $showingExportSuccessAlert) {
             Button(NSLocalizedString("btn.ok", comment: "OK button")) { }
         } message: {
-            Text(exportSuccessMessage ?? "Hymns exported successfully")
+            Text(exportSuccessMessage ?? NSLocalizedString("msg.hymns_exported_successfully", comment: "Export success fallback message"))
         }
         // PHASE 2: Enhanced error handling alerts
         .alert(NSLocalizedString("alert.save_error", comment: "Save Error"), isPresented: $showingSaveError) {
@@ -170,7 +170,7 @@ struct ContentView: View {
         }
         .alert(NSLocalizedString("alert.validation_warning", comment: "Validation Warning"), isPresented: $showingValidationWarning) {
             Button(NSLocalizedString("btn.cancel", comment: "Cancel"), role: .cancel) { }
-            Button(NSLocalizedString("btn.save", comment: "Save Anyway")) {
+            Button(NSLocalizedString("btn.save_anyway", comment: "Save Anyway")) {
                 // Force save despite warnings
                 Task {
                     await forceSaveWithWarnings()
@@ -183,43 +183,43 @@ struct ContentView: View {
         .alert(NSLocalizedString("alert.data_integrity_check", comment: "Data Integrity Check"), isPresented: $showingDataIntegrityCheck) {
             if let result = integrityCheckResult {
                 if result.hasCriticalIssues {
-                    Button("View Issues") {
+                    Button(NSLocalizedString("btn.view_issues", comment: "View Issues")) {
                         showingRecoveryOptions = true
                     }
-                    Button("Dismiss") { }
+                    Button(NSLocalizedString("btn.dismiss", comment: "Dismiss")) { }
                 } else {
-                    Button("OK") { }
+                    Button(NSLocalizedString("btn.ok", comment: "OK")) { }
                 }
             } else {
-                Button("OK") { }
+                Button(NSLocalizedString("btn.ok", comment: "OK")) { }
             }
         } message: {
             if let result = integrityCheckResult {
                 if result.hasCriticalIssues {
-                    Text("Critical data issues found: \(result.issues.filter { $0.severity == .critical }.count) critical, \(result.issues.filter { $0.severity == .warning }.count) warnings. Checked \(result.checkedHymns) hymns and \(result.checkedServices) services.")
+                    Text(String(format: NSLocalizedString("msg.data_integrity_critical", comment: "Critical data issues message"), result.issues.filter { $0.severity == .critical }.count, result.issues.filter { $0.severity == .warning }.count, result.checkedHymns, result.checkedServices))
                 } else if result.hasWarnings {
-                    Text("Data check complete: \(result.issues.count) warnings found. Checked \(result.checkedHymns) hymns and \(result.checkedServices) services.")
+                    Text(String(format: NSLocalizedString("msg.data_integrity_warnings", comment: "Data check warnings message"), result.issues.count, result.checkedHymns, result.checkedServices))
                 } else {
-                    Text("Data integrity check passed. No issues found in \(result.checkedHymns) hymns and \(result.checkedServices) services.")
+                    Text(String(format: NSLocalizedString("msg.data_integrity_passed", comment: "Data integrity passed message"), result.checkedHymns, result.checkedServices))
                 }
             } else {
-                Text("Running data integrity check...")
+                Text(NSLocalizedString("msg.data_integrity_running", comment: "Running data integrity check"))
             }
         }
-        .alert("Recovery Complete", isPresented: $showingRecoveryResult) {
-            Button("OK") { }
+        .alert(NSLocalizedString("alert.recovery_complete", comment: "Recovery Complete"), isPresented: $showingRecoveryResult) {
+            Button(NSLocalizedString("btn.ok", comment: "OK")) { }
         } message: {
             if let result = recoveryResult {
                 switch result {
                 case .success(let count, let message):
-                    Text("\(message) (\(count) items)")
+                    Text(String(format: NSLocalizedString("msg.recovery_success_items", comment: "Recovery success items"), message, count))
                 case .partialSuccess(let recovered, let failed, let message):
-                    Text("\(message) (\(recovered) recovered, \(failed) failed)")
+                    Text(String(format: NSLocalizedString("msg.recovery_partial", comment: "Recovery partial success"), message, recovered, failed))
                 case .failure(let message):
-                    Text("Recovery failed: \(message)")
+                    Text(String(format: NSLocalizedString("msg.recovery_failed", comment: "Recovery failed"), message))
                 }
             } else {
-                Text("Recovery completed")
+                Text(NSLocalizedString("msg.recovery_completed", comment: "Recovery completed"))
             }
         }
         // PHASE 1 FIX: Separate sheets for new vs edit operations
@@ -1994,7 +1994,7 @@ struct LoadingServicesView: View {
             ProgressView()
                 .scaleEffect(1.5)
             
-            Text("Loading Services...")
+            Text(NSLocalizedString("status.loading_services", comment: "Loading services"))
                 .font(.headline)
                 .foregroundColor(.secondary)
         }
@@ -2002,4 +2002,3 @@ struct LoadingServicesView: View {
         .background(Color(.systemBackground))
     }
 }
-

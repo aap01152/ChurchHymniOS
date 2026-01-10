@@ -30,11 +30,11 @@ struct DynamicPresenterView: View {
         } else {
             // Fallback view if no hymn is selected
             VStack {
-                Text("No hymn selected")
+                Text(NSLocalizedString("status.no_hymn_selected", comment: "No hymn selected"))
                     .font(.title)
                     .foregroundColor(.secondary)
                 
-                Button("Close") {
+                Button(NSLocalizedString("btn.close", comment: "Close")) {
                     onDismiss()
                 }
                 .buttonStyle(.borderedProminent)
@@ -47,7 +47,7 @@ struct DynamicPresenterView: View {
 }
 
 #Preview {
-    Text("DynamicPresenterView Preview")
+    Text(NSLocalizedString("preview.dynamic_presenter", comment: "Dynamic presenter preview"))
         .padding()
         .foregroundColor(.secondary)
         .font(.caption)

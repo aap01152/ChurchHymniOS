@@ -310,7 +310,7 @@ struct ManagedExternalDisplayPreview: View {
                     .frame(width: 6, height: 6)
                     .symbolEffect(.pulse)
                 
-                Text("LIVE")
+                Text(NSLocalizedString("preview.live", comment: "Live indicator"))
                     .font(.system(size: 9, weight: .bold))
                     .foregroundColor(.red)
             }
@@ -362,7 +362,7 @@ struct ManagedExternalDisplayPreview: View {
                     Image(systemName: "tv.slash")
                         .font(.title2)
                         .foregroundColor(.white.opacity(0.6))
-                    Text("No Content")
+                    Text(NSLocalizedString("status.no_content", comment: "No content"))
                         .font(.caption)
                         .foregroundColor(.white.opacity(0.7))
                 }
@@ -483,7 +483,7 @@ struct FloatingExternalDisplayPreview: View {
                     .frame(width: 6, height: 6)
                     .symbolEffect(.pulse)
                 
-                Text("LIVE")
+                Text(NSLocalizedString("preview.live", comment: "Live indicator"))
                     .font(.system(size: 9, weight: .bold))
                     .foregroundColor(.red)
             }
@@ -535,7 +535,7 @@ struct FloatingExternalDisplayPreview: View {
                     Image(systemName: "tv.slash")
                         .font(.title2)
                         .foregroundColor(.white.opacity(0.6))
-                    Text("No Content")
+                    Text(NSLocalizedString("status.no_content", comment: "No content"))
                         .font(.caption)
                         .foregroundColor(.white.opacity(0.7))
                 }

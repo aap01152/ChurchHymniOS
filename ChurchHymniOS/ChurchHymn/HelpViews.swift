@@ -21,11 +21,11 @@ struct HelpSheetView: View {
                 // Topics and content
                 helpContentArea
             }
-            .navigationTitle("Help & Support")
+            .navigationTitle(NSLocalizedString("help.support_title", comment: "Help and support title"))
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button(NSLocalizedString("btn.done", comment: "Done")) {
                         dismiss()
                     }
                 }
@@ -44,7 +44,7 @@ struct HelpSheetView: View {
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.secondary)
-                    TextField("Search help topics...", text: $helpSystem.searchText)
+                    TextField(NSLocalizedString("help.search_placeholder", comment: "Search help topics placeholder"), text: $helpSystem.searchText)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                 }
                 .padding(.horizontal, 16)
@@ -128,11 +128,11 @@ struct HelpSheetView: View {
                             .font(.system(size: 48))
                             .foregroundColor(.secondary)
                         
-                        Text("No help topics found")
+                        Text(NSLocalizedString("help.no_topics_title", comment: "No help topics found"))
                             .font(.headline)
                             .foregroundColor(.secondary)
                         
-                        Text("Try different search terms or browse categories")
+                        Text(NSLocalizedString("help.no_topics_message", comment: "Try different search terms or browse categories"))
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
@@ -140,13 +140,13 @@ struct HelpSheetView: View {
                 } else {
                     VStack(alignment: .leading, spacing: 16) {
                         HStack {
-                            Text("Search Results")
+                            Text(NSLocalizedString("help.search_results_title", comment: "Search results title"))
                                 .font(.title2)
                                 .fontWeight(.bold)
                             
                             Spacer()
                             
-                            Text("\(helpSystem.filteredTopics.count) topics found")
+                            Text(String(format: NSLocalizedString("help.search_results_count", comment: "Search results count"), helpSystem.filteredTopics.count))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -297,7 +297,7 @@ struct HelpTopicContentView: View {
             // Related topics
             if !topic.relatedTopics.isEmpty {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Related Topics")
+                    Text(NSLocalizedString("help.related_topics", comment: "Related topics"))
                         .font(.headline)
                         .fontWeight(.semibold)
                     
@@ -463,7 +463,7 @@ struct HelpButton: View {
                     .foregroundColor(.primary)
             }
         }
-        .help("Open help and support")
+        .help(NSLocalizedString("help.open_help", comment: "Open help and support"))
     }
 }
 

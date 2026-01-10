@@ -38,7 +38,7 @@ struct HymnToolbar {
                     }
                 }
                 .disabled(selected == nil)
-                .help("Present selected hymn")
+                .help(NSLocalizedString("help.present_selected_hymn", comment: "Present selected hymn help"))
                 
                 // Add Hymn button - prominent placement
                 Button(action: {
@@ -57,7 +57,7 @@ struct HymnToolbar {
                             .foregroundColor(.secondary)
                     }
                 }
-                .help("Add new hymn")
+                .help(NSLocalizedString("help.add_new_hymn", comment: "Add new hymn help"))
                 
                 // Import button - prominent placement
                 Button(action: {
@@ -73,7 +73,7 @@ struct HymnToolbar {
                             .foregroundColor(.secondary)
                     }
                 }
-                .help("Import hymns from text or JSON files")
+                .help(NSLocalizedString("help.import_hymns_text_json", comment: "Import hymns help"))
                 
                 // Edit button - prominent placement
                 Button(action: {
@@ -89,7 +89,7 @@ struct HymnToolbar {
                     }
                 }
                 .disabled(selected == nil)
-                .help("Edit selected hymn")
+                .help(NSLocalizedString("help.edit_selected_hymn", comment: "Edit selected hymn help"))
                 
                 // Delete button - prominent placement
                 Button(action: {
@@ -112,7 +112,10 @@ struct HymnToolbar {
                     }
                 }
                 .disabled(isMultiSelectMode ? selectedHymnsForDelete.isEmpty : selected == nil)
-                .help(isMultiSelectMode ? "Delete selected hymns" : "Delete selected hymn")
+                .help(isMultiSelectMode
+                    ? NSLocalizedString("help.delete_selected_hymns", comment: "Delete selected hymns help")
+                    : NSLocalizedString("help.delete_selected_hymn", comment: "Delete selected hymn help")
+                )
                 
                 // Select All button - only visible in multi-select mode
                 if isMultiSelectMode {
@@ -130,13 +133,16 @@ struct HymnToolbar {
                             Image(systemName: isAllSelected ? "checkmark.circle.fill" : "checkmark.circle")
                                 .font(.title)
                                 .foregroundColor(.blue)
-                            Text(isAllSelected ? "Deselect All" : "Select All")
+                            Text(isAllSelected ? NSLocalizedString("btn.deselect_all", comment: "Deselect All") : NSLocalizedString("btn.select_all", comment: "Select All"))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
                     }
                     .disabled(hymns.isEmpty)
-                    .help(isAllSelected ? "Deselect all hymns" : "Select all hymns")
+                    .help(isAllSelected
+                        ? NSLocalizedString("help.deselect_all_hymns", comment: "Deselect all hymns help")
+                        : NSLocalizedString("help.select_all_hymns", comment: "Select all hymns help")
+                    )
                 }
             }
             
@@ -145,7 +151,7 @@ struct HymnToolbar {
 
                 // Export Menu
                 Menu(NSLocalizedString("btn.export", comment: "Export")) {
-                    Button("Export Selected") { 
+                    Button(NSLocalizedString("export.selected", comment: "Export selected")) {
                         if let hymn = selected {
                             selectedHymnsForExport = [hymn.id]
                             showingExportSelection = true
@@ -153,28 +159,31 @@ struct HymnToolbar {
                     }
                     .disabled(selected == nil)
                     
-                    Button("Export Multiple") { 
+                    Button(NSLocalizedString("export.multiple", comment: "Export multiple")) {
                         showingExportSelection = true
                     }
                     .disabled(hymns.isEmpty)
                     
-                    Button("Export All") { 
+                    Button(NSLocalizedString("export.all", comment: "Export all")) {
                         selectedHymnsForExport = Set(hymns.map { $0.id })
                         showingExportSelection = true
                     }
                     .disabled(hymns.isEmpty)
                     
-                    Button("Export Large Collection") { 
+                    Button(NSLocalizedString("export.large_collection", comment: "Export large collection")) {
                         selectedHymnsForExport = Set(hymns.map { $0.id })
                         showingExportSelection = true
                     }
                     .disabled(hymns.isEmpty)
-                    .help("Use streaming for large collections (>1000 hymns)")
+                    .help(NSLocalizedString("help.export_large_collection", comment: "Use streaming for large collections"))
                 }
                 
                 // Management Menu
                 Menu(NSLocalizedString("btn.manage", comment: "Manage")) {
-                    Button(isMultiSelectMode ? "Exit Multi-Select" : "Multi-Select") {
+                    Button(isMultiSelectMode
+                        ? NSLocalizedString("multiselect.exit", comment: "Exit multi-select")
+                        : NSLocalizedString("multiselect.mode", comment: "Multi-select")
+                    ) {
                         isMultiSelectMode.toggle()
                         if !isMultiSelectMode {
                             selectedHymnsForDelete.removeAll()
@@ -184,12 +193,12 @@ struct HymnToolbar {
                     
                     if isMultiSelectMode {
                         Divider()
-                        Button("Select All") {
+                        Button(NSLocalizedString("btn.select_all", comment: "Select All")) {
                             selectedHymnsForDelete = Set(hymns.map { $0.id })
                         }
                         .disabled(hymns.isEmpty)
                         
-                        Button("Deselect All") {
+                        Button(NSLocalizedString("btn.deselect_all", comment: "Deselect All")) {
                             selectedHymnsForDelete.removeAll()
                         }
                         .disabled(selectedHymnsForDelete.isEmpty)
@@ -219,8 +228,8 @@ struct ExternalDisplayButton: View {
         }
         .disabled(isButtonDisabled)
         .help(buttonHelpText)
-        .alert("External Display Error", isPresented: $showingErrorAlert) {
-            Button("OK") { }
+        .alert(NSLocalizedString("alert.external_display_error", comment: "External Display Error"), isPresented: $showingErrorAlert) {
+            Button(NSLocalizedString("btn.ok", comment: "OK")) { }
         } message: {
             Text(errorMessage)
         }
@@ -261,28 +270,28 @@ struct ExternalDisplayButton: View {
         case .disconnected:
             return NSLocalizedString("external.no_display", comment: "No external display available")
         case .connected:
-            return "External"
+            return NSLocalizedString("external.button.external", comment: "External button")
         case .presenting:
-            return "Stop External"
+            return NSLocalizedString("external.button.stop_external", comment: "Stop external")
         case .worshipMode:
-            return "Worship"
+            return NSLocalizedString("external.button.worship", comment: "Worship")
         case .worshipPresenting:
-            return "Stop Hymn"
+            return NSLocalizedString("external.button.stop_hymn", comment: "Stop hymn")
         }
     }
     
     private var buttonHelpText: String {
         switch externalDisplayManager.state {
         case .disconnected:
-            return "No external display connected"
+            return NSLocalizedString("help.external.no_display_connected", comment: "No external display connected")
         case .connected:
-            return "Present to external display"
+            return NSLocalizedString("help.external.present_to_external", comment: "Present to external display")
         case .presenting:
-            return "Stop external presentation"
+            return NSLocalizedString("help.external.stop_external_presentation", comment: "Stop external presentation")
         case .worshipMode:
-            return "Present hymn in worship session"
+            return NSLocalizedString("help.external.present_in_worship", comment: "Present hymn in worship session")
         case .worshipPresenting:
-            return "Stop hymn presentation (return to worship background)"
+            return NSLocalizedString("help.external.stop_hymn_return_worship", comment: "Stop hymn presentation and return to worship background")
         }
     }
     
@@ -378,7 +387,7 @@ struct FontSizeSliderButton: View {
             .frame(width: 220)
             .padding()
         }
-        .help("Adjust font size")
+        .help(NSLocalizedString("help.adjust_font_size", comment: "Adjust font size"))
     }
 } 
 
@@ -423,7 +432,7 @@ struct HymnToolbarView: View {
                         },
                         isEnabled: selected != nil
                     )
-                    .help("Present selected hymn")
+                    .help(NSLocalizedString("help.present_selected_hymn", comment: "Present selected hymn help"))
                     
                     // Add Button
                     UniformToolbarButton(
@@ -432,7 +441,7 @@ struct HymnToolbarView: View {
                         color: .blue,
                         action: onAddNew
                     )
-                    .help("Add new hymn")
+                    .help(NSLocalizedString("help.add_new_hymn", comment: "Add new hymn help"))
                     
                     // Edit Button
                     UniformToolbarButton(
@@ -442,7 +451,7 @@ struct HymnToolbarView: View {
                         action: onEdit,
                         isEnabled: selected != nil
                     )
-                    .help("Edit selected hymn")
+                    .help(NSLocalizedString("help.edit_selected_hymn", comment: "Edit selected hymn help"))
                     
                     // Delete Button
                     UniformToolbarButton(
@@ -461,7 +470,10 @@ struct HymnToolbarView: View {
                         },
                         isEnabled: isMultiSelectMode ? !selectedHymnsForDelete.isEmpty : selected != nil
                     )
-                    .help(isMultiSelectMode ? "Delete selected hymns" : "Delete selected hymn")
+                    .help(isMultiSelectMode
+                        ? NSLocalizedString("help.delete_selected_hymns", comment: "Delete selected hymns help")
+                        : NSLocalizedString("help.delete_selected_hymn", comment: "Delete selected hymn help")
+                    )
                     
                     // Import Button
                     UniformToolbarButton(
@@ -472,11 +484,11 @@ struct HymnToolbarView: View {
                             showingImporter = true
                         }
                     )
-                    .help("Import hymns from files")
+                    .help(NSLocalizedString("help.import_hymns_files", comment: "Import hymns from files"))
                     
                     // Export Menu
                     Menu {
-                        Button("Export Selected") {
+                        Button(NSLocalizedString("export.selected", comment: "Export selected")) {
                             if let hymn = selected {
                                 selectedHymnsForExport = [hymn.id]
                                 showingExportSelection = true
@@ -484,12 +496,12 @@ struct HymnToolbarView: View {
                         }
                         .disabled(selected == nil)
                         
-                        Button("Export Multiple") {
+                        Button(NSLocalizedString("export.multiple", comment: "Export multiple")) {
                             showingExportSelection = true
                         }
                         .disabled(hymnService.hymns.isEmpty)
                         
-                        Button("Export All") {
+                        Button(NSLocalizedString("export.all", comment: "Export all")) {
                             selectedHymnsForExport = Set(hymnService.hymns.map { $0.id })
                             showingExportSelection = true
                         }
@@ -497,7 +509,7 @@ struct HymnToolbarView: View {
                         
                         Divider()
                         
-                        Button("Export Help") {
+                        Button(NSLocalizedString("export.help", comment: "Export help")) {
                             helpSystem.showHelp(for: .exportingHymns)
                         }
                     } label: {
@@ -507,7 +519,7 @@ struct HymnToolbarView: View {
                             color: .blue
                         )
                     }
-                    .help("Export hymns to files")
+                    .help(NSLocalizedString("help.export_hymns_files", comment: "Export hymns to files"))
                     
                     // External Display Button
                     UniformToolbarButton(
@@ -564,11 +576,11 @@ struct HymnToolbarView: View {
                     } label: {
                         UniformToolbarButtonContent(
                             icon: "textformat.size",
-                            text: "Font\nSize",
+                            text: NSLocalizedString("display.font_size_multiline", comment: "Font size multiline"),
                             color: .secondary
                         )
                     }
-                    .help("Adjust font size")
+                    .help(NSLocalizedString("help.adjust_font_size", comment: "Adjust font size"))
                     
                     // Help Button (iPad only)
                     if UIDevice.current.userInterfaceIdiom == .pad {
@@ -586,7 +598,7 @@ struct HymnToolbarView: View {
                                 color: .secondary
                             )
                         }
-                        .help("Get contextual help")
+                        .help(NSLocalizedString("help.get_contextual_help", comment: "Get contextual help"))
                         .frame(maxWidth: .infinity)
                     }
             }
@@ -623,20 +635,20 @@ struct HymnToolbarView: View {
     private var externalDisplayText: String {
         switch externalDisplayManager.state {
         case .disconnected: return NSLocalizedString("external.no_display", comment: "No external display available")
-        case .connected: return "External"
-        case .presenting: return "Stop External"
-        case .worshipMode: return "Worship"
-        case .worshipPresenting: return "Stop Hymn"
+        case .connected: return NSLocalizedString("external.button.external", comment: "External button")
+        case .presenting: return NSLocalizedString("external.button.stop_external", comment: "Stop external")
+        case .worshipMode: return NSLocalizedString("external.button.worship", comment: "Worship")
+        case .worshipPresenting: return NSLocalizedString("external.button.stop_hymn", comment: "Stop hymn")
         }
     }
     
     private var externalDisplayHelpText: String {
         switch externalDisplayManager.state {
-        case .disconnected: return "No external display"
-        case .connected: return "Present to external display"
-        case .presenting: return "Stop external presentation"
-        case .worshipMode: return "Present hymn in worship session"
-        case .worshipPresenting: return "Stop hymn (return to worship background)"
+        case .disconnected: return NSLocalizedString("status.no_external_display", comment: "No external display")
+        case .connected: return NSLocalizedString("help.external.present_to_external", comment: "Present to external display")
+        case .presenting: return NSLocalizedString("help.external.stop_external_presentation", comment: "Stop external presentation")
+        case .worshipMode: return NSLocalizedString("help.external.present_in_worship", comment: "Present hymn in worship session")
+        case .worshipPresenting: return NSLocalizedString("help.external.stop_hymn_return_worship", comment: "Stop hymn presentation and return to worship background")
         }
     }
     

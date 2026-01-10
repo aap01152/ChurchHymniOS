@@ -149,7 +149,7 @@ struct ExternalDisplayPreview: View {
             } else {
                 // Fallback content
                 VStack {
-                    Text("No Content")
+                    Text(NSLocalizedString("status.no_content", comment: "No content"))
                         .font(.caption)
                         .foregroundColor(.white.opacity(0.7))
                 }
@@ -264,7 +264,7 @@ struct ExternalDisplayMiniPreview: View {
                         .minimumScaleFactor(0.7)
                     
                     if let key = hymn.musicalKey, !key.isEmpty {
-                        Text("(\(key))")
+                        Text(String(format: NSLocalizedString("external.key_in_parens", comment: "Key in parentheses"), key))
                             .font(.system(size: 8, weight: .medium, design: .rounded))
                             .foregroundColor(.yellow)
                     }
@@ -307,7 +307,7 @@ struct ExternalDisplayMiniPreview: View {
                                 .foregroundColor(.yellow)
                         } else {
                             let verseNumber = presentationParts[0...verseIndex].filter { $0.label == nil }.count
-                            Text("V\(verseNumber)")
+                            Text(String(format: NSLocalizedString("external.verse_short", comment: "Short verse label"), verseNumber))
                                 .font(.system(size: 7, weight: .bold))
                                 .foregroundColor(.yellow)
                         }

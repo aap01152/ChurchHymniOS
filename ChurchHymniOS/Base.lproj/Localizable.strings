@@ -162,6 +162,7 @@
 "display.preview" = "Preview";
 "display.font_size" = "Font Size";
 "display.font_size_value" = "Font Size: %d";
+"display.font_size_multiline" = "Font\nSize";
 
 /* External Display and Presentation */
 "external.verse_number" = "Verse %d";
@@ -218,6 +219,379 @@
 "help.json_batch" = "JSON – Batch Import";
 "help.plain_text" = "Plain Text";
 "help.chorus_instruction" = "Put the word 'Chorus' on a line by itself before the chorus section.";
+
+/* Additional Buttons */
+"btn.done" = "Done";
+"btn.close" = "Close";
+"btn.create" = "Create";
+"btn.activate" = "Activate";
+"btn.details" = "Details";
+"btn.remove" = "Remove";
+"btn.run" = "Run";
+"btn.view_issues" = "View Issues";
+"btn.dismiss" = "Dismiss";
+"btn.save_anyway" = "Save Anyway";
+"btn.start_worship" = "Start Worship";
+"btn.stop_worship" = "Stop Worship";
+"btn.start_worship_multiline" = "Start\nWorship";
+"btn.stop_worship_multiline" = "Stop\nWorship";
+"btn.worship" = "Worship";
+"btn.stop_first" = "Stop First";
+"btn.present_next" = "Present Next";
+"btn.clear_done" = "Clear Done";
+"btn.delete_selected_count" = "Delete Selected (%d)";
+"btn.new_service" = "New Service";
+
+/* Alerts */
+"alert.recovery_complete" = "Recovery Complete";
+"alert.present_hymn_error" = "Present Hymn Error";
+"alert.worship_session_error" = "Worship Session Error";
+"alert.control_error" = "Control Error";
+"alert.delete_service" = "Delete Service";
+
+/* Messages */
+"msg.hymns_exported_successfully" = "Hymns exported successfully";
+"msg.data_integrity_critical" = "Critical data issues found: %d critical, %d warnings. Checked %d hymns and %d services.";
+"msg.data_integrity_warnings" = "Data check complete: %d warnings found. Checked %d hymns and %d services.";
+"msg.data_integrity_passed" = "Data integrity check passed. No issues found in %d hymns and %d services.";
+"msg.data_integrity_running" = "Running data integrity check...";
+"msg.recovery_success_items" = "%@ (%d items)";
+"msg.recovery_partial" = "%@ (%d recovered, %d failed)";
+"msg.recovery_failed" = "Recovery failed: %@";
+"msg.recovery_completed" = "Recovery completed";
+"msg.delete_service_confirm" = "Are you sure you want to delete '%@'? This action cannot be undone.";
+
+/* Status */
+"status.loading_services" = "Loading Services...";
+"status.loading_hymns" = "Loading hymns...";
+"status.external_display_active" = "External display active";
+"status.worship_active" = "Worship Active";
+"status.worship_presenting" = "Worship Presenting";
+"status.worship_session" = "Worship Session";
+"status.presenting_with_hymn" = "Presenting: %@";
+"status.presenting" = "Presenting";
+"status.external_display" = "External Display";
+"status.ready_for_worship_session" = "Ready for worship session";
+"status.select_hymn_to_present" = "Showing background - Select hymn to present";
+"status.worship_session_active" = "Worship Session Active";
+"status.no_hymn_selected" = "No hymn selected";
+"status.no_hymn" = "No Hymn";
+"status.untitled_hymn" = "Untitled Hymn";
+"status.not_available" = "N/A";
+
+/* Help */
+"help.external_display_status" = "External Display Status: %@";
+"help.present_hymn_in_worship" = "Present %@ in worship session";
+"help.select_hymn_for_worship" = "Select a hymn to present in worship session";
+"help.support_title" = "Help & Support";
+"help.search_placeholder" = "Search help topics...";
+"help.no_topics_title" = "No help topics found";
+"help.no_topics_message" = "Try different search terms or browse categories";
+"help.search_results_title" = "Search Results";
+"help.search_results_count" = "%d topics found";
+"help.related_topics" = "Related Topics";
+"help.open_help" = "Open help and support";
+"help.start_worship_session" = "Start worship session";
+"help.stop_worship_session" = "Stop worship session";
+"help.connect_external_display_first" = "Connect an external display first";
+"help.start_worship_background" = "Start worship session with background display";
+"help.add_hymns_before_worship" = "Add hymns to your active service before starting worship session";
+"help.stop_presentation_to_enable_worship" = "Stop current presentation to enable worship session";
+"help.stop_worship_return_normal" = "Stop worship session and return to normal mode";
+"help.stop_presentation_first" = "Stop current presentation first";
+"help.present_selected_hymn" = "Present selected hymn";
+"help.add_new_hymn" = "Add new hymn";
+"help.import_hymns_text_json" = "Import hymns from text or JSON files";
+"help.import_hymns_files" = "Import hymns from files";
+"help.edit_selected_hymn" = "Edit selected hymn";
+"help.delete_selected_hymn" = "Delete selected hymn";
+"help.delete_selected_hymns" = "Delete selected hymns";
+"help.select_all_hymns" = "Select all hymns";
+"help.deselect_all_hymns" = "Deselect all hymns";
+"help.export_large_collection" = "Use streaming for large collections (>1000 hymns)";
+"help.export_hymns_files" = "Export hymns to files";
+"help.adjust_font_size" = "Adjust font size";
+"help.get_contextual_help" = "Get contextual help";
+"help.external.no_display_connected" = "No external display connected";
+"help.external.present_to_external" = "Present to external display";
+"help.external.stop_external_presentation" = "Stop external presentation";
+"help.external.present_in_worship" = "Present hymn in worship session";
+"help.external.stop_hymn_return_worship" = "Stop hymn presentation (return to worship background)";
+"help.add_hymn_to_service" = "Add %@ to %@";
+
+/* Navigation */
+"nav.data_recovery" = "Data Recovery";
+"nav.service_details" = "Service Details";
+"nav.add_hymn" = "Add Hymn";
+
+/* Tests */
+"test.summary" = "Test Summary";
+"test.passed_count" = "Tests Passed: %d/%d";
+"test.total_execution_time" = "Total Execution Time: %.3fs";
+"test.success_rate" = "Success Rate: %.1f%%";
+"test.result_title" = "%d. %@";
+"test.execution_time" = "%.3fs";
+"test.no_results_title" = "No test results available";
+"test.no_results_message" = "Run the test suite to see validation results";
+"test.results_title" = "Test Results";
+
+/* Preview */
+"preview.unified_control_banner" = "Unified Control Banner Preview";
+"preview.present_current_hymn_button" = "Preview of Present Current Hymn Button";
+"preview.dynamic_presenter" = "DynamicPresenterView Preview";
+"preview.service_quick_add" = "ServiceQuickAddView Preview";
+"preview.worship_session_controls" = "WorshipSessionControls Preview";
+"preview.position_x" = "X: %d";
+"preview.position_y" = "Y: %d";
+
+/* Import / Export */
+"import.new_hymns_count" = "New Hymns (%d)";
+"import.duplicates_count" = "Duplicates (%d)";
+"import.conflicts_with" = "Conflicts with: %@";
+"import.type.auto" = "Auto-detect";
+"count.selected_of_total" = "%d of %d";
+"error.export_serialization_failed" = "Failed to serialize hymns for export";
+"export.help" = "Export Help";
+
+/* Service */
+"service.todays_service" = "Today's Service";
+"service.hymn_count" = "%d hymns";
+"service.active_badge" = "ACTIVE";
+"service.completed_badge" = "COMPLETED";
+"service.completed_at" = "Completed %@";
+"service.hymns_count" = "Hymns (%d)";
+"service.no_hymns_added" = "No hymns added yet";
+"service.no_hymns_added_message" = "Add hymns to this service to organize worship music";
+"service.add_first_hymn" = "Add First Hymn";
+"service.no_active_service" = "No Active Service";
+"service.no_active_service_message" = "Create or activate a service to start managing hymns for worship";
+"service.create_todays_service" = "Create Today's Service";
+"service.create_service" = "Create Service";
+"service.all_services" = "All Services";
+"service.no_services_yet" = "No services created yet";
+"service.create_first_service" = "Create Your First Service";
+"service.details_section" = "Service Details";
+"service.title_field" = "Service Title";
+"service.notes_optional" = "Notes (Optional)";
+"service.not_found_title" = "Service Not Found";
+"service.not_found_message" = "The service details could not be loaded.";
+"service.hymns_presented" = "Hymns Presented During Worship";
+"service.unknown_hymn" = "Unknown Hymn";
+"service.note_prefix" = "Note: %@";
+"service.no_hymns_available" = "No hymns available";
+"service.no_hymns_available_message" = "Please add some hymns first before creating services";
+"service.search_hymns_prompt" = "Search hymns...";
+"service.in_service" = "In Service";
+"service.adding" = "Adding...";
+"service.add_to_service" = "Add to Service";
+"service.green_plus_help" = "Green + buttons add hymns to service";
+"service.reorder_help" = "Drag hymns to reorder them in the service";
+"service.reorder_exit" = "Exit Reorder";
+"service.reorder_start" = "Reorder Hymns";
+
+/* Queue */
+"queue.status.waiting" = "Waiting";
+"queue.status.presenting" = "Presenting";
+"queue.status.completed" = "Completed";
+"queue.status.skipped" = "Skipped";
+"queue.seconds_label" = "%d seconds";
+"queue.title" = "Hymn Queue";
+"queue.mode" = "Queue Mode";
+"queue.total" = "Total";
+"queue.waiting" = "Waiting";
+"queue.done" = "Done";
+"queue.empty_title" = "Queue is Empty";
+"queue.empty_message" = "Add hymns to the queue from the main hymn list";
+"queue.start_at_verse" = "Start at verse %d";
+
+/* Auto-Present */
+"time.seconds_label" = "%d seconds";
+"auto_present.enable" = "Enable Auto-Present";
+"auto_present.present_delay" = "Present Delay";
+"auto_present.step.navigate_hymn" = "Navigate to a hymn during worship";
+"auto_present.step.countdown_starts" = "Countdown timer starts automatically";
+"auto_present.step.presents_on_zero" = "Hymn presents when timer reaches zero";
+"auto_present.step.timer_cancels" = "Timer cancels when navigating away";
+
+/* External Display */
+"external.key_in_parens" = "(%@)";
+"external.verse_short" = "V%d";
+"external.of_total" = "of %d";
+"external.button.external" = "External";
+"external.button.stop_external" = "Stop External";
+"external.button.worship" = "Worship";
+"external.button.stop_hymn" = "Stop Hymn";
+
+/* External State Management */
+"external.state_management_title" = "State Management";
+"external.state_validation_title" = "State Validation";
+"external.state_validation_errors" = "Errors: %@";
+"external.state_validation_warnings" = "Warnings: %@";
+"external.state_validation_suggestions" = "Suggestions: %@";
+"external.current_state" = "Current State";
+"external.state_priority" = "Priority";
+"external.state_capabilities" = "State Capabilities";
+"external.capability.connected" = "Connected";
+"external.capability.presenting" = "Presenting";
+"external.capability.worship_session" = "Worship Session";
+"external.capability.hymn_switching" = "Hymn Switching";
+"external.capability.verse_navigation" = "Verse Navigation";
+"external.capability.can_start_presentation" = "Can Start Presentation";
+"external.capability.can_stop_presentation" = "Can Stop Presentation";
+"external.capability.can_present_hymn" = "Can Present Hymn";
+"external.state_transition_testing" = "State Transition Testing";
+"external.target_state" = "Target State";
+"external.transition_status" = "Transition %@";
+"external.transition_allowed" = "Allowed";
+"external.transition_blocked" = "Blocked";
+"external.suggested_actions" = "Suggested Actions";
+"external.validate_current_state" = "Validate Current State";
+"external.errors_found" = "Errors Found";
+"external.warnings_found" = "Warnings Found";
+"external.recent_transitions" = "Recent Transitions";
+"external.no_recent_transitions" = "No recent transitions";
+"external.validation.no_display_warning" = "No external display connected";
+"external.validation.connect_display_suggestion" = "Connect an external display for presentation features";
+"external.validation.no_hymn_error" = "Presenting without a hymn loaded";
+"external.validation.load_hymn_suggestion" = "Load a hymn to continue presentation";
+"external.validation.worship_mode_error" = "External display in worship mode but no worship session active";
+"external.validation.worship_mode_suggestion" = "Start a worship session or exit worship mode";
+"external.transition.display_connected" = "Display connected";
+"external.transition.worship_started" = "Worship session started";
+"external.transition.hymn_presented" = "Hymn presented";
+
+/* Recovery */
+"recovery.tools_title" = "Data Recovery Tools";
+"recovery.issues_found" = "Found %d data integrity issues";
+"recovery.issues_found_title" = "Issues Found";
+"recovery.orphaned_references" = "Orphaned Service References: %d";
+"recovery.duplicate_hymns" = "Duplicate Hymns: %d";
+"recovery.critical_issues" = "Critical Issues: %d";
+"recovery.warnings" = "Warnings: %d";
+"recovery.actions_title" = "Recovery Actions";
+"recovery.action.recover_missing_hymns" = "Recover Missing Hymns";
+"recovery.action.recover_missing_hymns_desc" = "Attempt to restore hymns that are referenced in services but missing from the main collection";
+"recovery.action.cleanup_orphaned" = "Clean Up Orphaned References";
+"recovery.action.cleanup_orphaned_desc" = "Remove service references to hymns that no longer exist";
+"recovery.action.run_integrity_check" = "Run Integrity Check";
+"recovery.action.run_integrity_check_desc" = "Perform a comprehensive check for data integrity issues";
+"recovery.action.run_test_suite" = "Run Test Suite";
+"recovery.action.run_test_suite_desc" = "Execute comprehensive validation tests for all phases";
+"recovery.running_operation" = "Running recovery operation...";
+
+/* Lists */
+"list.bullet_item" = "• %@";
+
+/* Progress */
+"progress.bytes_processed" = "%@ / %@";
+"progress.hymns_processed" = "%d / %d hymns";
+
+/* Additional Error Strings */
+"business.error.business_rule_violation" = "Business rule violation";
+"business.error.invalid_input" = "Invalid input";
+"business.error.operation_not_allowed" = "Operation not allowed";
+"business.error.permission_denied" = "Permission denied";
+"business.error.quota_exceeded" = "Quota exceeded";
+"business.error.resource_not_found" = "Resource not found";
+"business.error.state_conflict" = "State conflict";
+
+"data.error.batch_delete_failed" = "Batch delete failed";
+"data.error.batch_insert_failed" = "Batch insert failed";
+"data.error.batch_update_failed" = "Batch update failed";
+"data.error.cloud_sync_failed" = "Cloud sync failed";
+"data.error.cloud_sync_failed.reason" = "Cloud sync failed: %@";
+"data.error.concurrency_error" = "Concurrency error";
+"data.error.concurrency_error.reason" = "Concurrency error: %@";
+"data.error.constraint_violation" = "Constraint violation";
+"data.error.constraint_violation.reason" = "Constraint violation: %@";
+"data.error.container_init_failed" = "Data container initialization failed";
+"data.error.container_init_failed.reason" = "Data container initialization failed: %@";
+"data.error.context_creation_failed" = "Context creation failed";
+"data.error.context_creation_failed.reason" = "Context creation failed: %@";
+"data.error.context_mismatch" = "Context mismatch";
+"data.error.context_mismatch.reason" = "Context mismatch: %@";
+"data.error.database_corrupted" = "Database corrupted";
+"data.error.database_corrupted.reason" = "Database corrupted: %@";
+"data.error.deadlock_detected" = "Deadlock detected";
+"data.error.deadlock_detected.reason" = "Deadlock detected: %@";
+"data.error.delete_failed" = "Delete failed";
+"data.error.delete_failed.reason" = "Delete failed: %@";
+"data.error.disk_space_insufficient" = "Insufficient disk space";
+"data.error.disk_space_insufficient.reason" = "Insufficient disk space: %@";
+"data.error.fetch_failed" = "Fetch failed";
+"data.error.fetch_failed.reason" = "Fetch failed: %@";
+"data.error.insert_failed" = "Insert failed";
+"data.error.insert_failed.reason" = "Insert failed: %@";
+"data.error.memory_pressure" = "Memory pressure";
+"data.error.memory_pressure.reason" = "Memory pressure: %@";
+"data.error.migration_failed" = "Migration failed";
+"data.error.migration_failed.reason" = "Migration failed: %@";
+"data.error.network_unavailable" = "Network unavailable";
+"data.error.network_unavailable.reason" = "Network unavailable: %@";
+"data.error.permission_denied" = "Permission denied";
+"data.error.permission_denied.reason" = "Permission denied: %@";
+"data.error.relationship_error" = "Relationship error";
+"data.error.relationship_error.reason" = "Relationship error: %@";
+"data.error.save_failed" = "Save failed";
+"data.error.save_failed.reason" = "Save failed: %@";
+"data.error.sync_conflict" = "Sync conflict";
+"data.error.sync_conflict.reason" = "Sync conflict: %@";
+"data.error.transaction_failed" = "Transaction failed";
+"data.error.transaction_failed.reason" = "Transaction failed: %@";
+"data.error.update_failed" = "Update failed";
+"data.error.update_failed.reason" = "Update failed: %@";
+"data.error.validation_failed" = "Validation failed";
+"data.error.validation_failed.reason" = "Validation failed: %@";
+
+"data.error.recovery.cloud_sync" = "Check your network and try syncing again.";
+"data.error.recovery.concurrency" = "Retry the operation.";
+"data.error.recovery.constraint" = "Check for duplicate or invalid data.";
+"data.error.recovery.context" = "Restart the app and try again.";
+"data.error.recovery.corruption" = "Restore from backup or re-import data.";
+"data.error.recovery.disk_space" = "Free up disk space and try again.";
+"data.error.recovery.memory" = "Close other apps and try again.";
+"data.error.recovery.migration" = "Restart the app to complete migration.";
+"data.error.recovery.network" = "Check your internet connection and try again.";
+"data.error.recovery.permission" = "Check permissions and try again.";
+"data.error.recovery.reduce_batch" = "Try a smaller batch size.";
+"data.error.recovery.relationship" = "Check related items and try again.";
+"data.error.recovery.restart_app" = "Restart the app and try again.";
+"data.error.recovery.retry" = "Try the operation again.";
+"data.error.recovery.sync_conflict" = "Resolve sync conflicts and try again.";
+"data.error.recovery.transaction" = "Try the operation again.";
+"data.error.recovery.validation" = "Fix validation errors and try again.";
+
+"hymn.error.duplicate" = "Hymn already exists";
+"hymn.error.in_use" = "Hymn is in use";
+"hymn.error.invalid_data" = "Invalid hymn data";
+"hymn.error.not_found" = "Hymn not found";
+"hymn.error.recovery.duplicate" = "Choose a different title.";
+"hymn.error.recovery.in_use" = "Remove the hymn from services before deleting.";
+"hymn.error.recovery.invalid_data" = "Fix the hymn data and try again.";
+"hymn.error.recovery.not_found" = "Refresh the list and try again.";
+"hymn.error.validation_failed" = "Hymn validation failed";
+
+"repository.error.cache_error" = "Cache error";
+"repository.error.duplicate_entity" = "Duplicate entity";
+"repository.error.entity_not_found" = "Entity not found";
+"repository.error.invalid_query" = "Invalid query";
+"repository.error.serialization_error" = "Serialization error";
+"repository.error.unavailable" = "Repository unavailable";
+
+"service.error.invalid_configuration" = "Invalid service configuration";
+"service.error.max_hymns_reached" = "Maximum hymns reached";
+"service.error.recovery.hymn_duplicate" = "Remove duplicate hymns and try again.";
+"service.error.recovery.invalid_config" = "Check service configuration and try again.";
+"service.error.recovery.max_hymns" = "Remove some hymns and try again.";
+"service.error.recovery.not_active" = "Activate the service and try again.";
+"service.error.recovery.schedule_conflict" = "Pick a different time and try again.";
+"service.error.schedule_conflict" = "Schedule conflict";
+"service.error.service_not_active" = "Service not active";
+
+"status.worship_with_hymn" = "Worship: %@";
+"verse.currently_displayed" = "Currently displayed";
+"verse.tap_to_navigate_current" = "Tap to navigate to this verse";
+
 "help.support_page" = "Support page";
 "help.import_description" = "You can import hymns from **JSON** or **plain-text** files. Use the **Import** toolbar button, and select your file(s).";
 

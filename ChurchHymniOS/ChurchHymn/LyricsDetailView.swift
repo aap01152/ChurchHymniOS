@@ -145,7 +145,7 @@ struct LyricsDetailView: View {
                                                 .opacity(0.8)
                                                 .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: externalDisplayManager.currentVerseIndex)
                                             
-                                            Text("LIVE")
+                                            Text(NSLocalizedString("external.live", comment: "Live"))
                                                 .font(.caption2)
                                                 .fontWeight(.bold)
                                                 .foregroundColor(.red)

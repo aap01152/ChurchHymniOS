@@ -246,13 +246,13 @@ struct HymnListView: View {
                     
                     Spacer()
                     
-                    Button("Done") {
+                    Button(NSLocalizedString("btn.done", comment: "Done")) {
                         isMultiSelectMode = false
                         selectedHymnsForDelete.removeAll()
                     }
                     
                     if !selectedHymnsForDelete.isEmpty {
-                        Button("Delete Selected (\(selectedHymnsForDelete.count))") {
+                        Button(String(format: NSLocalizedString("btn.delete_selected_count", comment: "Delete selected count"), selectedHymnsForDelete.count)) {
                             showingBatchDeleteConfirmation = true
                         }
                         .foregroundColor(.red)
@@ -286,7 +286,10 @@ struct HymnListView: View {
                                 HStack(spacing: 6) {
                                     Image(systemName: isServiceReorderMode ? "arrow.up.arrow.down.circle.fill" : "arrow.up.arrow.down.circle")
                                         .foregroundColor(isServiceReorderMode ? .orange : .accentColor)
-                                    Text(isServiceReorderMode ? "Exit Reorder" : "Reorder Hymns")
+                                    Text(isServiceReorderMode
+                                        ? NSLocalizedString("service.reorder_exit", comment: "Exit reorder")
+                                        : NSLocalizedString("service.reorder_start", comment: "Reorder hymns")
+                                    )
                                         .font(.subheadline)
                                         .fontWeight(.medium)
                                         .foregroundColor(isServiceReorderMode ? .orange : .accentColor)
@@ -314,7 +317,7 @@ struct HymnListView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                     Spacer()
-                    Button("Dismiss") {
+                    Button(NSLocalizedString("btn.dismiss", comment: "Dismiss")) {
                         hymnService.clearError()
                     }
                     .font(.caption)
@@ -328,7 +331,7 @@ struct HymnListView: View {
             if hymnService.isLoading {
                 VStack {
                     ProgressView()
-                    Text("Loading hymns...")
+                    Text(NSLocalizedString("status.loading_hymns", comment: "Loading hymns"))
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -429,7 +432,7 @@ struct HymnListView: View {
                     HStack {
                         Image(systemName: "arrow.up.arrow.down")
                             .foregroundColor(.orange)
-                        Text("Drag hymns to reorder them in the service")
+                        Text(NSLocalizedString("service.reorder_help", comment: "Drag hymns to reorder them in the service"))
                             .font(.caption)
                             .foregroundColor(.orange)
                         Spacer()
@@ -701,7 +704,7 @@ struct ServiceManagementBar: View {
                                     Image(systemName: "plus.circle.fill")
                                         .font(.caption2)
                                         .foregroundColor(.green)
-                                    Text("Green + buttons add hymns to service")
+                                    Text(NSLocalizedString("service.green_plus_help", comment: "Green plus buttons add hymns to service"))
                                         .font(.caption2)
                                         .foregroundColor(.green)
                                 }
@@ -867,7 +870,7 @@ struct HymnRow: View {
                             .foregroundColor(.red)
                     }
                     .buttonStyle(PlainButtonStyle())
-                    .help("Remove from service")
+                    .help(NSLocalizedString("service.remove_from_service", comment: "Remove from service"))
                 } else {
                     // Show add button for hymns not in service
                     Button(action: onAddToService) {
@@ -881,7 +884,7 @@ struct HymnRow: View {
                             )
                     }
                     .buttonStyle(PlainButtonStyle())
-                    .help("Add to service")
+                    .help(NSLocalizedString("service.add_to_service", comment: "Add to service"))
                 }
             }
             

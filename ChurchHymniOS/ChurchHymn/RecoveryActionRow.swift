@@ -33,7 +33,7 @@ struct RecoveryActionRow: View {
             
             Spacer()
             
-            Button(isEnabled ? "Run" : "N/A") {
+            Button(isEnabled ? NSLocalizedString("btn.run", comment: "Run") : NSLocalizedString("status.not_available", comment: "Not available")) {
                 action()
             }
             .buttonStyle(.borderedProminent)
@@ -62,12 +62,12 @@ struct DataRecoveryOptionsView: View {
                         .font(.system(size: 48))
                         .foregroundColor(.orange)
                     
-                    Text("Data Recovery Tools")
+                    Text(NSLocalizedString("recovery.tools_title", comment: "Data recovery tools"))
                         .font(.title2)
                         .fontWeight(.bold)
                     
                     if let result = integrityResult {
-                        Text("Found \(result.issues.count) data integrity issues")
+                        Text(String(format: NSLocalizedString("recovery.issues_found", comment: "Data integrity issues found"), result.issues.count))
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
@@ -76,13 +76,13 @@ struct DataRecoveryOptionsView: View {
                 
                 // Issues Summary
                 if let result = integrityResult {
-                    GroupBox("Issues Found") {
+                    GroupBox(NSLocalizedString("recovery.issues_found_title", comment: "Issues found title")) {
                         VStack(alignment: .leading, spacing: 12) {
                             if result.orphanedServiceHymns > 0 {
                                 HStack {
                                     Image(systemName: "exclamationmark.triangle")
                                         .foregroundColor(.red)
-                                    Text("Orphaned Service References: \(result.orphanedServiceHymns)")
+                                    Text(String(format: NSLocalizedString("recovery.orphaned_references", comment: "Orphaned service references"), result.orphanedServiceHymns))
                                     Spacer()
                                 }
                             }
@@ -91,7 +91,7 @@ struct DataRecoveryOptionsView: View {
                                 HStack {
                                     Image(systemName: "doc.on.doc")
                                         .foregroundColor(.orange)
-                                    Text("Duplicate Hymns: \(result.duplicateHymns)")
+                                    Text(String(format: NSLocalizedString("recovery.duplicate_hymns", comment: "Duplicate hymns"), result.duplicateHymns))
                                     Spacer()
                                 }
                             }
@@ -101,7 +101,7 @@ struct DataRecoveryOptionsView: View {
                                 HStack {
                                     Image(systemName: "xmark.circle")
                                         .foregroundColor(.red)
-                                    Text("Critical Issues: \(criticalCount)")
+                                    Text(String(format: NSLocalizedString("recovery.critical_issues", comment: "Critical issues"), criticalCount))
                                     Spacer()
                                 }
                             }
@@ -111,7 +111,7 @@ struct DataRecoveryOptionsView: View {
                                 HStack {
                                     Image(systemName: "exclamationmark.triangle")
                                         .foregroundColor(.orange)
-                                    Text("Warnings: \(warningCount)")
+                                    Text(String(format: NSLocalizedString("recovery.warnings", comment: "Warnings"), warningCount))
                                     Spacer()
                                 }
                             }
@@ -121,12 +121,12 @@ struct DataRecoveryOptionsView: View {
                 }
                 
                 // Recovery Actions
-                GroupBox("Recovery Actions") {
+                GroupBox(NSLocalizedString("recovery.actions_title", comment: "Recovery actions title")) {
                     VStack(spacing: 16) {
                         RecoveryActionRow(
                             icon: "arrow.clockwise",
-                            title: "Recover Missing Hymns",
-                            description: "Attempt to restore hymns that are referenced in services but missing from the main collection",
+                            title: NSLocalizedString("recovery.action.recover_missing_hymns", comment: "Recover missing hymns"),
+                            description: NSLocalizedString("recovery.action.recover_missing_hymns_desc", comment: "Recover missing hymns description"),
                             isEnabled: !isRunningRecovery && (integrityResult?.orphanedServiceHymns ?? 0) > 0,
                             action: onRecoverOrphans
                         )
@@ -135,8 +135,8 @@ struct DataRecoveryOptionsView: View {
                         
                         RecoveryActionRow(
                             icon: "trash",
-                            title: "Clean Up Orphaned References",
-                            description: "Remove service references to hymns that no longer exist",
+                            title: NSLocalizedString("recovery.action.cleanup_orphaned", comment: "Clean up orphaned references"),
+                            description: NSLocalizedString("recovery.action.cleanup_orphaned_desc", comment: "Clean up orphaned references description"),
                             isEnabled: !isRunningRecovery && (integrityResult?.orphanedServiceHymns ?? 0) > 0,
                             action: onCleanupOrphans
                         )
@@ -145,16 +145,16 @@ struct DataRecoveryOptionsView: View {
                         
                         RecoveryActionRow(
                             icon: "checkmark.shield",
-                            title: "Run Integrity Check",
-                            description: "Perform a comprehensive check for data integrity issues",
+                            title: NSLocalizedString("recovery.action.run_integrity_check", comment: "Run integrity check"),
+                            description: NSLocalizedString("recovery.action.run_integrity_check_desc", comment: "Run integrity check description"),
                             isEnabled: !isRunningRecovery,
                             action: onRunIntegrityCheck
                         )
                         
                         RecoveryActionRow(
                             icon: "testtube.2",
-                            title: "Run Test Suite",
-                            description: "Execute comprehensive validation tests for all phases",
+                            title: NSLocalizedString("recovery.action.run_test_suite", comment: "Run test suite"),
+                            description: NSLocalizedString("recovery.action.run_test_suite_desc", comment: "Run test suite description"),
                             isEnabled: !isRunningTests && !isRunningRecovery,
                             action: onRunTestSuite
                         )
@@ -166,7 +166,7 @@ struct DataRecoveryOptionsView: View {
                     HStack {
                         ProgressView()
                             .controlSize(.small)
-                        Text("Running recovery operation...")
+                        Text(NSLocalizedString("recovery.running_operation", comment: "Running recovery operation"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -176,11 +176,11 @@ struct DataRecoveryOptionsView: View {
                 Spacer()
             }
             .padding()
-            .navigationTitle("Data Recovery")
+            .navigationTitle(NSLocalizedString("nav.data_recovery", comment: "Data recovery title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Close") {
+                    Button(NSLocalizedString("btn.close", comment: "Close")) {
                         dismiss()
                     }
                 }
@@ -188,4 +188,3 @@ struct DataRecoveryOptionsView: View {
         }
     }
 }
-

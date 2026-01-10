@@ -43,11 +43,11 @@ final class AutoPresentManager: ObservableObject {
     
     /// Delay option labels
     static let delayLabels: [TimeInterval: String] = [
-        2.0: "2 seconds",
-        3.0: "3 seconds", 
-        5.0: "5 seconds",
-        7.0: "7 seconds",
-        10.0: "10 seconds"
+        2.0: String(format: NSLocalizedString("time.seconds_label", comment: "Seconds label"), 2),
+        3.0: String(format: NSLocalizedString("time.seconds_label", comment: "Seconds label"), 3),
+        5.0: String(format: NSLocalizedString("time.seconds_label", comment: "Seconds label"), 5),
+        7.0: String(format: NSLocalizedString("time.seconds_label", comment: "Seconds label"), 7),
+        10.0: String(format: NSLocalizedString("time.seconds_label", comment: "Seconds label"), 10)
     ]
     
     // MARK: - Public Methods
@@ -197,7 +197,7 @@ struct AutoPresentSettingsView: View {
         NavigationView {
             Form {
                 Section {
-                    Toggle("Enable Auto-Present", isOn: $autoPresentManager.isEnabled)
+                    Toggle(NSLocalizedString("auto_present.enable", comment: "Enable auto-present"), isOn: $autoPresentManager.isEnabled)
                         .onChange(of: autoPresentManager.isEnabled) { _ in
                             if !autoPresentManager.isEnabled {
                                 autoPresentManager.cancelTimer()
@@ -209,9 +209,9 @@ struct AutoPresentSettingsView: View {
                 
                 if autoPresentManager.isEnabled {
                     Section {
-                        Picker("Present Delay", selection: $autoPresentManager.presentDelay) {
+                        Picker(NSLocalizedString("auto_present.present_delay", comment: "Present delay"), selection: $autoPresentManager.presentDelay) {
                             ForEach(AutoPresentManager.delayOptions, id: \.self) { delay in
-                                Text(AutoPresentManager.delayLabels[delay] ?? "\(Int(delay)) seconds")
+                                Text(AutoPresentManager.delayLabels[delay] ?? String(format: NSLocalizedString("time.seconds_label", comment: "Seconds label"), Int(delay)))
                                     .tag(delay)
                             }
                         }
@@ -223,10 +223,10 @@ struct AutoPresentSettingsView: View {
                     }
                     
                     Section {
-                        Label("Navigate to a hymn during worship", systemImage: "1.circle.fill")
-                        Label("Countdown timer starts automatically", systemImage: "2.circle.fill")  
-                        Label("Hymn presents when timer reaches zero", systemImage: "3.circle.fill")
-                        Label("Timer cancels when navigating away", systemImage: "4.circle.fill")
+                        Label(NSLocalizedString("auto_present.step.navigate_hymn", comment: "Navigate to hymn during worship"), systemImage: "1.circle.fill")
+                        Label(NSLocalizedString("auto_present.step.countdown_starts", comment: "Countdown starts automatically"), systemImage: "2.circle.fill")
+                        Label(NSLocalizedString("auto_present.step.presents_on_zero", comment: "Hymn presents when timer hits zero"), systemImage: "3.circle.fill")
+                        Label(NSLocalizedString("auto_present.step.timer_cancels", comment: "Timer cancels when navigating away"), systemImage: "4.circle.fill")
                     } header: {
                         Text(NSLocalizedString("auto_present.how_it_works", comment: "How It Works"))
                     } footer: {

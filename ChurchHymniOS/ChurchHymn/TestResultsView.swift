@@ -17,7 +17,7 @@ struct TestResultsView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     // Summary Section
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Test Summary")
+                        Text(NSLocalizedString("test.summary", comment: "Test summary section title"))
                             .font(.title2)
                             .fontWeight(.bold)
                         
@@ -29,15 +29,15 @@ struct TestResultsView: View {
                             HStack {
                                 Image(systemName: passedCount == totalCount ? "checkmark.circle.fill" : "xmark.circle.fill")
                                     .foregroundColor(passedCount == totalCount ? .green : .red)
-                                Text("Tests Passed: \(passedCount)/\(totalCount)")
+                                Text(String(format: NSLocalizedString("test.passed_count", comment: "Tests passed count"), passedCount, totalCount))
                                     .font(.headline)
                             }
                             
-                            Text("Total Execution Time: \(String(format: "%.3f", totalTime))s")
+                            Text(String(format: NSLocalizedString("test.total_execution_time", comment: "Total execution time"), totalTime))
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                             
-                            Text("Success Rate: \(String(format: "%.1f", Double(passedCount) / Double(max(totalCount, 1)) * 100))%")
+                            Text(String(format: NSLocalizedString("test.success_rate", comment: "Success rate"), Double(passedCount) / Double(max(totalCount, 1)) * 100))
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                         }
@@ -53,12 +53,12 @@ struct TestResultsView: View {
                                 Image(systemName: result.passed ? "checkmark.circle.fill" : "xmark.circle.fill")
                                     .foregroundColor(result.passed ? .green : .red)
                                 
-                                Text("\(index + 1). \(result.testName)")
+                                Text(String(format: NSLocalizedString("test.result_title", comment: "Test result title"), index + 1, result.testName))
                                     .font(.headline)
                                 
                                 Spacer()
                                 
-                                Text("\(String(format: "%.3f", result.executionTime))s")
+                                Text(String(format: NSLocalizedString("test.execution_time", comment: "Execution time"), result.executionTime))
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             }
@@ -91,11 +91,11 @@ struct TestResultsView: View {
                                 .font(.largeTitle)
                                 .foregroundColor(.gray)
                             
-                            Text("No test results available")
+                            Text(NSLocalizedString("test.no_results_title", comment: "No test results title"))
                                 .font(.headline)
                                 .foregroundColor(.gray)
                             
-                            Text("Run the test suite to see validation results")
+                            Text(NSLocalizedString("test.no_results_message", comment: "No test results message"))
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                         }
@@ -105,11 +105,11 @@ struct TestResultsView: View {
                 }
                 .padding()
             }
-            .navigationTitle("Test Results")
+            .navigationTitle(NSLocalizedString("test.results_title", comment: "Test results title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button(NSLocalizedString("btn.done", comment: "Done")) {
                         dismiss()
                     }
                 }
