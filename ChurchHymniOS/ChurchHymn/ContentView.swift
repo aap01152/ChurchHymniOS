@@ -112,7 +112,6 @@ struct ContentView: View {
     
     // Separate state for existing hymn editing (Phase 1 fix for data corruption)
     @State private var existingHymnBeingEdited: Hymn? = nil
-    @State private var showingEditHymnSheet = false
     
     // PHASE 2: Enhanced error handling and validation
     @State private var showingSaveError = false
@@ -322,28 +321,19 @@ struct ContentView: View {
                 }
             )
         }
-        .sheet(isPresented: $showingEditHymnSheet) {
-            if let hymn = existingHymnBeingEdited {
-                HymnEditView(
-                    hymn: hymn, 
-                    onSave: { savedHymn in
-                        Task {
-                            await updateExistingHymn(savedHymn)
-                        }
-                    },
-                    onCancel: {
-                        // Clean up edit state on cancel
-                        existingHymnBeingEdited = nil
-                        showingEditHymnSheet = false
+        .sheet(item: $existingHymnBeingEdited) { hymn in
+            HymnEditView(
+                hymn: hymn,
+                onSave: { savedHymn in
+                    Task {
+                        await updateExistingHymn(savedHymn)
                     }
-                )
-            } else {
-                // This should not happen with proper state management
-                Text("No hymn to edit")
-                    .onAppear {
-                        showingEditHymnSheet = false
-                    }
-            }
+                },
+                onCancel: {
+                    // Clean up edit state on cancel
+                    existingHymnBeingEdited = nil
+                }
+            )
         }
         // PHASE 3: Data recovery options sheet
         .sheet(isPresented: $showingRecoveryOptions) {
@@ -809,7 +799,7 @@ struct ContentView: View {
     
     private func addNewHymn() {
         // Prevent multiple rapid taps - check if sheet is already showing
-        guard newHymnBeingCreated == nil && !showingEditHymnSheet else {
+        guard newHymnBeingCreated == nil && existingHymnBeingEdited == nil else {
             print("Hymn sheet already showing, ignoring duplicate add request")
             return
         }
@@ -852,7 +842,7 @@ struct ContentView: View {
     
     private func editCurrentHymn() {
         // Prevent multiple rapid taps - check both sheet states
-        guard newHymnBeingCreated == nil && !showingEditHymnSheet else {
+        guard newHymnBeingCreated == nil && existingHymnBeingEdited == nil else {
             print("Hymn sheet already showing, ignoring duplicate edit request")
             return
         }
@@ -866,7 +856,6 @@ struct ContentView: View {
         
         // Set dedicated edit state
         existingHymnBeingEdited = hymn
-        showingEditHymnSheet = true
     }
     
     @State private var isSaving = false
@@ -1054,7 +1043,6 @@ struct ContentView: View {
                 } else {
                     // Clean up edit state
                     existingHymnBeingEdited = nil
-                    showingEditHymnSheet = false
                 }
                 selected = hymn
                 
@@ -1070,7 +1058,6 @@ struct ContentView: View {
                     showingNewHymnSheet = false
                 } else {
                     existingHymnBeingEdited = nil
-                    showingEditHymnSheet = false
                 }
                 
             case .rollback(let message):
@@ -1085,7 +1072,6 @@ struct ContentView: View {
                     showingNewHymnSheet = false
                 } else {
                     existingHymnBeingEdited = nil
-                    showingEditHymnSheet = false
                 }
             }
         }
@@ -1284,7 +1270,6 @@ struct ContentView: View {
             // Clean up edit/new state if deleted hymn was being edited
             if existingHymnBeingEdited?.id == hymn.id {
                 existingHymnBeingEdited = nil
-                showingEditHymnSheet = false
             }
             if newHymnBeingCreated?.id == hymn.id {
                 newHymnBeingCreated = nil
@@ -1308,7 +1293,6 @@ struct ContentView: View {
                 // Clean up edit/new state if deleted hymn was being edited
                 if existingHymnBeingEdited?.id == hymn.id {
                     existingHymnBeingEdited = nil
-                    showingEditHymnSheet = false
                 }
                 if newHymnBeingCreated?.id == hymn.id {
                     newHymnBeingCreated = nil
@@ -1645,7 +1629,7 @@ struct ContentView: View {
         }
         
         // Test that edit state remains separate
-        if !showingEditHymnSheet && existingHymnBeingEdited == nil {
+        if existingHymnBeingEdited == nil {
             details.append("✅ Edit state remains separate from new state")
         } else {
             let executionTime = CFAbsoluteTimeGetCurrent() - startTime
@@ -3493,5 +3477,3 @@ struct TestResultsView: View {
     }
     
 }
-
-
