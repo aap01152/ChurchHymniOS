@@ -476,8 +476,9 @@ class ExternalDisplayManager: ObservableObject {
     
     func nextVerse() {
         guard let hymn = currentHymn, isPresenting else { return }
-        
-        let maxIndex = hymn.parts.isEmpty ? 0 : hymn.parts.count - 1
+
+        let parts = presentationParts(for: hymn)
+        let maxIndex = parts.isEmpty ? 0 : parts.count - 1
         if currentVerseIndex < maxIndex {
             currentVerseIndex += 1
             Task {
@@ -499,8 +500,9 @@ class ExternalDisplayManager: ObservableObject {
     
     func goToVerse(_ index: Int) {
         guard let hymn = currentHymn, isPresenting else { return }
-        
-        let maxIndex = hymn.parts.isEmpty ? 0 : hymn.parts.count - 1
+
+        let parts = presentationParts(for: hymn)
+        let maxIndex = parts.isEmpty ? 0 : parts.count - 1
         if index >= 0 && index <= maxIndex {
             currentVerseIndex = index
             Task {
@@ -564,7 +566,8 @@ class ExternalDisplayManager: ObservableObject {
     
     var canGoToNextVerse: Bool {
         guard let hymn = currentHymn else { return false }
-        let maxIndex = hymn.parts.isEmpty ? 0 : hymn.parts.count - 1
+        let parts = presentationParts(for: hymn)
+        let maxIndex = parts.isEmpty ? 0 : parts.count - 1
         return currentVerseIndex < maxIndex
     }
     
@@ -573,20 +576,38 @@ class ExternalDisplayManager: ObservableObject {
     }
     
     var currentVerseInfo: String {
-        guard let hymn = currentHymn, !hymn.parts.isEmpty else {
+        guard let hymn = currentHymn else {
             return NSLocalizedString("status.no_lyrics_available", comment: "No verse available status")
         }
-        
-        let part = hymn.parts[currentVerseIndex]
+
+        let parts = presentationParts(for: hymn)
+        guard !parts.isEmpty, currentVerseIndex < parts.count else {
+            return NSLocalizedString("status.no_lyrics_available", comment: "No verse available status")
+        }
+
+        let part = parts[currentVerseIndex]
         if let label = part.label {
             return label
         } else {
-            let verseNumber = hymn.parts[0...currentVerseIndex].filter { $0.label == nil }.count
+            let verseNumber = parts[0...currentVerseIndex].filter { $0.label == nil }.count
             return String(format: NSLocalizedString("external.verse_number", comment: "Verse number format"), verseNumber)
         }
     }
     
     var totalVerses: Int {
-        return currentHymn?.parts.count ?? 0
+        guard let hymn = currentHymn else { return 0 }
+        return presentationParts(for: hymn).count
+    }
+
+    private func presentationParts(for hymn: Hymn) -> [(label: String?, lines: [String])] {
+        let allBlocks = hymn.parts
+        let choruses = allBlocks.filter { $0.label != nil }
+        let verses = allBlocks.filter { $0.label == nil }
+
+        if let chorusPart = choruses.first {
+            return verses.flatMap { [$0, chorusPart] }
+        }
+
+        return verses
     }
 }
