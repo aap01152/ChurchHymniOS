@@ -12,13 +12,17 @@ struct DynamicPresenterView: View {
     @ObservedObject var hymnService: HymnService
     @Binding var selected: Hymn?
     var onDismiss: () -> Void
+    @EnvironmentObject private var externalDisplayManager: ExternalDisplayManager
     
     var body: some View {
         if let currentHymn = selected {
             PresenterView(
                 hymn: currentHymn,
-                onIndexChange: { _ in
-                    // Index change is handled by the parent ContentView
+                onIndexChange: { newIndex in
+                    // Sync verse changes with external display if presenting
+                    if externalDisplayManager.isPresenting && externalDisplayManager.currentHymn?.id == currentHymn.id {
+                        externalDisplayManager.goToVerse(newIndex)
+                    }
                 },
                 onDismiss: onDismiss
             )

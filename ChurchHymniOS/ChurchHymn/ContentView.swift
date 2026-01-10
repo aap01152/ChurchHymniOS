@@ -307,8 +307,20 @@ struct ContentView: View {
             }
         }
         // PHASE 1 FIX: Separate sheets for new vs edit operations
-        .sheet(isPresented: $showingNewHymnSheet) {
-            newHymnEditSheet
+        // Using .sheet(item:) instead of .sheet(isPresented:) to ensure sheet only presents when hymn exists
+        .sheet(item: $newHymnBeingCreated) { hymn in
+            HymnEditView(
+                hymn: hymn,
+                onSave: { savedHymn in
+                    Task {
+                        await saveNewHymn(savedHymn)
+                    }
+                },
+                onCancel: {
+                    print("🚫 New hymn creation cancelled")
+                    newHymnBeingCreated = nil
+                }
+            )
         }
         .sheet(isPresented: $showingEditHymnSheet) {
             if let hymn = existingHymnBeingEdited {
@@ -472,50 +484,7 @@ struct ContentView: View {
     }
     
     // MARK: - Layout Components
-    
-    @ViewBuilder
-    private var newHymnEditSheet: some View {
-        let _ = print("🔍 Sheet building - newHymnBeingCreated: \(newHymnBeingCreated?.id.uuidString ?? "NIL")")
-        if let hymn = newHymnBeingCreated {
-            HymnEditView(
-                hymn: hymn, 
-                onSave: { savedHymn in
-                    print("DEBUG: Save called - Original ID: \(hymn.id.uuidString), Saved ID: \(savedHymn.id.uuidString)")
-                    Task {
-                        await saveNewHymn(savedHymn)
-                    }
-                },
-                onCancel: {
-                    print("🚫 New hymn creation cancelled")
-                    newHymnBeingCreated = nil
-                    showingNewHymnSheet = false
-                }
-            )
-        } else {
-            // CRITICAL FIX: Never show edit sheet if state is corrupted
-            VStack(spacing: 20) {
-                Image(systemName: "exclamationmark.triangle")
-                    .font(.largeTitle)
-                    .foregroundColor(.red)
-                
-                Text("Error: Invalid State")
-                    .font(.headline)
-                
-                Text("Hymn creation state was corrupted. Please try again.")
-                    .font(.subheadline)
-                    .multilineTextAlignment(.center)
-                
-                Button("Close") {
-                    print("ERROR: Sheet shown without proper state - forcing close")
-                    newHymnBeingCreated = nil
-                    showingNewHymnSheet = false
-                }
-                .buttonStyle(.borderedProminent)
-            }
-            .padding()
-        }
-    }
-    
+
     @ViewBuilder
     private func iPadLayout(hymnService: HymnService, serviceService: ServiceService) -> some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
@@ -532,29 +501,8 @@ struct ContentView: View {
                 onPresent: onPresentHymn,
                 onAddNew: {
                     print("🔵 ADD BUTTON PRESSED - calling addNewHymn()")
-                    print("🔍 Pre-add state check:")
-                    print("  - Selected hymn: \(selected?.title ?? "None")")
-                    print("  - showingNewHymnSheet: \(showingNewHymnSheet)")
-                    print("  - showingEditHymnSheet: \(showingEditHymnSheet)")
-                    print("  - newHymnBeingCreated: \(newHymnBeingCreated?.title ?? "None")")
-                    print("  - existingHymnBeingEdited: \(existingHymnBeingEdited?.title ?? "None")")
-                    
-                    // CRITICAL FIX: Don't clear edit state if edit sheet is showing to prevent race condition
-                    guard !showingEditHymnSheet else {
-                        print("⚠️ Edit sheet is showing, ignoring add request to prevent race condition")
-                        return
-                    }
-                    
-                    // Force clean state before adding
-                    newHymnBeingCreated = nil
-                    existingHymnBeingEdited = nil
-                    showingNewHymnSheet = false
-                    showingEditHymnSheet = false
-                    
-                    // Small delay to ensure clean state
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        addNewHymn()
-                    }
+                    // Call addNewHymn directly - it has its own guards to prevent duplicate calls
+                    addNewHymn()
                 },
                 onEdit: editCurrentHymn
             )
@@ -609,29 +557,8 @@ struct ContentView: View {
                 onPresent: onPresentHymn,
                 onAddNew: {
                     print("🔵 ADD BUTTON PRESSED - calling addNewHymn()")
-                    print("🔍 Pre-add state check:")
-                    print("  - Selected hymn: \(selected?.title ?? "None")")
-                    print("  - showingNewHymnSheet: \(showingNewHymnSheet)")
-                    print("  - showingEditHymnSheet: \(showingEditHymnSheet)")
-                    print("  - newHymnBeingCreated: \(newHymnBeingCreated?.title ?? "None")")
-                    print("  - existingHymnBeingEdited: \(existingHymnBeingEdited?.title ?? "None")")
-                    
-                    // CRITICAL FIX: Don't clear edit state if edit sheet is showing to prevent race condition
-                    guard !showingEditHymnSheet else {
-                        print("⚠️ Edit sheet is showing, ignoring add request to prevent race condition")
-                        return
-                    }
-                    
-                    // Force clean state before adding
-                    newHymnBeingCreated = nil
-                    existingHymnBeingEdited = nil
-                    showingNewHymnSheet = false
-                    showingEditHymnSheet = false
-                    
-                    // Small delay to ensure clean state
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        addNewHymn()
-                    }
+                    // Call addNewHymn directly - it has its own guards to prevent duplicate calls
+                    addNewHymn()
                 },
                 onEdit: editCurrentHymn
             )
@@ -684,29 +611,8 @@ struct ContentView: View {
                 onPresent: onPresentHymn,
                 onAddNew: {
                     print("🔵 ADD BUTTON PRESSED - calling addNewHymn()")
-                    print("🔍 Pre-add state check:")
-                    print("  - Selected hymn: \(selected?.title ?? "None")")
-                    print("  - showingNewHymnSheet: \(showingNewHymnSheet)")
-                    print("  - showingEditHymnSheet: \(showingEditHymnSheet)")
-                    print("  - newHymnBeingCreated: \(newHymnBeingCreated?.title ?? "None")")
-                    print("  - existingHymnBeingEdited: \(existingHymnBeingEdited?.title ?? "None")")
-                    
-                    // CRITICAL FIX: Don't clear edit state if edit sheet is showing to prevent race condition
-                    guard !showingEditHymnSheet else {
-                        print("⚠️ Edit sheet is showing, ignoring add request to prevent race condition")
-                        return
-                    }
-                    
-                    // Force clean state before adding
-                    newHymnBeingCreated = nil
-                    existingHymnBeingEdited = nil
-                    showingNewHymnSheet = false
-                    showingEditHymnSheet = false
-                    
-                    // Small delay to ensure clean state
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        addNewHymn()
-                    }
+                    // Call addNewHymn directly - it has its own guards to prevent duplicate calls
+                    addNewHymn()
                 },
                 onEdit: editCurrentHymn
             )
@@ -746,29 +652,8 @@ struct ContentView: View {
                 onPresent: onPresentHymn,
                 onAddNew: {
                     print("🔵 ADD BUTTON PRESSED - calling addNewHymn()")
-                    print("🔍 Pre-add state check:")
-                    print("  - Selected hymn: \(selected?.title ?? "None")")
-                    print("  - showingNewHymnSheet: \(showingNewHymnSheet)")
-                    print("  - showingEditHymnSheet: \(showingEditHymnSheet)")
-                    print("  - newHymnBeingCreated: \(newHymnBeingCreated?.title ?? "None")")
-                    print("  - existingHymnBeingEdited: \(existingHymnBeingEdited?.title ?? "None")")
-                    
-                    // CRITICAL FIX: Don't clear edit state if edit sheet is showing to prevent race condition
-                    guard !showingEditHymnSheet else {
-                        print("⚠️ Edit sheet is showing, ignoring add request to prevent race condition")
-                        return
-                    }
-                    
-                    // Force clean state before adding
-                    newHymnBeingCreated = nil
-                    existingHymnBeingEdited = nil
-                    showingNewHymnSheet = false
-                    showingEditHymnSheet = false
-                    
-                    // Small delay to ensure clean state
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        addNewHymn()
-                    }
+                    // Call addNewHymn directly - it has its own guards to prevent duplicate calls
+                    addNewHymn()
                 },
                 onEdit: editCurrentHymn
             )
@@ -923,63 +808,51 @@ struct ContentView: View {
     }
     
     private func addNewHymn() {
-        // Prevent multiple rapid taps - check both sheet states
-        guard !showingNewHymnSheet && !showingEditHymnSheet else {
+        // Prevent multiple rapid taps - check if sheet is already showing
+        guard newHymnBeingCreated == nil && !showingEditHymnSheet else {
             print("Hymn sheet already showing, ignoring duplicate add request")
             return
         }
-        
+
+        // CRITICAL: Ensure hymnService is initialized before creating hymn
+        guard let hymnService = hymnService else {
+            print("❌ ERROR: Cannot create hymn - hymnService not initialized")
+            return
+        }
+
         print("📝 Creating new hymn for editing")
         print("📝 Current selected hymn: \(selected?.title ?? "None") (ID: \(selected?.id.uuidString.prefix(8) ?? "None")...)")
-        print("📝 Current hymns in array: \(hymnService?.hymns.count ?? 0)")
+        print("📝 Current hymns in array: \(hymnService.hymns.count)")
         
         // Create new hymn with guaranteed unique ID
         var hymn = Hymn(title: "")
-        
+
         // CRITICAL FIX: Ensure the new hymn ID is absolutely unique
         var attempts = 0
-        while hymnService?.hymns.contains(where: { $0.id == hymn.id }) == true {
+        while hymnService.hymns.contains(where: { $0.id == hymn.id }) {
             attempts += 1
             print("⚠️ ID collision detected! Attempt \(attempts) - Generating new ID...")
-            print("   Colliding with existing hymn: \(hymnService?.hymns.first(where: { $0.id == hymn.id })?.title ?? "Unknown")")
+            print("   Colliding with existing hymn: \(hymnService.hymns.first(where: { $0.id == hymn.id })?.title ?? "Unknown")")
             hymn = Hymn(title: "")
             if attempts > 10 {
                 print("🚨 CRITICAL: Failed to generate unique ID after 10 attempts!")
                 return
             }
         }
-        
+
         print("📝 Created guaranteed unique hymn with ID: \(hymn.id.uuidString)")
-        print("📝 Verified: This ID does not exist in current \(hymnService?.hymns.count ?? 0) hymns")
-        print("📝 Existing hymn IDs: \(hymnService?.hymns.map { $0.id.uuidString.prefix(8) } ?? [])")
+        print("📝 Verified: This ID does not exist in current \(hymnService.hymns.count) hymns")
+        print("📝 Existing hymn IDs: \(hymnService.hymns.map { $0.id.uuidString.prefix(8) })")
+
+        // Set the hymn - this will automatically present the sheet via .sheet(item:)
         newHymnBeingCreated = hymn
-        
-        print("✅ New hymn created and state set - ID: \(hymn.id.uuidString)")
-        print("✅ State verified before showing sheet: \(newHymnBeingCreated != nil)")
-        
-        // CRITICAL FIX: Set state atomically to prevent race conditions
-        // Capture the hymn reference to ensure it persists
-        let capturedHymn = hymn
-        
-        // Set both state variables together to prevent timing issues
-        newHymnBeingCreated = capturedHymn
-        showingNewHymnSheet = true
-        
-        print("✅ Sheet shown with confirmed state")
-        
-        // Verify state is still valid after sheet presentation
-        DispatchQueue.main.async {
-            if self.newHymnBeingCreated == nil {
-                print("❌ WARNING: State was lost after sheet presentation - this indicates a SwiftUI timing issue")
-                // Restore state if it was lost
-                self.newHymnBeingCreated = capturedHymn
-            }
-        }
+
+        print("✅ New hymn created, sheet will present - ID: \(hymn.id.uuidString)")
     }
     
     private func editCurrentHymn() {
         // Prevent multiple rapid taps - check both sheet states
-        guard !showingNewHymnSheet && !showingEditHymnSheet else {
+        guard newHymnBeingCreated == nil && !showingEditHymnSheet else {
             print("Hymn sheet already showing, ignoring duplicate edit request")
             return
         }
