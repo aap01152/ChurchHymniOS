@@ -71,7 +71,6 @@ struct ContentView: View {
     @State private var exportFormat: ExportFormat = .json
     @State private var selectedHymnsForExport: Set<UUID> = []
     @State private var showingExportSelection = false
-    @State private var showingImportPreview = false
     @State private var importPreview: ImportPreview?
     @State private var exportHymns: [Hymn] = []
     
@@ -336,13 +335,12 @@ struct ContentView: View {
         ) { result in
             handleExportResult(result)
         }
-        .sheet(isPresented: $showingImportPreview) {
-            if let preview = importPreview, let manager = importExportManager {
+        .sheet(item: $importPreview) { preview in
+            if let manager = importExportManager {
                 ImportPreviewView(
                     preview: preview,
                     importManager: manager,
                     onComplete: { success in
-                        showingImportPreview = false
                         if success {
                             // Show success alert with statistics
                             let totalHymns = preview.hymns.count + preview.duplicates.count
@@ -365,6 +363,9 @@ struct ContentView: View {
                         importPreview = nil
                     }
                 )
+            } else {
+                Text(NSLocalizedString("import.error.service_unavailable", comment: "Import service unavailable"))
+                    .padding()
             }
         }
         .sheet(isPresented: $showingExportSelection) {
@@ -404,6 +405,7 @@ struct ContentView: View {
                 hymnToDelete: $hymnToDelete,
                 showingDeleteConfirmation: $showingDeleteConfirmation,
                 showingBatchDeleteConfirmation: $showingBatchDeleteConfirmation,
+                showingServiceManagement: $showingServiceManagement,
                 helpSystem: helpSystem,
                 onPresent: onPresentHymn,
                 onAddNew: {
@@ -460,6 +462,7 @@ struct ContentView: View {
                 hymnToDelete: $hymnToDelete,
                 showingDeleteConfirmation: $showingDeleteConfirmation,
                 showingBatchDeleteConfirmation: $showingBatchDeleteConfirmation,
+                showingServiceManagement: $showingServiceManagement,
                 helpSystem: helpSystem,
                 onPresent: onPresentHymn,
                 onAddNew: {
@@ -1872,13 +1875,18 @@ struct ContentView: View {
         Task {
             switch result {
             case .success(let urls):
-                guard let manager = importExportManager else { return }
+                guard let manager = importExportManager else {
+                    await MainActor.run {
+                        importError = ImportExportError.unexpectedError(NSLocalizedString("import.error.service_unavailable", comment: "Import service unavailable"))
+                        showingImportErrorAlert = true
+                    }
+                    return
+                }
                 let importResult = await manager.importHymnsFromFiles(urls, importType: importType)
                 
                 await MainActor.run {
                     if let preview = importResult.preview {
                         importPreview = preview
-                        showingImportPreview = true
                     } else if !importResult.errors.isEmpty {
                         // Show import error alert
                         importError = convertToImportExportError(ImportResultError(messages: importResult.errors))
@@ -1899,19 +1907,11 @@ struct ContentView: View {
         Task {
             switch result {
             case .success(let url):
-                guard let manager = importExportManager else { return }
-                let success = await manager.exportHymns(exportHymns, to: url, format: exportFormat)
-                
                 await MainActor.run {
-                    if success {
-                        let count = exportHymns.count
-                        let hymnWord = count == 1 ? NSLocalizedString("service.hymn_single", comment: "hymn") : NSLocalizedString("service.hymn_plural", comment: "hymns")
-                        exportSuccessMessage = "Successfully exported \(count) \(hymnWord) to \(url.lastPathComponent)"
-                        showingExportSuccessAlert = true
-                    } else {
-                        importError = ImportExportError.unexpectedError("Failed to export hymns")
-                        showingImportErrorAlert = true
-                    }
+                    let count = exportHymns.count
+                    let hymnWord = count == 1 ? NSLocalizedString("service.hymn_single", comment: "hymn") : NSLocalizedString("service.hymn_plural", comment: "hymns")
+                    exportSuccessMessage = "Successfully exported \(count) \(hymnWord) to \(url.lastPathComponent)"
+                    showingExportSuccessAlert = true
                 }
                 
             case .failure(let error):

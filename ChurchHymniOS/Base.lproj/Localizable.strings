@@ -817,6 +817,7 @@
 
 /* Import/Export Interface (Additional) */
 "import.preview_title" = "Import Preview";
+"import.error.service_unavailable" = "Import service is not available yet.";
 "import.total" = "%d total";
 "import.duplicates" = "%d duplicates";
 "import.duplicate_resolution_title" = "Duplicate Resolution";

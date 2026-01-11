@@ -12,6 +12,7 @@ struct HymnListView: View {
     @Binding var hymnToDelete: Hymn?
     @Binding var showingDeleteConfirmation: Bool
     @Binding var showingBatchDeleteConfirmation: Bool
+    @Binding var showingServiceManagement: Bool
     
     @ObservedObject var helpSystem: HelpSystem
     
@@ -24,9 +25,7 @@ struct HymnListView: View {
     @State private var isServiceBarCollapsed = false
     
     // Service management alerts
-    @State private var showingClearAllConfirmation = false
-    @State private var showingCompleteServiceConfirmation = false
-    @State private var showingServiceCompletedSuccess = false
+    @State private var serviceAlert: ServiceAlert?
     
     // Service reorder mode
     @State private var isServiceReorderMode = false
@@ -451,45 +450,52 @@ struct HymnListView: View {
             }
         }
         // Service Confirmation Alerts
-        .alert(NSLocalizedString("service.clear_all_title", comment: "Clear all hymns title"), isPresented: $showingClearAllConfirmation) {
-            Button(NSLocalizedString("btn.cancel", comment: "Cancel"), role: .cancel) { }
-            Button(NSLocalizedString("service.clear_all", comment: "Clear all"), role: .destructive) {
-                Task {
-                    guard let activeService = serviceService.activeService else { return }
-                    let success = await serviceService.clearAllHymnsFromService(activeService.id)
-                    if success {
-                        print("Successfully cleared all hymns from service")
-                    } else {
-                        print("Failed to clear hymns from service")
-                    }
-                }
+        .alert(item: $serviceAlert) { alert in
+            switch alert {
+            case .clearAllConfirm:
+                return Alert(
+                    title: Text(NSLocalizedString("service.clear_all_title", comment: "Clear all hymns title")),
+                    message: Text(NSLocalizedString("service.clear_all_message", comment: "Clear all confirmation message")),
+                    primaryButton: .destructive(Text(NSLocalizedString("service.clear_all", comment: "Clear all"))) {
+                        Task {
+                            guard let activeService = serviceService.activeService else { return }
+                            let success = await serviceService.clearAllHymnsFromService(activeService.id)
+                            if success {
+                                print("Successfully cleared all hymns from service")
+                            } else {
+                                print("Failed to clear hymns from service")
+                            }
+                        }
+                    },
+                    secondaryButton: .cancel(Text(NSLocalizedString("btn.cancel", comment: "Cancel")))
+                )
+            case .completeConfirm:
+                return Alert(
+                    title: Text(NSLocalizedString("service.complete_title", comment: "Complete service title")),
+                    message: Text(NSLocalizedString("service.complete_message", comment: "Complete service confirmation message")),
+                    primaryButton: .destructive(Text(NSLocalizedString("service.complete", comment: "Complete"))) {
+                        completeCurrentService()
+                    },
+                    secondaryButton: .cancel(Text(NSLocalizedString("btn.cancel", comment: "Cancel")))
+                )
+            case .completedSuccess:
+                return Alert(
+                    title: Text(NSLocalizedString("service.completed_success_title", comment: "Service completed success title")),
+                    message: Text(NSLocalizedString("service.completed_success_message", comment: "Service completed success message")),
+                    dismissButton: .default(Text(NSLocalizedString("btn.ok", comment: "OK button")))
+                )
             }
-        } message: {
-            Text(NSLocalizedString("service.clear_all_message", comment: "Clear all confirmation message"))
-        }
-        .alert(NSLocalizedString("service.complete_title", comment: "Complete service title"), isPresented: $showingCompleteServiceConfirmation) {
-            Button(NSLocalizedString("btn.cancel", comment: "Cancel"), role: .cancel) { }
-            Button(NSLocalizedString("service.complete", comment: "Complete"), role: .destructive) {
-                completeCurrentService()
-            }
-        } message: {
-            Text(NSLocalizedString("service.complete_message", comment: "Complete service confirmation message"))
-        }
-        .alert(NSLocalizedString("service.completed_success_title", comment: "Service completed success title"), isPresented: $showingServiceCompletedSuccess) {
-            Button(NSLocalizedString("btn.ok", comment: "OK button")) { }
-        } message: {
-            Text(NSLocalizedString("service.completed_success_message", comment: "Service completed success message"))
         }
     }
     
     // MARK: - Service Management Actions
     
     private func clearAllServiceHymns() {
-        showingClearAllConfirmation = true
+        serviceAlert = .clearAllConfirm
     }
     
     private func completeActiveService() {
-        showingCompleteServiceConfirmation = true
+        serviceAlert = .completeConfirm
     }
     
     private func completeCurrentService() {
@@ -507,11 +513,28 @@ struct HymnListView: View {
             
             await MainActor.run {
                 if success {
-                    showingServiceCompletedSuccess = true
+                    serviceAlert = .completedSuccess
                     print("Service completed successfully with worship history")
                 } else {
                     print("Failed to complete service")
                 }
+            }
+        }
+    }
+
+    private enum ServiceAlert: Identifiable {
+        case clearAllConfirm
+        case completeConfirm
+        case completedSuccess
+
+        var id: Int {
+            switch self {
+            case .clearAllConfirm:
+                return 0
+            case .completeConfirm:
+                return 1
+            case .completedSuccess:
+                return 2
             }
         }
     }
@@ -524,7 +547,7 @@ struct HymnListView: View {
     }
     
     private func toggleServiceManagement() {
-        print("Service management mode toggled")
+        showingServiceManagement = true
     }
     
     // MARK: - Service Reordering

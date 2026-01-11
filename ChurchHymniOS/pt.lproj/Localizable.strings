@@ -444,6 +444,7 @@
 
 /* Import/Export Interface (Additional) */
 "import.preview_title" = "Pré-visualização da Importação";
+"import.error.service_unavailable" = "O serviço de importação ainda não está disponível.";
 "import.total" = "%d total";
 "import.duplicates" = "%d duplicados";
 "import.duplicate_resolution_title" = "Resolução de Duplicados";

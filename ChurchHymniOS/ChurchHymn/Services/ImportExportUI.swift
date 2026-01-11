@@ -66,7 +66,8 @@ struct ImportPreviewHymn: Identifiable {
     }
 }
 
-struct ImportPreview: @unchecked Sendable {
+struct ImportPreview: Identifiable, @unchecked Sendable {
+    let id = UUID()
     let hymns: [ImportPreviewHymn]
     let duplicates: [ImportPreviewHymn]
     let errors: [String]

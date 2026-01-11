@@ -7,7 +7,6 @@ struct ServiceManagementView: View {
     @ObservedObject var hymnService: HymnService
     
     @State private var showingCreateService = false
-    @State private var showingServiceDetails = false
     @State private var selectedService: WorshipService?
     @State private var newServiceTitle = ""
     @State private var newServiceDate = Date()
@@ -24,7 +23,6 @@ struct ServiceManagementView: View {
                         hymnService: hymnService,
                         onViewDetails: {
                             selectedService = activeService
-                            showingServiceDetails = true
                         }
                     )
                     .padding()
@@ -58,7 +56,6 @@ struct ServiceManagementView: View {
                     serviceService: serviceService,
                     onServiceTap: { service in
                         selectedService = service
-                        showingServiceDetails = true
                     },
                     onCreateService: {
                         showingCreateService = true
@@ -86,16 +83,12 @@ struct ServiceManagementView: View {
                 }
             )
         }
-        .sheet(isPresented: $showingServiceDetails, onDismiss: {
-            selectedService = nil
-        }) {
-            if let service = selectedService {
-                ServiceDetailsView(
-                    service: service,
-                    serviceService: serviceService,
-                    hymnService: hymnService
-                )
-            }
+        .sheet(item: $selectedService) { service in
+            ServiceDetailsView(
+                service: service,
+                serviceService: serviceService,
+                hymnService: hymnService
+            )
         }
         .task {
             if serviceService.services.isEmpty && !serviceService.isLoading {
