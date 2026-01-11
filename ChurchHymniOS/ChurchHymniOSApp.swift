@@ -7,24 +7,34 @@
 
 import SwiftUI
 import SwiftData
+import AppIntents
 
 @main
 struct ChurchHymniOSApp: App {
-    @StateObject private var externalDisplayManager = ExternalDisplayManager()
-    @StateObject private var serviceFactory = ServiceFactoryManager()
-    
-    // Worship session manager depends on external display manager
+    @StateObject private var externalDisplayManager: ExternalDisplayManager
+    @StateObject private var serviceFactory: ServiceFactoryManager
     @StateObject private var worshipSessionManager: WorshipSessionManager
-    
+
+    // CRITICAL FIX: Create ONE persistent container shared across the app
+    private let sharedContainer: ModelContainer
+
     init() {
+        // Create the shared persistent container FIRST
+        print("🔧 Creating shared ModelContainer for persistent storage...")
+        self.sharedContainer = ModelContainerFactory.createProductionContainer()
+        print("✅ Shared ModelContainer created successfully")
+
         let externalDisplayManager = ExternalDisplayManager()
         let worshipSessionManager = WorshipSessionManager(externalDisplayManager: externalDisplayManager)
-        
+
         self._externalDisplayManager = StateObject(wrappedValue: externalDisplayManager)
         self._worshipSessionManager = StateObject(wrappedValue: worshipSessionManager)
-        self._serviceFactory = StateObject(wrappedValue: ServiceFactoryManager())
+
+        // Pass the shared container to the factory manager
+        let factoryManager = ServiceFactoryManager(container: self.sharedContainer)
+        self._serviceFactory = StateObject(wrappedValue: factoryManager)
     }
-    
+
     var body: some Scene {
         WindowGroup {
             if serviceFactory.isInitialized, let factory = serviceFactory.factory {
@@ -35,7 +45,7 @@ struct ChurchHymniOSApp: App {
                     .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
                         // Refresh external display state when app becomes active
                         externalDisplayManager.refreshExternalDisplayState()
-                        
+
                         // Restore worship session state to keep managers in sync
                         Task {
                             await worshipSessionManager.restoreStateAfterAppBecomesActive()
@@ -56,7 +66,7 @@ struct ChurchHymniOSApp: App {
                     }
             }
         }
-        .modelContainer(ServiceMigrationManager.createModelContainer())
+        .modelContainer(sharedContainer)
     }
 }
 
@@ -66,24 +76,29 @@ class ServiceFactoryManager: ObservableObject {
     @Published var isInitialized = false
     @Published var initializationError: Error?
     private(set) var factory: ServiceFactory?
-    
+    private let container: ModelContainer
+
+    init(container: ModelContainer) {
+        self.container = container
+        print("📦 ServiceFactoryManager initialized with shared container")
+    }
+
     func initialize() async {
         do {
-            // CRITICAL FIX: Use proper production container instead of migration fallback
-            let container = ModelContainerFactory.createProductionContainer()
-            print("✅ Using production ModelContainer for persistent storage")
-            
-            // Create SwiftDataManager with the container
+            print("🚀 Initializing ServiceFactory with persistent container...")
+
+            // Create SwiftDataManager with the SHARED container
             let dataManager = await SwiftDataManager(modelContainer: container)
-            
+
             // Create and initialize the service factory
             let serviceFactory = try await ServiceFactory.createForSwiftUI(dataManager: dataManager)
-            
+
             self.factory = serviceFactory
             self.isInitialized = true
+            print("✅ ServiceFactory initialized successfully")
         } catch {
             self.initializationError = error
-            print("Failed to initialize service factory: \(error)")
+            print("❌ Failed to initialize service factory: \(error)")
         }
     }
 }

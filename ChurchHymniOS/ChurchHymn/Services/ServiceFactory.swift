@@ -85,18 +85,13 @@ final class ServiceFactory: ObservableObject {
     /// Create HymnOperations instance
     func createHymnOperations() async throws -> HymnOperations {
         logger.info("Creating HymnOperations instance")
-        
-        do {
-            // Get dataManager through the factory's dataManager property
-            let dataManager = await repositoryManager.getDataManager()
-            let operations = await HymnOperations(context: dataManager.mainContext)
-            
-            logger.info("HymnOperations created successfully")
-            return operations
-        } catch {
-            logger.error("Failed to create HymnOperations: \(error.localizedDescription)")
-            throw ServiceCreationError.repositoryUnavailable("Failed to create HymnOperations")
-        }
+
+        // Get dataManager through the factory's dataManager property
+        let dataManager = await repositoryManager.getDataManager()
+        let operations = HymnOperations(context: dataManager.mainContext)
+
+        logger.info("HymnOperations created successfully")
+        return operations
     }
     
     // MARK: - Service Bundle Creation

@@ -28,8 +28,8 @@ struct ExternalDisplayStatusView: View {
         .padding(.vertical, 4)
         .background(statusBackgroundColor)
         .cornerRadius(6)
-        .alert("External Display Error", isPresented: $showingErrorAlert) {
-            Button("OK") { }
+        .alert(NSLocalizedString("alert.external_display_error", comment: "External Display Error"), isPresented: $showingErrorAlert) {
+            Button(NSLocalizedString("btn.ok", comment: "OK")) { }
         } message: {
             Text(errorMessage)
         }
@@ -62,16 +62,16 @@ struct ExternalDisplayStatusView: View {
         Group {
             switch externalDisplayManager.state {
             case .disconnected:
-                Text("No External Display")
+                Text(NSLocalizedString("status.no_external_display", comment: "No external display"))
                     .foregroundColor(.gray)
             case .connected:
-                Text("External Display Ready")
+                Text(NSLocalizedString("status.external_display_ready", comment: "External display ready"))
                     .foregroundColor(.blue)
             case .presenting:
                 Text(externalDisplayManager.currentVerseInfo)
                     .foregroundColor(.green)
             case .worshipMode:
-                Text("Worship Session Active")
+                Text(NSLocalizedString("status.worship_session_active", comment: "Worship session active"))
                     .foregroundColor(.purple)
             case .worshipPresenting:
                 Text(externalDisplayManager.currentVerseInfo)
@@ -138,8 +138,8 @@ struct ExternalDisplayControlsView: View {
                 presentationControls
             }
         }
-        .alert("External Display Error", isPresented: $showingErrorAlert) {
-            Button("OK") { }
+        .alert(NSLocalizedString("alert.external_display_error", comment: "External Display Error"), isPresented: $showingErrorAlert) {
+            Button(NSLocalizedString("btn.ok", comment: "OK")) { }
         } message: {
             Text(errorMessage)
         }
@@ -149,7 +149,7 @@ struct ExternalDisplayControlsView: View {
         Button(action: startExternalPresentation) {
             HStack(spacing: 4) {
                 Image(systemName: "tv")
-                Text("Present Externally")
+                Text(NSLocalizedString("btn.present_externally", comment: "Present externally"))
             }
         }
         .buttonStyle(.borderedProminent)
@@ -166,7 +166,7 @@ struct ExternalDisplayControlsView: View {
             VStack(spacing: 2) {
                 Text("\(externalDisplayManager.currentVerseIndex + 1)")
                     .font(.headline)
-                Text("of \(externalDisplayManager.totalVerses)")
+                Text(String(format: NSLocalizedString("external.of_total", comment: "Of total verses"), externalDisplayManager.totalVerses))
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
@@ -180,7 +180,7 @@ struct ExternalDisplayControlsView: View {
             Button(action: externalDisplayManager.stopPresentation) {
                 HStack(spacing: 4) {
                     Image(systemName: "stop.fill")
-                    Text("Stop")
+                    Text(NSLocalizedString("btn.stop", comment: "Stop"))
                 }
             }
             .buttonStyle(.bordered)

@@ -7,7 +7,6 @@ struct ServiceManagementView: View {
     @ObservedObject var hymnService: HymnService
     
     @State private var showingCreateService = false
-    @State private var showingServiceDetails = false
     @State private var selectedService: WorshipService?
     @State private var newServiceTitle = ""
     @State private var newServiceDate = Date()
@@ -24,7 +23,6 @@ struct ServiceManagementView: View {
                         hymnService: hymnService,
                         onViewDetails: {
                             selectedService = activeService
-                            showingServiceDetails = true
                         }
                     )
                     .padding()
@@ -36,14 +34,14 @@ struct ServiceManagementView: View {
                         onCreateTodaysService: {
                             Task {
                                 let todayService = WorshipService(
-                                    title: "Today's Service",
+                                    title: NSLocalizedString("service.todays_service", comment: "Today's Service"),
                                     date: Date(),
                                     notes: nil
                                 )
                                 let success = await serviceService.createService(todayService)
                                 if success {
                                     // Automatically activate the newly created service
-                                    await serviceService.setActiveService(todayService)
+                                    _ = await serviceService.setActiveService(todayService)
                                 }
                             }
                         }
@@ -58,7 +56,6 @@ struct ServiceManagementView: View {
                     serviceService: serviceService,
                     onServiceTap: { service in
                         selectedService = service
-                        showingServiceDetails = true
                     },
                     onCreateService: {
                         showingCreateService = true
@@ -86,16 +83,12 @@ struct ServiceManagementView: View {
                 }
             )
         }
-        .sheet(isPresented: $showingServiceDetails, onDismiss: {
-            selectedService = nil
-        }) {
-            if let service = selectedService {
-                ServiceDetailsView(
-                    service: service,
-                    serviceService: serviceService,
-                    hymnService: hymnService
-                )
-            }
+        .sheet(item: $selectedService) { service in
+            ServiceDetailsView(
+                service: service,
+                serviceService: serviceService,
+                hymnService: hymnService
+            )
         }
         .task {
             if serviceService.services.isEmpty && !serviceService.isLoading {
@@ -165,7 +158,7 @@ struct ActiveServiceCard: View {
                 
                 Spacer()
                 
-                Button("Details") {
+                Button(NSLocalizedString("btn.details", comment: "Details")) {
                     onViewDetails()
                 }
                 .buttonStyle(.bordered)
@@ -174,7 +167,7 @@ struct ActiveServiceCard: View {
             
             // Info Row
             HStack {
-                Label("\(hymnCount) hymns", systemImage: "music.note")
+                Label(String(format: NSLocalizedString("service.hymn_count", comment: "Hymn count"), hymnCount), systemImage: "music.note")
                     .font(.caption)
                     .foregroundColor(.secondary)
                 
@@ -189,14 +182,14 @@ struct ActiveServiceCard: View {
             
             // Quick Actions
             HStack(spacing: 12) {
-                Button("Add Hymn") {
+                Button(NSLocalizedString("btn.add_hymn", comment: "Add Hymn")) {
                     onViewDetails()
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
                 
                 if hymnCount > 0 {
-                    Button("Clear All") {
+                    Button(NSLocalizedString("btn.clear_all", comment: "Clear All")) {
                         Task {
                             for serviceHymn in serviceService.serviceHymns {
                                 _ = await serviceService.removeHymnFromService(
@@ -223,7 +216,7 @@ struct ActiveServiceCard: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                     Spacer()
-                    Button("Dismiss") {
+                    Button(NSLocalizedString("btn.dismiss", comment: "Dismiss")) {
                         serviceService.clearServiceOperationError()
                     }
                     .font(.caption)
@@ -250,23 +243,23 @@ struct NoActiveServiceCard: View {
                     .font(.system(size: 32))
                     .foregroundColor(.secondary)
                 
-                Text("No Active Service")
+                Text(NSLocalizedString("service.no_active_service", comment: "No active service"))
                     .font(.headline)
                     .fontWeight(.medium)
                 
-                Text("Create or activate a service to start managing hymns for worship")
+                Text(NSLocalizedString("service.no_active_service_message", comment: "Create or activate a service to start managing hymns for worship"))
                     .font(.body)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
             }
             
             HStack(spacing: 12) {
-                Button("Create Today's Service") {
+                Button(NSLocalizedString("service.create_todays_service", comment: "Create today's service")) {
                     onCreateTodaysService()
                 }
                 .buttonStyle(.borderedProminent)
                 
-                Button("Create Service") {
+                Button(NSLocalizedString("service.create_service", comment: "Create service")) {
                     onCreateService()
                 }
                 .buttonStyle(.bordered)
@@ -289,7 +282,7 @@ struct ServicesList: View {
         VStack(alignment: .leading, spacing: 0) {
             // Header
             HStack {
-                Text("All Services")
+                Text(NSLocalizedString("service.all_services", comment: "All services"))
                     .font(.headline)
                     .fontWeight(.semibold)
                 
@@ -305,11 +298,11 @@ struct ServicesList: View {
             // Content
             if serviceService.services.isEmpty && !serviceService.isLoading {
                 VStack(spacing: 16) {
-                    Text("No services created yet")
+                    Text(NSLocalizedString("service.no_services_yet", comment: "No services created yet"))
                         .font(.body)
                         .foregroundColor(.secondary)
                     
-                    Button("Create Your First Service") {
+                    Button(NSLocalizedString("service.create_first_service", comment: "Create your first service")) {
                         onCreateService()
                     }
                     .buttonStyle(.borderedProminent)
@@ -360,7 +353,7 @@ struct ServiceRowView: View {
                         .lineLimit(1)
                     
                     if isActive {
-                        Text("ACTIVE")
+                        Text(NSLocalizedString("service.active_badge", comment: "Active badge"))
                             .font(.caption2)
                             .fontWeight(.semibold)
                             .foregroundColor(.white)
@@ -387,14 +380,14 @@ struct ServiceRowView: View {
             
             VStack(spacing: 4) {
                 if !isActive {
-                    Button("Activate") {
+                    Button(NSLocalizedString("btn.activate", comment: "Activate")) {
                         onSetActive()
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.small)
                 }
                 
-                Button("Details") {
+                Button(NSLocalizedString("btn.details", comment: "Details")) {
                     onTap()
                 }
                 .buttonStyle(.bordered)
@@ -412,13 +405,13 @@ struct ServiceRowView: View {
         .onTapGesture {
             onTap()
         }
-        .alert("Delete Service", isPresented: $showingDeleteAlert) {
-            Button("Cancel", role: .cancel) { }
+        .alert(NSLocalizedString("alert.delete_service", comment: "Delete Service"), isPresented: $showingDeleteAlert) {
+            Button(NSLocalizedString("btn.cancel", comment: "Cancel"), role: .cancel) { }
             Button(NSLocalizedString("btn.delete", comment: "Delete"), role: .destructive) {
                 onDelete()
             }
         } message: {
-            Text("Are you sure you want to delete '\(service.displayTitle)'? This action cannot be undone.")
+            Text(String(format: NSLocalizedString("msg.delete_service_confirm", comment: "Delete service confirmation"), service.displayTitle))
         }
     }
 }
@@ -436,13 +429,13 @@ struct CreateServiceSheet: View {
     var body: some View {
         NavigationView {
             Form {
-                Section("Service Details") {
-                    TextField("Service Title", text: $title)
-                    DatePicker("Date", selection: $date, displayedComponents: .date)
+                Section(NSLocalizedString("service.details_section", comment: "Service details section")) {
+                    TextField(NSLocalizedString("service.title_field", comment: "Service title field"), text: $title)
+                    DatePicker(NSLocalizedString("form.date", comment: "Date"), selection: $date, displayedComponents: .date)
                 }
                 
-                Section("Notes") {
-                    TextField("Notes (Optional)", text: $notes, axis: .vertical)
+                Section(NSLocalizedString("form.notes", comment: "Notes")) {
+                    TextField(NSLocalizedString("service.notes_optional", comment: "Notes optional"), text: $notes, axis: .vertical)
                         .lineLimit(3...6)
                 }
             }
@@ -450,13 +443,13 @@ struct CreateServiceSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    Button(NSLocalizedString("btn.cancel", comment: "Cancel")) {
                         dismiss()
                     }
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Create") {
+                    Button(NSLocalizedString("btn.create", comment: "Create")) {
                         onCreate(title, date, notes)
                     }
                     .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
@@ -520,7 +513,7 @@ struct ServiceDetailsView: View {
                             
                             VStack(alignment: .trailing, spacing: 4) {
                                 if currentService.isActive {
-                                    Text("ACTIVE")
+                                    Text(NSLocalizedString("service.active_badge", comment: "Active badge"))
                                         .font(.caption)
                                         .fontWeight(.semibold)
                                         .foregroundColor(.white)
@@ -531,7 +524,7 @@ struct ServiceDetailsView: View {
                                 }
                                 
                                 if currentService.isCompleted {
-                                    Text("COMPLETED")
+                                    Text(NSLocalizedString("service.completed_badge", comment: "Completed badge"))
                                         .font(.caption)
                                         .fontWeight(.semibold)
                                         .foregroundColor(.white)
@@ -541,7 +534,7 @@ struct ServiceDetailsView: View {
                                         .cornerRadius(6)
                                         
                                     if let completedAt = currentService.completedAt {
-                                        Text("Completed \(completedAt.formatted(date: .abbreviated, time: .shortened))")
+                                        Text(String(format: NSLocalizedString("service.completed_at", comment: "Completed date"), completedAt.formatted(date: .abbreviated, time: .shortened)))
                                             .font(.caption2)
                                             .foregroundColor(.secondary)
                                     }
@@ -567,13 +560,13 @@ struct ServiceDetailsView: View {
                 // Hymns Section
                 VStack(alignment: .leading, spacing: 0) {
                     HStack {
-                        Text("Hymns (\(localServiceHymns.count))")
+                        Text(String(format: NSLocalizedString("service.hymns_count", comment: "Hymns count"), localServiceHymns.count))
                             .font(.headline)
                             .fontWeight(.semibold)
                         
                         Spacer()
                         
-                        Button("Add Hymn") {
+                        Button(NSLocalizedString("btn.add_hymn", comment: "Add Hymn")) {
                             showingAddHymn = true
                         }
                         .buttonStyle(.borderedProminent)
@@ -587,15 +580,15 @@ struct ServiceDetailsView: View {
                                 .font(.system(size: 32))
                                 .foregroundColor(.secondary)
                             
-                            Text("No hymns added yet")
+                            Text(NSLocalizedString("service.no_hymns_added", comment: "No hymns added yet"))
                                 .font(.headline)
                             
-                            Text("Add hymns to this service to organize worship music")
+                            Text(NSLocalizedString("service.no_hymns_added_message", comment: "Add hymns to this service to organize worship music"))
                                 .font(.body)
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
                             
-                            Button("Add First Hymn") {
+                            Button(NSLocalizedString("service.add_first_hymn", comment: "Add first hymn")) {
                                 showingAddHymn = true
                             }
                             .buttonStyle(.borderedProminent)
@@ -610,7 +603,7 @@ struct ServiceDetailsView: View {
                                     hymn: hymnService.hymns.first { $0.id == serviceHymn.hymnId },
                                     onRemove: {
                                         Task {
-                                            await serviceService.removeHymnFromService(
+                                            _ = await serviceService.removeHymnFromService(
                                                 hymnId: serviceHymn.hymnId,
                                                 serviceId: service.id
                                             )
@@ -637,17 +630,17 @@ struct ServiceDetailsView: View {
                     }
                 }
             }
-            .navigationTitle("Service Details")
+            .navigationTitle(NSLocalizedString("nav.service_details", comment: "Service details title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Close") {
+                    Button(NSLocalizedString("btn.close", comment: "Close")) {
                         dismiss()
                     }
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button(NSLocalizedString("btn.done", comment: "Done")) {
                         dismiss()
                     }
                 }
@@ -658,26 +651,26 @@ struct ServiceDetailsView: View {
                     .font(.system(size: 32))
                     .foregroundColor(.secondary)
                 
-                Text("Service Not Found")
+                Text(NSLocalizedString("service.not_found_title", comment: "Service not found"))
                     .font(.headline)
                 
-                Text("The service details could not be loaded.")
+                Text(NSLocalizedString("service.not_found_message", comment: "Service details could not be loaded"))
                     .font(.body)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
                 
-                Button("Close") {
+                Button(NSLocalizedString("btn.close", comment: "Close")) {
                     dismiss()
                 }
                 .buttonStyle(.borderedProminent)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding()
-            .navigationTitle("Service Details")
+            .navigationTitle(NSLocalizedString("nav.service_details", comment: "Service details title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button(NSLocalizedString("btn.done", comment: "Done")) {
                         dismiss()
                     }
                 }
@@ -699,7 +692,7 @@ struct ServiceDetailsView: View {
                 availableHymns: hymnService.hymns,
                 onAddHymn: { hymn in
                     Task {
-                        await serviceService.addHymnToService(
+                        _ = await serviceService.addHymnToService(
                             hymnId: hymn.id,
                             serviceId: service.id
                         )
@@ -722,7 +715,7 @@ struct ServiceDetailsView: View {
             HStack {
                 Image(systemName: "music.note")
                     .foregroundColor(.green)
-                Text("Hymns Presented During Worship")
+                Text(NSLocalizedString("service.hymns_presented", comment: "Hymns presented during worship"))
                     .font(.headline)
                     .fontWeight(.semibold)
             }
@@ -763,7 +756,7 @@ struct ServiceHymnRowView: View {
                 .frame(width: 30)
             
             VStack(alignment: .leading, spacing: 2) {
-                Text(hymn?.title ?? "Unknown Hymn")
+                Text(hymn?.title ?? NSLocalizedString("service.unknown_hymn", comment: "Unknown hymn"))
                     .font(.headline)
                 
                 if let author = hymn?.author, !author.isEmpty {
@@ -773,7 +766,7 @@ struct ServiceHymnRowView: View {
                 }
                 
                 if let notes = serviceHymn.notes, !notes.isEmpty {
-                    Text("Note: \(notes)")
+                    Text(String(format: NSLocalizedString("service.note_prefix", comment: "Note prefix"), notes))
                         .font(.caption)
                         .foregroundColor(.blue)
                 }
@@ -781,7 +774,7 @@ struct ServiceHymnRowView: View {
             
             Spacer()
             
-            Button("Remove") {
+            Button(NSLocalizedString("btn.remove", comment: "Remove")) {
                 onRemove()
             }
             .buttonStyle(.bordered)
@@ -819,10 +812,10 @@ struct AddHymnToServiceSheet: View {
                         .font(.system(size: 32))
                         .foregroundColor(.secondary)
                     
-                    Text("No hymns available")
+                    Text(NSLocalizedString("service.no_hymns_available", comment: "No hymns available"))
                         .font(.headline)
                     
-                    Text("Please add some hymns first before creating services")
+                    Text(NSLocalizedString("service.no_hymns_available_message", comment: "Add hymns before creating services"))
                         .font(.body)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -853,14 +846,14 @@ struct AddHymnToServiceSheet: View {
                         .controlSize(.small)
                     }
                 }
-                .searchable(text: $searchText, prompt: "Search hymns...")
+                .searchable(text: $searchText, prompt: NSLocalizedString("service.search_hymns_prompt", comment: "Search hymns prompt"))
             }
         }
-        .navigationTitle("Add Hymn")
+        .navigationTitle(NSLocalizedString("nav.add_hymn", comment: "Add hymn title"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                Button("Cancel") {
+                Button(NSLocalizedString("btn.cancel", comment: "Cancel")) {
                     dismiss()
                 }
             }

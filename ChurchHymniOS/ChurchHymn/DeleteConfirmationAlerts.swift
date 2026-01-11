@@ -56,7 +56,7 @@ struct DeleteConfirmationAlerts: ViewModifier {
                     
                     if selectedHymnsForDelete.count <= 5 {
                         ForEach(selectedHymns, id: \.id) { hymn in
-                            Text("• \(hymn.title)")
+                            Text(String(format: NSLocalizedString("list.bullet_item", comment: "Bullet item"), hymn.title))
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                         }
@@ -64,7 +64,7 @@ struct DeleteConfirmationAlerts: ViewModifier {
                         let titleList = selectedHymns.prefix(3).map { $0.title }.joined(separator: ", ")
                         let remainingCount = selectedHymnsForDelete.count - 3
                         
-                        Text("• \(titleList)")
+                        Text(String(format: NSLocalizedString("list.bullet_item", comment: "Bullet item"), titleList))
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                         
@@ -77,7 +77,7 @@ struct DeleteConfirmationAlerts: ViewModifier {
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
-                    Text("This action cannot be undone.")
+                    Text(NSLocalizedString("msg.action_cannot_be_undone", comment: "Action cannot be undone warning"))
                         .font(.caption)
                         .foregroundColor(.red)
                         .padding(.top, 4)

@@ -180,29 +180,21 @@ extension ServiceOperations {
             progressMessage = "Validating service data..."
             operationProgress = 0.0
         }
-        
-        do {
-            await MainActor.run {
-                operationProgress = 0.3
-                progressMessage = "Checking services..."
-            }
-            
-            ServiceMigrationManager.performMigrations(context: context)
-            
-            await MainActor.run {
-                operationProgress = 1.0
-                progressMessage = "Validation complete"
-                isLoading = false
-            }
-            
-            return .success("Data validation completed successfully")
-        } catch {
-            await MainActor.run {
-                isLoading = false
-                lastError = ServiceError.contextError(error.localizedDescription)
-            }
-            return .failure(ServiceError.contextError(error.localizedDescription))
+
+        await MainActor.run {
+            operationProgress = 0.3
+            progressMessage = "Checking services..."
         }
+        
+        ServiceMigrationManager.performMigrations(context: context)
+        
+        await MainActor.run {
+            operationProgress = 1.0
+            progressMessage = "Validation complete"
+            isLoading = false
+        }
+        
+        return .success("Data validation completed successfully")
     }
 }
 

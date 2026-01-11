@@ -224,7 +224,7 @@ class ServiceService: ObservableObject {
         guard !isPerformingServiceOperation else { return false }
         
         // Check if service exists and is not in progress
-        guard let service = services.first(where: { $0.id == serviceId }) else {
+        guard services.contains(where: { $0.id == serviceId }) else {
             self.serviceOperationError = .serviceNotActive(serviceId)
             return false
         }
@@ -324,7 +324,7 @@ class ServiceService: ObservableObject {
         serviceOperationError = nil
         
         do {
-            try await serviceHymnRepository.clearService(serviceId)
+            _ = try await serviceHymnRepository.clearService(serviceId)
             
             // Update local array if this is the active service
             if activeService?.id == serviceId {
@@ -349,12 +349,11 @@ class ServiceService: ObservableObject {
         do {
             // Get the service and mark it as completed
             if let service = services.first(where: { $0.id == serviceId }) {
-                var updatedService = service
-                updatedService.isCompleted = true
-                updatedService.completedAt = Date()
-                updatedService.worshipHymnsHistory = worshipHymnsHistory
+                service.isCompleted = true
+                service.completedAt = Date()
+                service.worshipHymnsHistory = worshipHymnsHistory
                 
-                let completedService = try await serviceRepository.updateService(updatedService)
+                let completedService = try await serviceRepository.updateService(service)
                 
                 // Update local array
                 if let index = services.firstIndex(where: { $0.id == serviceId }) {
@@ -363,7 +362,7 @@ class ServiceService: ObservableObject {
                 
                 // If this was the active service, deactivate it
                 if activeService?.id == serviceId {
-                    await deactivateAllServices()
+                    _ = await deactivateAllServices()
                 }
             }
             

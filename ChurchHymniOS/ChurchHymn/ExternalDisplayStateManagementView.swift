@@ -40,20 +40,20 @@ struct ExternalDisplayStateManagementView: View {
                 }
                 .padding()
             }
-            .navigationTitle("State Management")
+            .navigationTitle(NSLocalizedString("external.state_management_title", comment: "State management title"))
             .navigationBarTitleDisplayMode(.inline)
-            .alert("State Validation", isPresented: $showingValidationResults) {
-                Button("OK") { }
+            .alert(NSLocalizedString("external.state_validation_title", comment: "State validation title"), isPresented: $showingValidationResults) {
+                Button(NSLocalizedString("btn.ok", comment: "OK")) { }
             } message: {
                 VStack(alignment: .leading) {
                     if !validationResults.errors.isEmpty {
-                        Text("Errors: \(validationResults.errors.joined(separator: ", "))")
+                        Text(String(format: NSLocalizedString("external.state_validation_errors", comment: "State validation errors"), validationResults.errors.joined(separator: ", ")))
                     }
                     if !validationResults.warnings.isEmpty {
-                        Text("Warnings: \(validationResults.warnings.joined(separator: ", "))")
+                        Text(String(format: NSLocalizedString("external.state_validation_warnings", comment: "State validation warnings"), validationResults.warnings.joined(separator: ", ")))
                     }
                     if !validationResults.suggestions.isEmpty {
-                        Text("Suggestions: \(validationResults.suggestions.joined(separator: ", "))")
+                        Text(String(format: NSLocalizedString("external.state_validation_suggestions", comment: "State validation suggestions"), validationResults.suggestions.joined(separator: ", ")))
                     }
                 }
             }
@@ -73,7 +73,7 @@ struct ExternalDisplayStateManagementView: View {
                     .foregroundColor(externalDisplayManager.state.stateColor)
                 
                 VStack(alignment: .leading) {
-                    Text("Current State")
+                    Text(NSLocalizedString("external.current_state", comment: "Current state label"))
                         .font(.headline)
                         .fontWeight(.semibold)
                     
@@ -86,7 +86,7 @@ struct ExternalDisplayStateManagementView: View {
                 Spacer()
                 
                 VStack(alignment: .trailing) {
-                    Text("Priority")
+                    Text(NSLocalizedString("external.state_priority", comment: "State priority"))
                         .font(.caption)
                         .foregroundColor(.secondary)
                     Text("\(externalDisplayManager.state.transitionPriority)")
@@ -104,19 +104,19 @@ struct ExternalDisplayStateManagementView: View {
     
     private var capabilitiesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("State Capabilities")
+            Text(NSLocalizedString("external.state_capabilities", comment: "State capabilities"))
                 .font(.headline)
                 .fontWeight(.semibold)
             
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 8) {
-                CapabilityRow(title: "Connected", isEnabled: externalDisplayManager.state.isConnected)
-                CapabilityRow(title: "Presenting", isEnabled: externalDisplayManager.state.isPresenting)
-                CapabilityRow(title: "Worship Session", isEnabled: externalDisplayManager.state.isWorshipSession)
-                CapabilityRow(title: "Hymn Switching", isEnabled: externalDisplayManager.state.supportsHymnSwitching)
-                CapabilityRow(title: "Verse Navigation", isEnabled: externalDisplayManager.state.supportsVerseNavigation)
-                CapabilityRow(title: "Can Start Presentation", isEnabled: externalDisplayManager.state.canStartPresentation)
-                CapabilityRow(title: "Can Stop Presentation", isEnabled: externalDisplayManager.state.canStopPresentation)
-                CapabilityRow(title: "Can Present Hymn", isEnabled: externalDisplayManager.state.canPresentHymn)
+                CapabilityRow(title: NSLocalizedString("external.capability.connected", comment: "Connected capability"), isEnabled: externalDisplayManager.state.isConnected)
+                CapabilityRow(title: NSLocalizedString("external.capability.presenting", comment: "Presenting capability"), isEnabled: externalDisplayManager.state.isPresenting)
+                CapabilityRow(title: NSLocalizedString("external.capability.worship_session", comment: "Worship session capability"), isEnabled: externalDisplayManager.state.isWorshipSession)
+                CapabilityRow(title: NSLocalizedString("external.capability.hymn_switching", comment: "Hymn switching capability"), isEnabled: externalDisplayManager.state.supportsHymnSwitching)
+                CapabilityRow(title: NSLocalizedString("external.capability.verse_navigation", comment: "Verse navigation capability"), isEnabled: externalDisplayManager.state.supportsVerseNavigation)
+                CapabilityRow(title: NSLocalizedString("external.capability.can_start_presentation", comment: "Can start presentation"), isEnabled: externalDisplayManager.state.canStartPresentation)
+                CapabilityRow(title: NSLocalizedString("external.capability.can_stop_presentation", comment: "Can stop presentation"), isEnabled: externalDisplayManager.state.canStopPresentation)
+                CapabilityRow(title: NSLocalizedString("external.capability.can_present_hymn", comment: "Can present hymn"), isEnabled: externalDisplayManager.state.canPresentHymn)
             }
         }
     }
@@ -125,18 +125,18 @@ struct ExternalDisplayStateManagementView: View {
     
     private var transitionSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("State Transition Testing")
+            Text(NSLocalizedString("external.state_transition_testing", comment: "State transition testing"))
                 .font(.headline)
                 .fontWeight(.semibold)
             
             VStack(spacing: 16) {
                 // Target state picker
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Target State")
+                    Text(NSLocalizedString("external.target_state", comment: "Target state"))
                         .font(.subheadline)
                         .fontWeight(.medium)
                     
-                    Picker("Target State", selection: $selectedTargetState) {
+                    Picker(NSLocalizedString("external.target_state", comment: "Target state picker"), selection: $selectedTargetState) {
                         ForEach(ExternalDisplayState.allCases, id: \.self) { state in
                             HStack {
                                 Image(systemName: state.systemIcon)
@@ -157,7 +157,7 @@ struct ExternalDisplayStateManagementView: View {
                         .foregroundColor(canTransition ? .green : .red)
                     
                     VStack(alignment: .leading) {
-                        Text("Transition \(canTransition ? "Allowed" : "Blocked")")
+                        Text(String(format: NSLocalizedString("external.transition_status", comment: "Transition status"), canTransition ? NSLocalizedString("external.transition_allowed", comment: "Allowed") : NSLocalizedString("external.transition_blocked", comment: "Blocked")))
                             .fontWeight(.medium)
                             .foregroundColor(canTransition ? .green : .red)
                         
@@ -182,7 +182,7 @@ struct ExternalDisplayStateManagementView: View {
     
     private var actionsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Suggested Actions")
+            Text(NSLocalizedString("external.suggested_actions", comment: "Suggested actions"))
                 .font(.headline)
                 .fontWeight(.semibold)
             
@@ -210,14 +210,14 @@ struct ExternalDisplayStateManagementView: View {
     
     private var validationSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("State Validation")
+            Text(NSLocalizedString("external.state_validation_title", comment: "State validation"))
                 .font(.headline)
                 .fontWeight(.semibold)
             
             Button(action: validateCurrentState) {
                 HStack {
                     Image(systemName: "checkmark.shield.fill")
-                    Text("Validate Current State")
+                    Text(NSLocalizedString("external.validate_current_state", comment: "Validate current state"))
                 }
                 .frame(maxWidth: .infinity)
             }
@@ -226,14 +226,14 @@ struct ExternalDisplayStateManagementView: View {
             if validationResults.hasIssues {
                 VStack(alignment: .leading, spacing: 8) {
                     if !validationResults.errors.isEmpty {
-                        Label("Errors Found", systemImage: "exclamationmark.triangle.fill")
+                        Label(NSLocalizedString("external.errors_found", comment: "Errors found"), systemImage: "exclamationmark.triangle.fill")
                             .foregroundColor(.red)
                             .font(.subheadline)
                             .fontWeight(.medium)
                     }
                     
                     if !validationResults.warnings.isEmpty {
-                        Label("Warnings Found", systemImage: "exclamationmark.triangle")
+                        Label(NSLocalizedString("external.warnings_found", comment: "Warnings found"), systemImage: "exclamationmark.triangle")
                             .foregroundColor(.orange)
                             .font(.subheadline)
                             .fontWeight(.medium)
@@ -250,12 +250,12 @@ struct ExternalDisplayStateManagementView: View {
     
     private var historySection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Recent Transitions")
+            Text(NSLocalizedString("external.recent_transitions", comment: "Recent transitions"))
                 .font(.headline)
                 .fontWeight(.semibold)
             
             if transitionHistory.isEmpty {
-                Text("No recent transitions")
+                Text(NSLocalizedString("external.no_recent_transitions", comment: "No recent transitions"))
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .italic()
@@ -297,18 +297,18 @@ struct ExternalDisplayStateManagementView: View {
         
         // Check for potential issues
         if externalDisplayManager.state == .disconnected {
-            warnings.append("No external display connected")
-            suggestions.append("Connect an external display for presentation features")
+            warnings.append(NSLocalizedString("external.validation.no_display_warning", comment: "No external display connected"))
+            suggestions.append(NSLocalizedString("external.validation.connect_display_suggestion", comment: "Connect an external display for presentation features"))
         }
         
         if externalDisplayManager.state.isPresenting && externalDisplayManager.currentHymn == nil {
-            errors.append("Presenting without a hymn loaded")
-            suggestions.append("Load a hymn to continue presentation")
+            errors.append(NSLocalizedString("external.validation.no_hymn_error", comment: "Presenting without a hymn loaded"))
+            suggestions.append(NSLocalizedString("external.validation.load_hymn_suggestion", comment: "Load a hymn to continue presentation"))
         }
         
         if externalDisplayManager.state.isWorshipSession && !worshipSessionActive() {
-            errors.append("External display in worship mode but no worship session active")
-            suggestions.append("Start a worship session or exit worship mode")
+            errors.append(NSLocalizedString("external.validation.worship_mode_error", comment: "Worship mode without worship session"))
+            suggestions.append(NSLocalizedString("external.validation.worship_mode_suggestion", comment: "Start a worship session or exit worship mode"))
         }
         
         validationResults = StateValidationResult(
@@ -330,11 +330,10 @@ struct ExternalDisplayStateManagementView: View {
     private func updateTransitionHistory() {
         // In a real implementation, this would be maintained by the ExternalDisplayManager
         // For demo purposes, create some sample transitions
-        let now = Date()
         transitionHistory = [
-            StateTransition(from: .disconnected, to: .connected, reason: "Display connected"),
-            StateTransition(from: .connected, to: .worshipMode, reason: "Worship session started"),
-            StateTransition(from: .worshipMode, to: .worshipPresenting, reason: "Hymn presented")
+            StateTransition(from: .disconnected, to: .connected, reason: NSLocalizedString("external.transition.display_connected", comment: "Display connected")),
+            StateTransition(from: .connected, to: .worshipMode, reason: NSLocalizedString("external.transition.worship_started", comment: "Worship session started")),
+            StateTransition(from: .worshipMode, to: .worshipPresenting, reason: NSLocalizedString("external.transition.hymn_presented", comment: "Hymn presented"))
         ].map { transition in
             StateTransition(
                 from: transition.from,

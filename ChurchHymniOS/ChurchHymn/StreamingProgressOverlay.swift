@@ -36,7 +36,7 @@ struct StreamingProgressOverlay: View {
                                 .progressViewStyle(LinearProgressViewStyle())
                                 .frame(width: 300)
                             
-                            Text("\(formatBytes(progress.bytesProcessed)) / \(formatBytes(progress.totalBytes))")
+                            Text(String(format: NSLocalizedString("progress.bytes_processed", comment: "Bytes processed"), formatBytes(progress.bytesProcessed), formatBytes(progress.totalBytes)))
                                 .font(.caption2)
                                 .foregroundColor(.secondary)
                         }
@@ -53,7 +53,7 @@ struct StreamingProgressOverlay: View {
                                 .progressViewStyle(LinearProgressViewStyle())
                                 .frame(width: 300)
                             
-                            Text("\(progress.hymnsProcessed) / \(totalHymns) hymns")
+                            Text(String(format: NSLocalizedString("progress.hymns_processed", comment: "Hymns processed"), progress.hymnsProcessed, totalHymns))
                                 .font(.caption2)
                                 .foregroundColor(.secondary)
                         }

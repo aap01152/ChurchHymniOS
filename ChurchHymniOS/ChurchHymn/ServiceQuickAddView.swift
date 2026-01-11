@@ -38,7 +38,7 @@ struct ServiceQuickAddView: View {
                             .font(.caption)
                             .foregroundColor(.green)
                         
-                        Text("In Service")
+                        Text(NSLocalizedString("service.in_service", comment: "In service"))
                             .font(.caption2)
                             .fontWeight(.medium)
                         
@@ -75,7 +75,10 @@ struct ServiceQuickAddView: View {
                                     .foregroundColor(.accentColor)
                             }
                             
-                            Text(isAdding ? "Adding..." : "Add to Service")
+                            Text(isAdding
+                                ? NSLocalizedString("service.adding", comment: "Adding")
+                                : NSLocalizedString("service.add_to_service", comment: "Add to service")
+                            )
                                 .font(.caption2)
                         }
                     }
@@ -85,7 +88,7 @@ struct ServiceQuickAddView: View {
                     .padding(.vertical, 4)
                     .background(Color.accentColor.opacity(0.1))
                     .cornerRadius(8)
-                    .help("Add \(hymn.title) to \(activeService.displayTitle)")
+                    .help(String(format: NSLocalizedString("help.add_hymn_to_service", comment: "Add hymn to service help"), hymn.title, activeService.displayTitle))
                 }
             }
         }
@@ -150,7 +153,7 @@ struct ServiceQuickAddView: View {
 }
 
 #Preview {
-    Text("ServiceQuickAddView Preview")
+    Text(NSLocalizedString("preview.service_quick_add", comment: "Service quick add preview"))
         .padding()
         .foregroundColor(.secondary)
         .font(.caption)

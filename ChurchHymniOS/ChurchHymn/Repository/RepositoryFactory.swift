@@ -546,13 +546,13 @@ struct CacheStats: Sendable {
 }
 
 /// Complete service data with hymn details
-struct CompleteServiceData: Sendable {
+struct CompleteServiceData {
     let service: WorshipService
     let hymns: [ServiceHymnData]
 }
 
 /// Service hymn with full hymn details
-struct ServiceHymnData: Sendable {
+struct ServiceHymnData {
     let serviceHymn: ServiceHymn
     let hymn: Hymn
     

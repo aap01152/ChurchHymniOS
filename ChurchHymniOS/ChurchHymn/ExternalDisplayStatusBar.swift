@@ -50,8 +50,8 @@ struct ExternalDisplayStatusBar: View {
                 .stroke(statusBorderColor, lineWidth: 1)
         )
         .shadow(color: statusShadowColor, radius: 2, x: 0, y: 1)
-        .alert("External Display Error", isPresented: $showingErrorAlert) {
-            Button("OK") { }
+        .alert(NSLocalizedString("alert.external_display_error", comment: "External Display Error"), isPresented: $showingErrorAlert) {
+            Button(NSLocalizedString("btn.ok", comment: "OK")) { }
         } message: {
             Text(errorMessage)
         }
@@ -66,7 +66,7 @@ struct ExternalDisplayStatusBar: View {
                 .symbolEffect(.pulse, isActive: externalDisplayManager.state.isPresenting)
         }
         .frame(width: 32, height: 32)
-        .help("External Display Status: \(externalDisplayManager.state.displayName)")
+        .help(String(format: NSLocalizedString("help.external_display_status", comment: "External display status help"), externalDisplayManager.state.displayName))
     }
     
     private var statusTitle: String {
@@ -83,7 +83,7 @@ struct ExternalDisplayStatusBar: View {
     private var statusSubtitle: String {
         // Use suggested actions for disconnected state, otherwise existing logic
         if externalDisplayManager.state == .disconnected {
-            return externalDisplayManager.state.suggestedActions.first ?? "No external display"
+            return externalDisplayManager.state.suggestedActions.first ?? NSLocalizedString("status.no_external_display", comment: "No external display")
         }
         
         if let displayInfo = externalDisplayManager.externalDisplayInfo,
@@ -96,7 +96,7 @@ struct ExternalDisplayStatusBar: View {
         }
         
         // Use suggested action for other states
-        return externalDisplayManager.state.suggestedActions.first ?? "External display active"
+        return externalDisplayManager.state.suggestedActions.first ?? NSLocalizedString("status.external_display_active", comment: "External display active")
     }
     
     private var statusTextColor: Color {
@@ -145,7 +145,7 @@ struct ExternalDisplayStatusBar: View {
                 Button(action: externalDisplayManager.previousVerse) {
                     CompactControlButton(
                         icon: "chevron.left.circle.fill",
-                        text: "Previous"
+                        text: NSLocalizedString("btn.previous", comment: "Previous")
                     )
                 }
                 .buttonStyle(.bordered)
@@ -173,7 +173,7 @@ struct ExternalDisplayStatusBar: View {
                 Button(action: externalDisplayManager.nextVerse) {
                     CompactControlButton(
                         icon: "chevron.right.circle.fill",
-                        text: "Next"
+                        text: NSLocalizedString("btn.next", comment: "Next")
                     )
                 }
                 .buttonStyle(.bordered)
@@ -191,7 +191,7 @@ struct ExternalDisplayStatusBar: View {
                 Button(action: externalDisplayManager.stopPresentation) {
                     CompactControlButton(
                         icon: "stop.circle.fill",
-                        text: "Stop"
+                        text: NSLocalizedString("btn.stop", comment: "Stop")
                     )
                 }
                 .buttonStyle(.bordered)
@@ -206,7 +206,7 @@ struct ExternalDisplayStatusBar: View {
                         .font(.title3)
                         .foregroundColor(.purple)
                         .symbolEffect(.pulse)
-                    Text("Worship Active")
+                    Text(NSLocalizedString("status.worship_active", comment: "Worship active status"))
                         .font(.caption)
                         .fontWeight(.medium)
                         .foregroundColor(.purple)
@@ -218,13 +218,16 @@ struct ExternalDisplayStatusBar: View {
                 Button(action: presentSelectedHymnInWorship) {
                     CompactControlButton(
                         icon: "play.circle.fill",
-                        text: selectedHymn?.title ?? "No Hymn"
+                        text: selectedHymn?.title ?? NSLocalizedString("status.no_hymn", comment: "No hymn selected")
                     )
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
                 .disabled(selectedHymn == nil)
-                .help(selectedHymn != nil ? "Present \(selectedHymn!.title) in worship session" : "Select a hymn to present in worship session")
+                .help(selectedHymn != nil
+                    ? String(format: NSLocalizedString("help.present_hymn_in_worship", comment: "Present hymn in worship session help"), selectedHymn!.title)
+                    : NSLocalizedString("help.select_hymn_for_worship", comment: "Select a hymn to present in worship session")
+                )
             }
         case .worshipPresenting:
             // Show worship presentation controls with prominent navigation
@@ -233,7 +236,7 @@ struct ExternalDisplayStatusBar: View {
                 Button(action: externalDisplayManager.previousVerse) {
                     CompactControlButton(
                         icon: "chevron.left.circle.fill",
-                        text: "Previous"
+                        text: NSLocalizedString("btn.previous", comment: "Previous")
                     )
                 }
                 .buttonStyle(.bordered)
@@ -261,7 +264,7 @@ struct ExternalDisplayStatusBar: View {
                 Button(action: externalDisplayManager.nextVerse) {
                     CompactControlButton(
                         icon: "chevron.right.circle.fill",
-                        text: "Next"
+                        text: NSLocalizedString("btn.next", comment: "Next")
                     )
                 }
                 .buttonStyle(.bordered)
@@ -283,7 +286,7 @@ struct ExternalDisplayStatusBar: View {
                 }) {
                     CompactControlButton(
                         icon: "stop.circle.fill",
-                        text: "Stop"
+                        text: NSLocalizedString("btn.stop", comment: "Stop")
                     )
                 }
                 .buttonStyle(.bordered)
@@ -333,7 +336,7 @@ struct ExternalDisplayQuickControls: View {
                     Button(action: externalDisplayManager.previousVerse) {
                         CompactControlButton(
                             icon: "chevron.left.circle.fill",
-                            text: "Previous"
+                            text: NSLocalizedString("btn.previous", comment: "Previous")
                         )
                     }
                     .buttonStyle(.bordered)
@@ -343,7 +346,7 @@ struct ExternalDisplayQuickControls: View {
                         Text(externalDisplayManager.currentVerseInfo)
                             .font(.caption)
                             .fontWeight(.semibold)
-                        Text("Current Verse")
+                        Text(NSLocalizedString("external.current_verse", comment: "Current verse"))
                             .font(.caption2)
                             .foregroundColor(.secondary)
                     }
@@ -352,7 +355,7 @@ struct ExternalDisplayQuickControls: View {
                     Button(action: externalDisplayManager.nextVerse) {
                         CompactControlButton(
                             icon: "chevron.right.circle.fill",
-                            text: "Next"
+                            text: NSLocalizedString("btn.next", comment: "Next")
                         )
                     }
                     .buttonStyle(.bordered)
@@ -363,7 +366,7 @@ struct ExternalDisplayQuickControls: View {
                 Button(action: startExternalPresentation) {
                     HStack(spacing: 6) {
                         Image(systemName: "play.circle.fill")
-                        Text("Present to External Display")
+                        Text(NSLocalizedString("btn.present_to_external_display", comment: "Present to External Display"))
                     }
                     .font(.subheadline)
                     .fontWeight(.medium)
@@ -372,8 +375,8 @@ struct ExternalDisplayQuickControls: View {
                 .disabled(selectedHymn == nil)
             }
         }
-        .alert("External Display Error", isPresented: $showingErrorAlert) {
-            Button("OK") { }
+        .alert(NSLocalizedString("alert.external_display_error", comment: "External Display Error"), isPresented: $showingErrorAlert) {
+            Button(NSLocalizedString("btn.ok", comment: "OK")) { }
         } message: {
             Text(errorMessage)
         }

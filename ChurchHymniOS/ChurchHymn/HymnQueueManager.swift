@@ -32,10 +32,10 @@ struct QueuedHymn: Identifiable, Codable {
         
         var displayName: String {
             switch self {
-            case .waiting: return "Waiting"
-            case .presenting: return "Presenting"
-            case .completed: return "Completed"
-            case .skipped: return "Skipped"
+            case .waiting: return NSLocalizedString("queue.status.waiting", comment: "Waiting")
+            case .presenting: return NSLocalizedString("queue.status.presenting", comment: "Presenting")
+            case .completed: return NSLocalizedString("queue.status.completed", comment: "Completed")
+            case .skipped: return NSLocalizedString("queue.status.skipped", comment: "Skipped")
             }
         }
         
@@ -85,11 +85,11 @@ final class HymnQueueManager: ObservableObject {
     static let autoAdvanceDelayOptions: [TimeInterval] = [3.0, 5.0, 10.0, 15.0, 30.0]
     
     static let autoAdvanceDelayLabels: [TimeInterval: String] = [
-        3.0: "3 seconds",
-        5.0: "5 seconds",
-        10.0: "10 seconds", 
-        15.0: "15 seconds",
-        30.0: "30 seconds"
+        3.0: String(format: NSLocalizedString("queue.seconds_label", comment: "Seconds label"), 3),
+        5.0: String(format: NSLocalizedString("queue.seconds_label", comment: "Seconds label"), 5),
+        10.0: String(format: NSLocalizedString("queue.seconds_label", comment: "Seconds label"), 10),
+        15.0: String(format: NSLocalizedString("queue.seconds_label", comment: "Seconds label"), 15),
+        30.0: String(format: NSLocalizedString("queue.seconds_label", comment: "Seconds label"), 30)
     ]
     
     // MARK: - Setup
@@ -328,17 +328,17 @@ struct HymnQueueView: View {
                     queueListView
                 }
             }
-            .navigationTitle("Hymn Queue")
+            .navigationTitle(NSLocalizedString("queue.title", comment: "Hymn queue title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Settings") {
+                    Button(NSLocalizedString("btn.settings", comment: "Settings")) {
                         // Show queue settings
                     }
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button(NSLocalizedString("btn.done", comment: "Done")) {
                         dismiss()
                     }
                 }
@@ -351,7 +351,7 @@ struct HymnQueueView: View {
     private var queueControlsSection: some View {
         VStack(spacing: 12) {
             // Queue mode toggle
-            Toggle("Queue Mode", isOn: $queueManager.isQueueModeEnabled)
+            Toggle(NSLocalizedString("queue.mode", comment: "Queue mode"), isOn: $queueManager.isQueueModeEnabled)
                 .padding(.horizontal)
             
             if queueManager.isQueueModeEnabled {
@@ -363,7 +363,7 @@ struct HymnQueueView: View {
                         Text("\(stats.total)")
                             .font(.title2)
                             .fontWeight(.bold)
-                        Text("Total")
+                        Text(NSLocalizedString("queue.total", comment: "Total"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -373,7 +373,7 @@ struct HymnQueueView: View {
                             .font(.title2)
                             .fontWeight(.bold)
                             .foregroundColor(.blue)
-                        Text("Waiting")
+                        Text(NSLocalizedString("queue.waiting", comment: "Waiting"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -383,7 +383,7 @@ struct HymnQueueView: View {
                             .font(.title2)
                             .fontWeight(.bold)
                             .foregroundColor(.green)
-                        Text("Done")
+                        Text(NSLocalizedString("queue.done", comment: "Done"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -408,7 +408,7 @@ struct HymnQueueView: View {
                     }
                     .disabled(stats.completed + stats.skipped == 0)
                     
-                    Button("Clear All") {
+                    Button(NSLocalizedString("btn.clear_all", comment: "Clear All")) {
                         queueManager.clearQueue()
                     }
                     .disabled(stats.total == 0)
@@ -427,11 +427,11 @@ struct HymnQueueView: View {
                 .font(.system(size: 64))
                 .foregroundColor(.secondary)
             
-            Text("Queue is Empty")
+            Text(NSLocalizedString("queue.empty_title", comment: "Queue is empty"))
                 .font(.title2)
                 .fontWeight(.medium)
             
-            Text("Add hymns to the queue from the main hymn list")
+            Text(NSLocalizedString("queue.empty_message", comment: "Queue empty message"))
                 .font(.body)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -489,7 +489,7 @@ struct QueueItemRow: View {
                         .cornerRadius(4)
                     
                     if queuedHymn.startingVerse > 0 {
-                        Text("Start at verse \(queuedHymn.startingVerse + 1)")
+                        Text(String(format: NSLocalizedString("queue.start_at_verse", comment: "Start at verse"), queuedHymn.startingVerse + 1))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }

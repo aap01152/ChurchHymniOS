@@ -40,8 +40,8 @@ struct UnifiedControlBanner: View {
                     .frame(maxHeight: .infinity, alignment: .bottom)
             )
         }
-        .alert("Control Error", isPresented: $showingErrorAlert) {
-            Button("OK") { }
+        .alert(NSLocalizedString("alert.control_error", comment: "Control error"), isPresented: $showingErrorAlert) {
+            Button(NSLocalizedString("btn.ok", comment: "OK")) { }
         } message: {
             Text(errorMessage)
         }
@@ -144,7 +144,7 @@ struct UnifiedControlBanner: View {
                     // Start Worship button
                     UniformControlButton(
                         icon: "play.circle.fill",
-                        text: "Start\nWorship",
+                        text: NSLocalizedString("btn.start_worship_multiline", comment: "Start Worship"),
                         action: startWorshipSession,
                         style: .primary
                     )
@@ -188,7 +188,7 @@ struct UnifiedControlBanner: View {
                     HStack(spacing: 8) {
                         Image(systemName: "play.circle.fill")
                             .font(.title3)
-                        Text("Start Worship")
+                        Text(NSLocalizedString("btn.start_worship", comment: "Start Worship"))
                             .fontWeight(.medium)
                     }
                     .padding(.horizontal, 16)
@@ -233,7 +233,7 @@ struct UnifiedControlBanner: View {
         HStack(spacing: 8) {
             // Previous button
             Button(action: externalDisplayManager.previousVerse) {
-                CompactControlButton(icon: "chevron.left.circle.fill", text: "Previous")
+                CompactControlButton(icon: "chevron.left.circle.fill", text: NSLocalizedString("btn.previous", comment: "Previous"))
             }
             .buttonStyle(.bordered)
             .controlSize(.small)
@@ -241,7 +241,7 @@ struct UnifiedControlBanner: View {
             
             // Next button
             Button(action: externalDisplayManager.nextVerse) {
-                CompactControlButton(icon: "chevron.right.circle.fill", text: "Next")
+                CompactControlButton(icon: "chevron.right.circle.fill", text: NSLocalizedString("btn.next", comment: "Next"))
             }
             .buttonStyle(.bordered)
             .controlSize(.small)
@@ -249,7 +249,7 @@ struct UnifiedControlBanner: View {
             
             // Stop button
             Button(action: externalDisplayManager.stopPresentation) {
-                CompactControlButton(icon: "stop.circle.fill", text: "Stop")
+                CompactControlButton(icon: "stop.circle.fill", text: NSLocalizedString("btn.stop", comment: "Stop"))
             }
             .buttonStyle(.bordered)
             .controlSize(.small)
@@ -277,7 +277,7 @@ struct UnifiedControlBanner: View {
             Button(action: stopWorshipSession) {
                 HStack(spacing: 6) {
                     Image(systemName: "stop.circle.fill")
-                    Text("Stop Worship")
+                    Text(NSLocalizedString("btn.stop_worship", comment: "Stop Worship"))
                         .fontWeight(.medium)
                 }
                 .padding(.horizontal, 12)
@@ -296,7 +296,7 @@ struct UnifiedControlBanner: View {
         HStack(spacing: 8) {
             // Previous button
             Button(action: externalDisplayManager.previousVerse) {
-                CompactControlButton(icon: "chevron.left.circle.fill", text: "Previous")
+                CompactControlButton(icon: "chevron.left.circle.fill", text: NSLocalizedString("btn.previous", comment: "Previous"))
             }
             .buttonStyle(.bordered)
             .controlSize(.small)
@@ -304,7 +304,7 @@ struct UnifiedControlBanner: View {
             
             // Next button
             Button(action: externalDisplayManager.nextVerse) {
-                CompactControlButton(icon: "chevron.right.circle.fill", text: "Next")
+                CompactControlButton(icon: "chevron.right.circle.fill", text: NSLocalizedString("btn.next", comment: "Next"))
             }
             .buttonStyle(.bordered)
             .controlSize(.small)
@@ -312,7 +312,7 @@ struct UnifiedControlBanner: View {
             
             // Stop worship presentation (return to worship mode)
             Button(action: stopHymnInWorshipMode) {
-                CompactControlButton(icon: "stop.circle.fill", text: "Stop")
+                CompactControlButton(icon: "stop.circle.fill", text: NSLocalizedString("btn.stop", comment: "Stop"))
             }
             .buttonStyle(.bordered)
             .controlSize(.small)
@@ -345,25 +345,25 @@ struct UnifiedControlBanner: View {
         if worshipSessionManager.isWorshipSessionActive {
             switch externalDisplayManager.state {
             case .worshipMode:
-                return "Worship Active"
+                return NSLocalizedString("status.worship_active", comment: "Worship active")
             case .worshipPresenting:
                 if let hymn = externalDisplayManager.currentHymn {
-                    return "Worship: \(hymn.title)"
+                    return String(format: NSLocalizedString("status.worship_with_hymn", comment: "Worship with hymn"), hymn.title)
                 }
-                return "Worship Presenting"
+                return NSLocalizedString("status.worship_presenting", comment: "Worship presenting")
             default:
-                return "Worship Session"
+                return NSLocalizedString("status.worship_session", comment: "Worship session")
             }
         } else {
             switch externalDisplayManager.state {
-            case .disconnected: return "No External Display"
-            case .connected: return "External Display Ready"
+            case .disconnected: return NSLocalizedString("status.no_external_display", comment: "No external display")
+            case .connected: return NSLocalizedString("status.external_display_ready", comment: "External display ready")
             case .presenting:
                 if let hymn = externalDisplayManager.currentHymn {
-                    return "Presenting: \(hymn.title)"
+                    return String(format: NSLocalizedString("status.presenting_with_hymn", comment: "Presenting hymn"), hymn.title)
                 }
-                return "Presenting"
-            default: return "External Display"
+                return NSLocalizedString("status.presenting", comment: "Presenting")
+            default: return NSLocalizedString("status.external_display", comment: "External display")
             }
         }
     }
@@ -371,19 +371,19 @@ struct UnifiedControlBanner: View {
     private var secondaryStatusText: String {
         switch externalDisplayManager.state {
         case .disconnected:
-            return "Connect a projector or external monitor"
+            return NSLocalizedString("external.connect_projector", comment: "Connect a projector or external monitor")
         case .connected:
             if worshipSessionManager.canStartWorshipSession {
-                return "Ready for worship session"
+                return NSLocalizedString("status.ready_for_worship_session", comment: "Ready for worship session")
             } else if let displayInfo = externalDisplayManager.externalDisplayInfo {
                 return displayInfo.description
             } else {
-                return "Ready to present"
+                return NSLocalizedString("external.ready_to_present", comment: "Ready to present")
             }
         case .presenting, .worshipPresenting:
             return externalDisplayManager.currentVerseInfo
         case .worshipMode:
-            return "Showing background - Select hymn to present"
+            return NSLocalizedString("status.select_hymn_to_present", comment: "Select hymn to present")
         }
     }
     
@@ -477,7 +477,7 @@ struct UnifiedControlBanner: View {
         HStack(spacing: 4) {
             UniformControlButton(
                 icon: "chevron.left.circle.fill",
-                text: "Previous",
+                text: NSLocalizedString("btn.previous", comment: "Previous"),
                 action: externalDisplayManager.previousVerse,
                 style: .secondary,
                 isEnabled: externalDisplayManager.canGoToPreviousVerse
@@ -485,7 +485,7 @@ struct UnifiedControlBanner: View {
             
             UniformControlButton(
                 icon: "chevron.right.circle.fill",
-                text: "Next",
+                text: NSLocalizedString("btn.next", comment: "Next"),
                 action: externalDisplayManager.nextVerse,
                 style: .secondary,
                 isEnabled: externalDisplayManager.canGoToNextVerse
@@ -493,7 +493,7 @@ struct UnifiedControlBanner: View {
             
             UniformControlButton(
                 icon: "stop.circle.fill",
-                text: "Stop",
+                text: NSLocalizedString("btn.stop", comment: "Stop"),
                 action: externalDisplayManager.stopPresentation,
                 style: .destructive
             )
@@ -519,7 +519,7 @@ struct UnifiedControlBanner: View {
             
             UniformControlButton(
                 icon: "stop.circle.fill",
-                text: "Stop\nWorship",
+                text: NSLocalizedString("btn.stop_worship_multiline", comment: "Stop Worship"),
                 action: stopWorshipSession,
                 style: .destructive
             )
@@ -533,7 +533,7 @@ struct UnifiedControlBanner: View {
         HStack(spacing: 4) {
             UniformControlButton(
                 icon: "chevron.left.circle.fill",
-                text: "Previous",
+                text: NSLocalizedString("btn.previous", comment: "Previous"),
                 action: externalDisplayManager.previousVerse,
                 style: .secondary,
                 isEnabled: externalDisplayManager.canGoToPreviousVerse
@@ -541,7 +541,7 @@ struct UnifiedControlBanner: View {
             
             UniformControlButton(
                 icon: "chevron.right.circle.fill",
-                text: "Next",
+                text: NSLocalizedString("btn.next", comment: "Next"),
                 action: externalDisplayManager.nextVerse,
                 style: .secondary,
                 isEnabled: externalDisplayManager.canGoToNextVerse
@@ -552,7 +552,7 @@ struct UnifiedControlBanner: View {
             
             UniformControlButton(
                 icon: "stop.circle.fill",
-                text: "Stop",
+                text: NSLocalizedString("btn.stop", comment: "Stop"),
                 action: stopHymnInWorshipMode,
                 style: .destructive
             )
@@ -680,7 +680,7 @@ private extension ExternalDisplayState {
 
 #Preview {
     VStack {
-        Text("Unified Control Banner Preview")
+        Text(NSLocalizedString("preview.unified_control_banner", comment: "Unified control banner preview"))
             .padding()
     }
 }

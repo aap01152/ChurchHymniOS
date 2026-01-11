@@ -21,14 +21,19 @@ final class ModelContainerFactory {
     
     /// Creates a production ModelContainer with full features
     static func createProductionContainer() -> ModelContainer {
-        logger.info("Creating production ModelContainer...")
-        
+        logger.info("🔧 Creating production ModelContainer...")
+        print("🔧 Creating production ModelContainer for persistent storage...")
+
         do {
             let container = try createStandardContainer()
-            logger.info("Production ModelContainer created successfully")
+            logger.info("✅ Production ModelContainer created successfully - PERSISTENT STORAGE")
+            print("✅ Production ModelContainer created successfully")
+            print("✅ Database location: Application Support directory (persistent)")
             return container
         } catch {
-            logger.error("Production container creation failed: \(error.localizedDescription)")
+            logger.error("❌ Production container creation failed: \(error.localizedDescription)")
+            print("❌ Production container creation failed: \(error)")
+            print("⚠️ Attempting fallback container creation...")
             return createFallbackContainer()
         }
     }
@@ -36,21 +41,26 @@ final class ModelContainerFactory {
     /// Creates a development ModelContainer for testing
     static func createDevelopmentContainer() -> ModelContainer {
         logger.info("Creating development ModelContainer...")
-        
+
         do {
+            let appSupportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            let devURL = appSupportURL.appendingPathComponent("ChurchHymniOS_Dev.sqlite")
+
+            logger.info("Development database location: \(devURL.path)")
+            print("📁 Development database location: \(devURL.path)")
+
             let configuration = ModelConfiguration(
                 schema: createSchema(),
-                isStoredInMemoryOnly: false,
+                url: devURL,  // Explicit URL for persistent storage
                 allowsSave: true,
-                groupContainer: .automatic,
                 cloudKitDatabase: .none // Disable CloudKit for development
             )
-            
+
             let container = try ModelContainer(
                 for: createSchema(),
                 configurations: [configuration]
             )
-            
+
             logger.info("Development ModelContainer created successfully")
             return container
         } catch {
@@ -62,35 +72,34 @@ final class ModelContainerFactory {
     /// Creates an in-memory container for testing
     static func createTestContainer() -> ModelContainer {
         logger.info("Creating test ModelContainer...")
-        
-        do {
-            let container = createInMemoryContainer()
-            logger.info("Test ModelContainer created successfully")
-            return container
-        } catch {
-            logger.error("Test container creation failed - this should never happen")
-            fatalError("Failed to create test ModelContainer: \(error)")
-        }
+        let container = createInMemoryContainer()
+        logger.info("Test ModelContainer created successfully")
+        return container
     }
     
     /// Creates a container with CloudKit integration
     static func createCloudKitContainer() -> ModelContainer {
         logger.info("Creating CloudKit-enabled ModelContainer...")
-        
+
         do {
+            let appSupportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            let cloudKitURL = appSupportURL.appendingPathComponent("ChurchHymniOS_CloudKit.sqlite")
+
+            logger.info("CloudKit database location: \(cloudKitURL.path)")
+            print("📁 CloudKit database location: \(cloudKitURL.path)")
+
             let configuration = ModelConfiguration(
                 schema: createSchema(),
-                isStoredInMemoryOnly: false,
+                url: cloudKitURL,  // Explicit URL for persistent storage
                 allowsSave: true,
-                groupContainer: .automatic,
                 cloudKitDatabase: .automatic
             )
-            
+
             let container = try ModelContainer(
                 for: createSchema(),
                 configurations: [configuration]
             )
-            
+
             logger.info("CloudKit ModelContainer created successfully")
             return container
         } catch {
@@ -109,14 +118,20 @@ final class ModelContainerFactory {
     
     /// Creates a standard local container
     private static func createStandardContainer() throws -> ModelContainer {
+        // CRITICAL FIX: Specify explicit database URL to ensure persistent storage
+        let appSupportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        let storeURL = appSupportURL.appendingPathComponent("ChurchHymniOS.sqlite")
+
+        logger.info("Database will be stored at: \(storeURL.path)")
+        print("📁 Database location: \(storeURL.path)")
+
         let configuration = ModelConfiguration(
             schema: createSchema(),
-            isStoredInMemoryOnly: false,
+            url: storeURL,  // Explicit URL for persistent storage
             allowsSave: true,
-            groupContainer: .automatic,
             cloudKitDatabase: .none
         )
-        
+
         return try ModelContainer(
             for: createSchema(),
             configurations: [configuration]
@@ -125,27 +140,37 @@ final class ModelContainerFactory {
     
     /// Creates a fallback container if standard creation fails
     private static func createFallbackContainer() -> ModelContainer {
-        logger.warning("Creating fallback ModelContainer...")
-        
+        logger.warning("⚠️ Creating fallback ModelContainer...")
+
         do {
-            // Try with reduced schema first
+            // Try with reduced schema first - STILL PERSISTENT, NOT IN-MEMORY
+            let appSupportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            let fallbackURL = appSupportURL.appendingPathComponent("ChurchHymniOS_Fallback.sqlite")
+
+            logger.info("Fallback database location: \(fallbackURL.path)")
+            print("📁 Fallback database location: \(fallbackURL.path)")
+
             let fallbackSchema = Schema([Hymn.self])
             let configuration = ModelConfiguration(
                 schema: fallbackSchema,
-                isStoredInMemoryOnly: false,
+                url: fallbackURL,  // Explicit URL for persistent storage
                 allowsSave: true
             )
-            
+
             let container = try ModelContainer(
                 for: fallbackSchema,
                 configurations: [configuration]
             )
-            
-            logger.info("Fallback container created with Hymn model only")
+
+            logger.info("✅ Fallback container created with Hymn model only - PERSISTENT STORAGE")
+            print("✅ Database will be saved to disk")
             return container
         } catch {
-            logger.error("Fallback container creation failed: \(error.localizedDescription)")
-            logger.warning("Creating emergency in-memory container...")
+            logger.error("❌ Fallback container creation failed: \(error.localizedDescription)")
+            logger.critical("🚨 CRITICAL: All persistent storage attempts failed!")
+            print("🚨 CRITICAL ERROR: Cannot create persistent database!")
+            print("🚨 Error: \(error)")
+            print("🚨 The app will use IN-MEMORY storage as last resort - DATA WILL BE LOST ON APP CLOSE!")
             return createInMemoryContainer()
         }
     }
@@ -231,7 +256,7 @@ final class ModelContainerManager: ObservableObject {
                 logger.error("Attempted to access dataManager before initialization")
                 fatalError("SwiftDataManager not initialized. Call initialize() first.")
             }
-            return await dataManager
+            return dataManager
         }
     }
     

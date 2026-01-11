@@ -12,13 +12,17 @@ struct DynamicPresenterView: View {
     @ObservedObject var hymnService: HymnService
     @Binding var selected: Hymn?
     var onDismiss: () -> Void
+    @EnvironmentObject private var externalDisplayManager: ExternalDisplayManager
     
     var body: some View {
         if let currentHymn = selected {
             PresenterView(
                 hymn: currentHymn,
-                onIndexChange: { _ in
-                    // Index change is handled by the parent ContentView
+                onIndexChange: { newIndex in
+                    // Sync verse changes with external display if presenting
+                    if externalDisplayManager.isPresenting && externalDisplayManager.currentHymn?.id == currentHymn.id {
+                        externalDisplayManager.goToVerse(newIndex)
+                    }
                 },
                 onDismiss: onDismiss
             )
@@ -26,11 +30,11 @@ struct DynamicPresenterView: View {
         } else {
             // Fallback view if no hymn is selected
             VStack {
-                Text("No hymn selected")
+                Text(NSLocalizedString("status.no_hymn_selected", comment: "No hymn selected"))
                     .font(.title)
                     .foregroundColor(.secondary)
                 
-                Button("Close") {
+                Button(NSLocalizedString("btn.close", comment: "Close")) {
                     onDismiss()
                 }
                 .buttonStyle(.borderedProminent)
@@ -43,7 +47,7 @@ struct DynamicPresenterView: View {
 }
 
 #Preview {
-    Text("DynamicPresenterView Preview")
+    Text(NSLocalizedString("preview.dynamic_presenter", comment: "Dynamic presenter preview"))
         .padding()
         .foregroundColor(.secondary)
         .font(.caption)

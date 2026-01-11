@@ -34,15 +34,13 @@ final class SwiftDataManager {
     }()
     
     // Main context for UI operations
-    lazy var mainContext: ModelContext = {
-        let context = ModelContext(modelContainer)
-        return context
-    }()
+    nonisolated(unsafe) let mainContext: ModelContext
     
     // MARK: - Initialization
     
     init(modelContainer: ModelContainer) {
         self.modelContainer = modelContainer
+        self.mainContext = ModelContext(modelContainer)
         logger.info("SwiftDataManager initialized successfully")
     }
     

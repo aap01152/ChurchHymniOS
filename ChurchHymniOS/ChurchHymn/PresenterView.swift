@@ -81,7 +81,7 @@ struct PresenterView: View {
                         .font(.system(size: 28, weight: .bold))
                         .foregroundColor(.white)
                     if let key = hymn.musicalKey, !key.isEmpty {
-                        Text("(\(key))")
+                        Text(String(format: NSLocalizedString("external.key_in_parens", comment: "Key in parentheses"), key))
                             .font(.system(size: 32, weight: .semibold))
                             .foregroundColor(.white)
                     }
